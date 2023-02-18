@@ -1,0 +1,11 @@
+---
+name: SampaFileSinkEngine
+engine: org.jlab.ersap.actor.sampa.engine.SampaFileSinkEngine
+type: java
+
+author: ardan
+email: gurjyan@jlab.org
+
+version: 0.1
+description:
+  Writes SAMPA channel data into a file.
