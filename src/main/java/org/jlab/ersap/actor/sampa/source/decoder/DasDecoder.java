@@ -144,7 +144,8 @@ public class DasDecoder implements IDecoder {
         maxBufSize = ((rawEventByteSize + 3) / 4) * 4 * (80 / 5);
         maxFramesStored = maxBufSize / 4;    // 4 bytes per frame in each local buffer
 
-        System.out.print("Constructor: each buffer is of size " + maxBufSize + " bytes, max frames stored = " + maxFramesStored);
+        System.out.print("DASDecoder: each buffer is of size " + maxBufSize +
+                " bytes, max frames stored = " + maxFramesStored +"\n");
 
         sampa_stream_low_ = ByteBuffer.allocate(maxBufSize);
         sampa_stream_high_ = ByteBuffer.allocate(maxBufSize);
