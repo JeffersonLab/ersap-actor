@@ -43,9 +43,7 @@ public class SAggregator extends Thread {
                        Sequence[] sequences, SequenceBarrier[] barriers,
                        RingBuffer<SRingRawEvent> outputRingBuffer)
              {
-                 System.out.println( "DDD -3");
-                 System.out.println( "DDD -3");
-                 System.out.println( "DDD -3");
+                 System.out.println( " AMAN DDD -3");
 
         System.out.println("DDDD ****** "+ ringBuffers.length +" "+
                 sequences.length +" " +
