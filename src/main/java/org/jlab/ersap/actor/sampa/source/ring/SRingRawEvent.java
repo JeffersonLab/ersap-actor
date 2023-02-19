@@ -125,14 +125,15 @@ public class SRingRawEvent {
      * @param byteSize number of bytes in each internal buffer.
      * @param forAggregation if true, this is used to hold aggregated data -
      *                       all 160 channels of a SAMPA board. Or, in other words,
-     *                       it needs hold 2x the data coming from a single stream.
+     *                       it needs hold 6x the data coming from a single stream,
+     *                       in case we are reading 3 readout cards, each providing 2 streams.
      */
     public SRingRawEvent(EMode type, int byteSize, boolean forAggregation) {
         EMode = type;
 
-        // If aggregating we need double the channels
+        // If aggregating we need set channels times number of aggregated streams (TODO remove hardcoded value 6)
         int factor = 1;
-        if (forAggregation) factor = 2;
+        if (forAggregation) factor = 6;
 
         channelCount = 28*factor;
 
