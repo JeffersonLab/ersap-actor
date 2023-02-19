@@ -16,7 +16,7 @@ import java.util.Arrays;
  *
  * @author gurjyan on 2/14/23
  * @project ersap-coda
- *
+ * <p>
  * Aggregates N SAMPA streams.
  */
 public class SAggregator extends Thread {
@@ -41,8 +41,7 @@ public class SAggregator extends Thread {
 
     public SAggregator(EMode eMode, RingBuffer<SRingRawEvent>[] ringBuffers,
                        Sequence[] sequences, SequenceBarrier[] barriers,
-                       RingBuffer<SRingRawEvent> outputRingBuffer)
-             {
+                       RingBuffer<SRingRawEvent> outputRingBuffer) {
 
         // Make sure the data is correct. Array sizes must be the same as the number of streams.
         if ((ringBuffers.length != sequences.length) ||
@@ -70,25 +69,30 @@ public class SAggregator extends Thread {
      * numerical order with the block number increasing by one in each successive event.
      * It may be possible that particular members of that sequence are missing, but it
      * will still be monotonically increasing. Based on that assumption, the logic matches
-     * up data with identical block numbers from each of the 2 input streams and saves
+     * up data with identical block numbers from each of the N input streams and saves
      * that together in one event.</p>
-     *
+     * <p>
      * DAS mode: In this mode, there is no reliable clock accompanying the data. It relies
      * entirely on the sync signal and on not dropping any data in the receiver in assuring
      * that the given events are from the same time and can be combined.
-     *
      */
-    private SRingRawEvent[] getEvents()
+    private void getEvents()
             throws InterruptedException, AlertException, TimeoutException {
 
         SRingRawEvent[] events = new SRingRawEvent[ringBuffers.length];
-        for (int i = 0; i < ringBuffers.length; i++) {
-            if (availableSequences[i] < nextSequences[i]) {
-                availableSequences[i] = barriers[i].waitFor(nextSequences[i]);
+        try {
+            for (int i = 0; i < ringBuffers.length; i++) {
+                if (availableSequences[i] < nextSequences[i]) {
+                    availableSequences[i] = barriers[i].waitFor(nextSequences[i]);
+                }
+                events[i] = ringBuffers[i].get(nextSequences[i]);
             }
-            events[i] = ringBuffers[i].get(nextSequences[i]);
+            aggregateAndPublish(events);
+        } catch (final TimeoutException | AlertException ex) {
+            // This will never happen given the wait strategy used
+            // (see SMPTwoStreamAggregatorDecoder)
+            ex.printStackTrace();
         }
-        return events;
     }
 
     private void aggregateAndPublish(SRingRawEvent[] events)
@@ -110,8 +114,9 @@ public class SAggregator extends Thread {
                     sequences[i].set(nextSequences[i]++);
                 }
             }
-            // Get events from all ring buffers again. This time all sequences are aligned.
-            events = getEvents();
+            // TODO Get events from all ring buffers again. This time all sequences are aligned.
+            // TODO get events from those ring buffers that are changed
+//            events = getEvents();
         }
 
         // Get an event placeholder from the ring which holds the aggregated events
@@ -130,7 +135,9 @@ public class SAggregator extends Thread {
         outputRingBuffer.publish(outSequence);
     }
 
-    /** Release items claimed from both input ring buffers. */
+    /**
+     * Release items claimed from both input ring buffers.
+     */
     private void put() {
         for (int i = 0; i < ringBuffers.length; i++) {
             sequences[i].set(nextSequences[i]);
@@ -138,7 +145,9 @@ public class SAggregator extends Thread {
         }
     }
 
-    /** Run this thread. */
+    /**
+     * Run this thread.
+     */
     public void run() {
         try {
             while (running) {
@@ -150,7 +159,9 @@ public class SAggregator extends Thread {
         }
     }
 
-    /** Stop this thread. */
+    /**
+     * Stop this thread.
+     */
     public void exit() {
         running = false;
         //this.interrupt();
