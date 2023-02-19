@@ -32,7 +32,7 @@ public class SampaStatProcEngine implements Engine {
 
     @Override
     public EngineData configure(EngineData input) {
-        System.out.println("SMPStreamTestEngine engine configure...");
+        System.out.println("SampaStatProcEngine configure...");
 
         if (input.getMimeType().equalsIgnoreCase(EngineDataType.JSON.mimeType())) {
             String source = (String) input.getData();
