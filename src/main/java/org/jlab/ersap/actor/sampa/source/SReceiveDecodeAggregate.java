@@ -123,6 +123,7 @@ public class SReceiveDecodeAggregate extends Thread {
         while (running) {
             try {
                 ByteBuffer b = getSerializedData();
+                System.out.println("DDDD "+ b.capacity());
                 if (b != null) pool.add(b);
             } catch (Exception e) {
                 e.printStackTrace();
