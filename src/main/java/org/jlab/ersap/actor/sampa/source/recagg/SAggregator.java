@@ -42,7 +42,7 @@ public class SAggregator extends Thread {
     public SAggregator(EMode eMode, RingBuffer<SRingRawEvent>[] ringBuffers,
                        Sequence[] sequences, SequenceBarrier[] barriers,
                        RingBuffer<SRingRawEvent> outputRingBuffer)
-            throws IllegalArgumentException {
+             {
 
         System.out.println("DDDD ****** "+ ringBuffers.length +" "+
                 sequences.length +" " +
@@ -55,7 +55,7 @@ public class SAggregator extends Thread {
                 (sequences.length != barriers.length) ||
                 (barriers.length != nextSequences.length) ||
                 (nextSequences.length != availableSequences.length)) {
-            throw new IllegalArgumentException("Unequal array sizes.");
+            System.out.println("ERROR: Unequal array sizes.");
         }
 
         EMode = eMode;
