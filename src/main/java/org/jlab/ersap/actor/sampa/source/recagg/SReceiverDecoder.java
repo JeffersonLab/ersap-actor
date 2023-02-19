@@ -172,9 +172,9 @@ public class SReceiverDecoder extends Thread {
         // Connecting to the sampa stream source
         try {
             serverSocket = new ServerSocket(sampaPort);
-            System.out.println("Server is listening on port " + sampaPort);
+            System.out.println("SAMPA stream receiver is listening on port " + sampaPort);
             Socket socket = serverSocket.accept();
-            System.out.println("SAMPA client connected");
+            System.out.println("SAMPA stream receiver connected on port = " + sampaPort);
             InputStream input = socket.getInputStream();
             dataInputStream = new DataInputStream(new BufferedInputStream(input, 65536));
         }

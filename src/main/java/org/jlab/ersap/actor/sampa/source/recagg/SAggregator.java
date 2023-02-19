@@ -44,10 +44,6 @@ public class SAggregator extends Thread {
                        RingBuffer<SRingRawEvent> outputRingBuffer)
              {
 
-        System.out.println("DDDD ****** "+ ringBuffers.length +" "+
-                sequences.length +" " +
-                barriers.length);
-
         // Make sure the data is correct. Array sizes must be the same as the number of streams.
         if ((ringBuffers.length != sequences.length) ||
                 (sequences.length != barriers.length)) {

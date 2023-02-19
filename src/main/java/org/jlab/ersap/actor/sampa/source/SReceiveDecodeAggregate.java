@@ -92,22 +92,18 @@ public class SReceiveDecodeAggregate extends Thread {
             receivers[i] = new SReceiverDecoder(initPort + i, i,
                     ringBuffers[i], streamFrameLimit, eMode, byteSize);
         }
-        System.out.println( "DDD -1");
         // RingBuffer in which Aggregator will get empty events and fill them with data aggregated
         // from multiple streams. It then passes to this object which takes the place of the consumer.
         aggRingBuffer = createSingleProducer(
                 new SRingRawEventFactory(eMode, byteSize, true), maxRingItems,
                 new SpinCountBackoffWaitStrategy(30000, new LiteBlockingWaitStrategy()));
-        System.out.println( "DDD -2");
 
         aggSequence = new Sequence(Sequencer.INITIAL_CURSOR_VALUE);
         aggBarrier = aggRingBuffer.newBarrier();
         aggRingBuffer.addGatingSequences(aggSequence);
-        System.out.println( "DDD -3");
 
         // Create aggregator
         aggregator = new SAggregator(eMode, ringBuffers, sequences, barriers, aggRingBuffer);
-        System.out.println( "DDD -4");
 
         // Get this thread ready
         aggNextSequence = aggSequence.get() + 1L;
