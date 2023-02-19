@@ -75,7 +75,6 @@ public class SReceiveDecodeAggregate extends Thread {
 
         // Create receiver ring barriers
         SequenceBarrier[] barriers = new SequenceBarrier[nStreams];
-        System.out.println("DDD ------------- HEY 1");
 
         for (int i = 0; i < nStreams; i++) {
             ringBuffers[i] = createSingleProducer(
@@ -94,7 +93,6 @@ public class SReceiveDecodeAggregate extends Thread {
                     ringBuffers[i], streamFrameLimit, eMode, byteSize);
         }
 
-        System.out.println("DDD ------------- HEY 2");
         // RingBuffer in which Aggregator will get empty events and fill them with data aggregated
         // from multiple streams. It then passes to this object which takes the place of the consumer.
         aggRingBuffer = createSingleProducer(
@@ -107,7 +105,6 @@ public class SReceiveDecodeAggregate extends Thread {
 
         // Create aggregator
         aggregator = new SAggregator(eMode, ringBuffers, sequences, barriers, aggRingBuffer);
-        System.out.println("DDD ------------- HEY 3");
 
         // Get this thread ready
         aggNextSequence = aggSequence.get() + 1L;
