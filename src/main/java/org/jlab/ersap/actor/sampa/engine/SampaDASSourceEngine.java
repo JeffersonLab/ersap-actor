@@ -130,7 +130,7 @@ public class SampaDASSourceEngine extends AbstractEventReaderService<SReceiveDec
 
     @Override
     protected EngineDataType getDataType() {
-//        return EngineDataType.BYTES;
-        return DasDataType.SAMPA_DAS;
+        return EngineDataType.BYTES;
+//        return DasDataType.SAMPA_DAS;
     }}
 
