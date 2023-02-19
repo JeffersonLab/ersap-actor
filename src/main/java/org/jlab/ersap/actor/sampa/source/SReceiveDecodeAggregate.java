@@ -104,6 +104,9 @@ public class SReceiveDecodeAggregate extends Thread {
         aggBarrier = aggRingBuffer.newBarrier();
         aggRingBuffer.addGatingSequences(aggSequence);
         System.out.println( "DDD -3");
+        System.out.println( "DDD -3");
+        System.out.println( "DDD -3");
+        System.out.println( "DDD -3");
 
         // Create aggregator
         aggregator = new SAggregator(eMode, ringBuffers, sequences, barriers, aggRingBuffer);
