@@ -1,0 +1,11 @@
+---
+name: SampaDAS2SourceEngine
+engine: org.jlab.ersap.actor.sampa.engine.SampaDAS2SourceEngine
+type: java
+
+author: Carl&Vardan
+email: gurjyan@jlab.org
+
+version: 0.1
+description:
+  Gets data from 2 SAMPA streams (note there are 2 streams per FEC), aggregates, decodes and returns an event on each request.

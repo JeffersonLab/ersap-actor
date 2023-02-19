@@ -39,7 +39,7 @@ import java.util.function.Consumer;
  *
  * @author timmer
  */
-public class SampaDAS2SSourceEngine extends AbstractEventReaderService<S2RecDecAgg> {
+public class SampaDAS2SourceEngine extends AbstractEventReaderService<S2RecDecAgg> {
 
     private static final String SMP_PORT1 = "port1";
     private static final String SMP_PORT2 = "port2";
