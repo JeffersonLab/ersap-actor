@@ -43,19 +43,14 @@ public class SAggregator extends Thread {
                        Sequence[] sequences, SequenceBarrier[] barriers,
                        RingBuffer<SRingRawEvent> outputRingBuffer)
              {
-                 System.out.println( " AMAN DDD -3 "+ ringBuffers.length);
 
         System.out.println("DDDD ****** "+ ringBuffers.length +" "+
                 sequences.length +" " +
-                barriers.length +" " +
-                nextSequences.length +" " +
-                availableSequences.length);
+                barriers.length);
 
         // Make sure the data is correct. Array sizes must be the same as the number of streams.
         if ((ringBuffers.length != sequences.length) ||
-                (sequences.length != barriers.length) ||
-                (barriers.length != nextSequences.length) ||
-                (nextSequences.length != availableSequences.length)) {
+                (sequences.length != barriers.length)) {
             System.out.println("ERROR: Unequal array sizes.");
         }
 
