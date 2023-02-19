@@ -71,15 +71,15 @@ public class Das6StreamStatistics {
 
         if (json) {
             writer.write("\"mean\": [");
-            for (int channel = 0; channel < 160; channel++) {
+            for (int channel = 0; channel < chNum; channel++) {
                 writer.printf("%8.4f", mean[channel]);
-                writer.write((channel == 159 ? "]" : ", "));
+                writer.write((channel == chNum -1 ? "]" : ", "));
             }
 
             writer.write(",\n");
             writer.write("\"stdev\": [");
 
-            for (int channel = 0; channel < 160; channel++) {
+            for (int channel = 0; channel < chNum; channel++) {
                 writer.printf("%6.4f", sdv[channel]);
                 writer.write((channel == chNum -1 ? "]" : ", "));
             }
