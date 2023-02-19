@@ -41,7 +41,7 @@ public class SReceiveDecodeAggregate extends Thread {
     private final SequenceBarrier aggBarrier;
 
     // Data receivers receiving and decoding SAMPA streams
-    private final SReceiverDecoder [] receivers;
+    private final SReceiverDecoder[] receivers;
 
     // Data aggregator reading from receivers and aggregating into the output ring buffer
     private final SAggregator aggregator;
@@ -71,7 +71,6 @@ public class SReceiveDecodeAggregate extends Thread {
         RingBuffer<SRingRawEvent>[] ringBuffers = new RingBuffer[nStreams];
         // Receiver ring sequences
         Sequence[] sequences = new Sequence[nStreams];
-
 
 
         // Create receiver ring barriers
@@ -116,14 +115,15 @@ public class SReceiveDecodeAggregate extends Thread {
 
     @Override
     public void run() {
-        for (int i= 0;i<nStreams; i++) {
+        for (int i = 0; i < nStreams; i++) {
+            System.out.println("DDD starting stream receiver = " + i);
             receivers[i].start();
         }
         aggregator.start();
         while (running) {
             try {
                 ByteBuffer b = getSerializedData();
-                if(b!=null) pool.add(b);
+                if (b != null) pool.add(b);
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -189,7 +189,7 @@ public class SReceiveDecodeAggregate extends Thread {
     }
 
     public ByteBuffer getEvent() {
-        while (pool.isEmpty()){
+        while (pool.isEmpty()) {
             try {
                 Thread.sleep(100);
             } catch (InterruptedException e) {
@@ -200,7 +200,7 @@ public class SReceiveDecodeAggregate extends Thread {
     }
 
     public void close() {
-        for (int i= 0;i<nStreams; i++) {
+        for (int i = 0; i < nStreams; i++) {
             receivers[i].exit();
         }
         aggregator.exit();
