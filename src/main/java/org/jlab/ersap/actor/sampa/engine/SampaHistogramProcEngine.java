@@ -45,6 +45,9 @@ public class SampaHistogramProcEngine implements Engine {
 
     private DasHistogram histogram;
 
+    private int linkNum = 6;
+    private int chNum = 80 * linkNum;
+
     @Override
     public EngineData configure(EngineData input) {
         if (input.getMimeType().equalsIgnoreCase(EngineDataType.JSON.mimeType())) {
@@ -95,7 +98,8 @@ public class SampaHistogramProcEngine implements Engine {
         try {
             data = DasDataType.deserialize(bb);
             int sampleLimit = data[0].limit()/2;
-            for (int channel = 0; channel < 160; channel++) {
+            System.out.println("DDD ================= "+ sampleLimit);
+            for (int channel = 0; channel < chNum; channel++) {
                 String title = String.valueOf(channel);
                 if(histTitles.contains(title)) {
                     short[] _sData = new short[sampleLimit];

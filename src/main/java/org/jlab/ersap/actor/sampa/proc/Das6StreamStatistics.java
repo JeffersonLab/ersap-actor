@@ -20,8 +20,9 @@ import java.util.Arrays;
 public class Das6StreamStatistics {
     private double[] mean;
     private double[] sdv;
+    private int linkNum = 6;
 
-    private int chNum = 80 * 6;
+    private int chNum = 80 * linkNum;
     public Das6StreamStatistics() {
         mean = new double[chNum];
         sdv = new double[chNum];
