@@ -98,7 +98,6 @@ public class SampaHistogramProcEngine implements Engine {
         try {
             data = DasDataType.deserialize(bb);
             int sampleLimit = data[0].limit()/2;
-            System.out.println("DDD ================= "+ sampleLimit);
             for (int channel = 0; channel < chNum; channel++) {
                 String title = String.valueOf(channel);
                 if(histTitles.contains(title)) {
