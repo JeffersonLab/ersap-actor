@@ -64,6 +64,7 @@ public class SampaFileSinkEngine extends AbstractEventWriterService<FileOutputSt
                 evt_count++;
                 ByteBuffer b = (ByteBuffer) event;
                 writer.write(b.array());
+                System.out.println("DDD "+ evt_count);
                 if (evt_count >= 1000) {
                     writer.flush();
                     writer.close();
