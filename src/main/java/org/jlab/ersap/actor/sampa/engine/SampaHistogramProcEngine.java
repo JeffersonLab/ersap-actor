@@ -22,6 +22,8 @@ import java.util.StringTokenizer;
  * 12000, Jefferson Ave, Newport News, VA 23606
  * Phone : (757)-269-7100
  *
+ * This class is for 6 stream SAMPA readout system, i.e. 3 FEC readout cards (each with 2 links)
+ *
  * @author gurjyan on 9/29/22
  * @project ersap-sampa
  */

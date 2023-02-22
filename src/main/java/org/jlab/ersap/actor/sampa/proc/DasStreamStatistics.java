@@ -17,13 +17,15 @@ import java.util.Arrays;
  * @author gurjyan on 2/19/23
  * @project ersap-coda
  */
-public class Das6StreamStatistics {
+public class DasStreamStatistics {
     private double[] mean;
     private double[] sdv;
-    private int linkNum = 6;
+    private int linkNum;
+    private int chNum;
 
-    private int chNum = 80 * linkNum;
-    public Das6StreamStatistics() {
+    public DasStreamStatistics(int linkNum) {
+        this.linkNum = linkNum;
+        chNum = 80 * linkNum;
         mean = new double[chNum];
         sdv = new double[chNum];
     }

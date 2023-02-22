@@ -65,7 +65,8 @@ public class SampaDASSourceEngine extends AbstractEventReaderService<SReceiveDec
      */
     private void startupTReadout() throws IOException {
         ProcessBuilder builder = new ProcessBuilder();
-        builder.command("sh", "-c", "treadout --data-type 1 --frames 2000 --mode das --events 0");
+        // Initial port = 6000, mask=0x7 that means we only read FEC 0,1 and 2
+        builder.command("sh", "-c", "treadout --data-type 1 --frames 4000 --mode das --mask 0x7 --port 6000 --host_ip localhost --events 0");
         tReadoutProcess = builder.start();
         StreamGobbler streamGobbler =
                 new StreamGobbler(tReadoutProcess.getInputStream(), System.out::println);
@@ -79,6 +80,8 @@ public class SampaDASSourceEngine extends AbstractEventReaderService<SReceiveDec
     protected SReceiveDecodeAggregate createReader(Path file, JSONObject opts)
             throws EventReaderException {
         int initialPort = opts.has(SMP_PORT) ? opts.getInt(SMP_PORT) : 6000;
+        // This is the initial port, assuming that treadout will send each link/stream data to
+        // sequential ports starting from initialPort (e.g. 6000, 6001, 6002, etc.)
         int streamCount = opts.has(SMP_STREAMS) ? opts.getInt(SMP_STREAMS) : 2;
         try {
             SReceiveDecodeAggregate v =

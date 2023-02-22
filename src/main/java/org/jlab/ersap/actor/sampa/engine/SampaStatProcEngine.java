@@ -17,8 +17,7 @@ import org.jlab.epsci.ersap.engine.Engine;
 import org.jlab.epsci.ersap.engine.EngineData;
 import org.jlab.epsci.ersap.engine.EngineDataType;
 import org.jlab.ersap.actor.datatypes.DasDataType;
-import org.jlab.ersap.actor.sampa.proc.Das2StreamStatistics;
-import org.jlab.ersap.actor.sampa.proc.Das6StreamStatistics;
+import org.jlab.ersap.actor.sampa.proc.DasStreamStatistics;
 import org.json.JSONObject;
 
 import java.nio.ByteBuffer;
@@ -27,7 +26,7 @@ import java.util.Set;
 public class SampaStatProcEngine implements Engine {
     private static final String VERBOSE = "verbose";
     private boolean verbose = false;
-    private Das6StreamStatistics dasStat = new Das6StreamStatistics();
+    private DasStreamStatistics dasStat = new DasStreamStatistics(6);
 
 
 
