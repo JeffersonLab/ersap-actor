@@ -1,4 +1,4 @@
 #!/bin/sh
 unsetenv CLASSPATH
 setenv JAVA_HOME /daqfs/java/jdk-11.0.2
-$JAVA_HOME/bin/java -cp $ERSAP_HOME/plugins/epsci/lib/ersap-actor-1.0-SNAPSHOT.jar org.jlab.ersap.actor.sampa.proc.DecodedOutputFileReader
+$JAVA_HOME/bin/java -cp $ERSAP_HOME/plugins/epsci/lib/ersap-actor-1.0-SNAPSHOT.jar org.jlab.ersap.actor.sampa.proc.DecodedOutputFileReader $1
