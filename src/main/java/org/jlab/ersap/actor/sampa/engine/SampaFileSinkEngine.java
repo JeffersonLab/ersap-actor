@@ -64,8 +64,6 @@ public class SampaFileSinkEngine extends AbstractEventWriterService<FileOutputSt
             try {
                 evt_count++;
                 ByteBuffer b = (ByteBuffer) event;
-                // Writing BIG_ENDIAN ordered data
-                b.order(ByteOrder.BIG_ENDIAN);
                 writer.write(b.array());
                 if (evt_count >= 100) {
                     writer.flush();
