@@ -8,6 +8,7 @@ import org.json.JSONObject;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 import java.nio.file.Path;
 
 /**
@@ -63,6 +64,8 @@ public class SampaFileSinkEngine extends AbstractEventWriterService<FileOutputSt
             try {
                 evt_count++;
                 ByteBuffer b = (ByteBuffer) event;
+                // Writing BIG_ENDIAN ordered data
+                b.order(ByteOrder.BIG_ENDIAN);
                 writer.write(b.array());
                 if (evt_count >= 100) {
                     writer.flush();

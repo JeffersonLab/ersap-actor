@@ -23,10 +23,12 @@ public class DecodedOutputFileReader {
         String inputFileName = args[0];
         try {
             DataInputStream dataInputStream = new DataInputStream(new FileInputStream(inputFileName));
-            for (int j = 0; j <= 6; j++) {
-                System.out.println("Link = " + j);
-                for (int i = 0; i < 80; i++) {
-                    System.out.println("channel = " + i + " value = " + dataInputStream.readShort());
+            while(true) {
+                for (int j = 0; j <= 6; j++) {
+                    System.out.println("Link = " + j);
+                    for (int i = 0; i < 80; i++) {
+                        System.out.println("channel = " + i + " value = " + dataInputStream.readShort());
+                    }
                 }
             }
         } catch (IOException e) {
