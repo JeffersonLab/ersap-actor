@@ -1,0 +1,35 @@
+---
+io-services:
+  reader:
+    class: org.jlab.ersap.actor.sampa.engine.SampaDASSourceEngine
+    name: SMPSource
+  writer:
+    class: org.jlab.ersap.actor.sampa.engine.SampaFileSinkEngine
+    name: SMPWriter
+services:
+  - class: org.jlab.ersap.actor.sampa.engine.SampaStatProcEngine
+    name: SMPStreamTest
+  - class: org.jlab.ersap.actor.sampa.engine.SampaHistogramProcEngine
+    name: SMPHistogram
+configuration:
+  io-services:
+    reader:
+      stream_count: 6
+      port: 6000
+    writer:
+      file_output: "true"
+  services:
+    SMPStreamTest:
+      verbose: "false"
+    SMPHistogram:
+      frame_title: "ERSAP"
+      frame_width: 1400
+      frame_height: 1200
+      grid_size: 2
+      #> hist_titles is a string containing the list of integers=channels separated by ,
+      hist_titles: "1, 3, 7, 17"
+      hist_bins: 100
+      hist_min: 0
+      hist_max: 500
+mime-types:
+  - binary/data-sampa
