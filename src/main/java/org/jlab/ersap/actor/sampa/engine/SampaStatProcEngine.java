@@ -26,7 +26,7 @@ import java.util.Set;
 public class SampaStatProcEngine implements Engine {
     private static final String VERBOSE = "verbose";
     private boolean verbose = false;
-    private DasStreamStatistics dasStat = new DasStreamStatistics(6);
+    private DasStreamStatistics dasStat = new DasStreamStatistics(1);
 
 
 
