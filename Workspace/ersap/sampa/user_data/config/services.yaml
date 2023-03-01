@@ -17,7 +17,7 @@ configuration:
       stream_count: 6
       port: 6000
     writer:
-      file_output: "true"
+      file_output: "false"
   services:
     SMPStreamTest:
       verbose: "false"
