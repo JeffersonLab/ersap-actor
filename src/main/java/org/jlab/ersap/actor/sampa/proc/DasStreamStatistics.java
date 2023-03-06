@@ -113,7 +113,7 @@ public class DasStreamStatistics {
         try {
 
         for (int channel = 0; channel < chNum; channel++) {
-            fileWriter.write(channel); fileWriter.write(" ");
+            fileWriter.write(String.valueOf(channel)); fileWriter.write(" ");
             fileWriter.write(String.valueOf(mean[channel])); fileWriter.write(" ");
             fileWriter.write(String.valueOf(sdv[channel]));fileWriter.write("\n");
         }
