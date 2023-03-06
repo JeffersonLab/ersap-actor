@@ -1,5 +1,7 @@
 package org.jlab.ersap.actor.sampa.proc;
 
+import java.io.FileWriter;
+import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.nio.ByteBuffer;
@@ -24,11 +26,19 @@ public class DasStreamStatistics {
     private int linkNum;
     private int chNum;
 
+    FileWriter fileWriter;
+
     public DasStreamStatistics(int linkNum) {
         this.linkNum = linkNum;
         chNum = 80 * linkNum;
         mean = new double[chNum];
         sdv = new double[chNum];
+        try {
+            String user_data = System.getenv("ERSAP_USER_DATA");
+            fileWriter = new FileWriter(user_data+"/data/output/pedestals.dat");
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public void calculateStats(ByteBuffer[] data) {
@@ -57,6 +67,7 @@ public class DasStreamStatistics {
             mean[channel] = m;
             sdv[channel]  = Math.sqrt(variance);
         }
+
     }
 
     public void printStats(OutputStream out, boolean json) {
@@ -93,11 +104,25 @@ public class DasStreamStatistics {
                 writer.printf("%2d] : ", channel);
                 writer.printf("%8.4f   ", mean[channel]);
                 writer.printf("%6.4f\n", sdv[channel]);
-
-            };
-        };
+            }
+        }
         writer.write((json ? "\n}" : ""));
         writer.write("\n");
+
+        // write to the pedestals file
+        try {
+
+        for (int channel = 0; channel < chNum; channel++) {
+                fileWriter.write("[ CHA ");
+            fileWriter.write(channel); fileWriter.write(" ");
+            fileWriter.write(String.valueOf(mean[channel])); fileWriter.write(" ");
+            fileWriter.write(String.valueOf(sdv[channel]));
+        }
+            fileWriter.write("\n");
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
     }
 
     private void reset(){
