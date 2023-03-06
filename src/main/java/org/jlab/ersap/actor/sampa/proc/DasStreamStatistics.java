@@ -66,6 +66,8 @@ public class DasStreamStatistics {
 
     public void printStats(OutputStream out, boolean json) {
 
+        System.out.println("DDDD "+json);
+     /*
         boolean autoFlush = true;
         PrintWriter writer = new PrintWriter(out, autoFlush, StandardCharsets.US_ASCII);
 
@@ -103,6 +105,8 @@ public class DasStreamStatistics {
         };
         writer.write((json ? "\n}" : ""));
         writer.write("\n");
+
+      */
     }
 
     private void reset(){
