@@ -21,10 +21,6 @@ public class DasStreamStatistics {
     private double[] mean;
     private double[] sdv;
 
-    private double m[];
-    private double M2[];
-    private double variance[];
-
     private int linkNum;
     private int chNum;
 
@@ -33,14 +29,11 @@ public class DasStreamStatistics {
         chNum = 80 * linkNum;
         mean = new double[chNum];
         sdv = new double[chNum];
-        m = new double[chNum];
-        M2 = new double[chNum];
-        variance = new double[chNum];
     }
 
     public void calculateStats(ByteBuffer[] data) {
 
-        double delta, dataPt;
+        double m, M2, variance, delta, dataPt;
 
         // reset stat arrays
         reset();
@@ -49,18 +42,20 @@ public class DasStreamStatistics {
         int sampleLimit = data[0].limit()/2;
 
         for (int channel = 0; channel < chNum; channel++) {
+            m = 0;
+            M2 = 0;
+            variance = 0;
 
             for (int sample = 0; sample < sampleLimit; sample++) {
                 dataPt = data[channel].getShort(2*sample); // ADC sample
-                delta = dataPt - m[channel];
-                m[channel]  += delta / (sample + 1);
-                M2[channel] += delta * (dataPt - m[channel]);
-                variance[channel] = M2[channel] / (sample + 1);
+                delta = dataPt - m;
+                m  += delta / (sample + 1);
+                M2 += delta * (dataPt - m);
+                variance = M2 / (sample + 1);
             };
-//            System.out.println("\n");
 
-            mean[channel] = m[channel];
-            sdv[channel]  = Math.sqrt(variance[channel]);
+            mean[channel] = m;
+            sdv[channel]  = Math.sqrt(variance);
         }
     }
 
@@ -103,7 +98,6 @@ public class DasStreamStatistics {
         };
         writer.write((json ? "\n}" : ""));
         writer.write("\n");
-
     }
 
     private void reset(){
