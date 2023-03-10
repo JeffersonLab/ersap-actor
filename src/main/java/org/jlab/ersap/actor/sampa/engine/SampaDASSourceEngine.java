@@ -87,7 +87,6 @@ public class SampaDASSourceEngine extends AbstractEventReaderService<SReceiveDec
             String fec =opts.getString(FEC);
             String [] tokens = fec.split(",");
             for (String token : tokens) {
-                System.out.println("DDDDDDDDDDD "+token);
                 switch (token.trim()) {
                     case "1":
                         activePorts.add(initialPort + 0);
@@ -160,7 +159,7 @@ public class SampaDASSourceEngine extends AbstractEventReaderService<SReceiveDec
 
     @Override
     protected Object readEvent(int eventNumber) throws EventReaderException {
-        System.out.println("DDD: Read event...");
+//        System.out.println("DDD: Read event...");
         return reader.getEvent();
     }
 
