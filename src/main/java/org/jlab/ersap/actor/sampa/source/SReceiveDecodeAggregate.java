@@ -174,20 +174,19 @@ public class SReceiveDecodeAggregate extends Thread {
      * @throws InterruptedException if thread interrupted.
      */
     private ByteBuffer getSerializedData() throws InterruptedException {
+        System.out.println( "DDDDD - 1");
 
         SRingRawEvent item = get();
         // Serialize this data here. By doing the copy here,
         // the put() can be done immediately, greatly simplifying
         // the engine code to wrap this class.
         ByteBuffer bb = null;
-        System.out.println( "DDDDD - 1");
 
         try {
             bb = DasDataType.serialize(item.getData());
         } catch (ErsapException e) {/* never happen */}
 
         put();
-        System.out.println( "DDDDD - 2");
 
         return bb;
     }
