@@ -192,10 +192,11 @@ public class SReceiveDecodeAggregate extends Thread {
     public ByteBuffer getEvent() {
         while (pool.isEmpty()) {
             try {
-                Thread.sleep(1);
+                Thread.sleep(100);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
+            System.out.println("DDDD pool is empty");
         }
         return pool.poll();
     }
