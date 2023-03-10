@@ -10,6 +10,7 @@ import org.jlab.ersap.actor.sampa.source.ring.SRingRawEvent;
 import org.jlab.ersap.actor.sampa.source.ring.SRingRawEventFactory;
 
 import java.nio.ByteBuffer;
+import java.util.ArrayList;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 import static com.lmax.disruptor.RingBuffer.createSingleProducer;
@@ -27,8 +28,9 @@ import static com.lmax.disruptor.RingBuffer.createSingleProducer;
  */
 public class SReceiveDecodeAggregate extends Thread {
 
-    // Number of SAMPA streams
-    private final int nStreams;
+    // Number of active streams (FEC has 2 streams) depending
+    // how many FEC we configure to read
+    private int activeStreams;
 
     // Max ring items
     private final static int maxRingItems = 2048;
@@ -57,8 +59,9 @@ public class SReceiveDecodeAggregate extends Thread {
     // Pool of ByteBuffers of serialized SAMPA stream data.
     private final ConcurrentLinkedQueue<ByteBuffer> pool;
 
-    public SReceiveDecodeAggregate(EMode eMode, int nStreams, int initPort) {
-        this.nStreams = nStreams;
+    public SReceiveDecodeAggregate(EMode eMode, ArrayList<Integer> activePorts) {
+        activeStreams = activePorts.size();
+
         // Max number of frames to receive before ending program.
         int streamFrameLimit = 0;
 
@@ -66,17 +69,17 @@ public class SReceiveDecodeAggregate extends Thread {
         int byteSize = 8192;
 
         // RingBuffers in which receivers will get & fill events, then pass them to the aggregator
-        receivers = new SReceiverDecoder[nStreams];
+        receivers = new SReceiverDecoder[activeStreams];
         // RingBuffers in which receivers will get & fill events, then pass them to the aggregator
-        RingBuffer<SRingRawEvent>[] ringBuffers = new RingBuffer[nStreams];
+        RingBuffer<SRingRawEvent>[] ringBuffers = new RingBuffer[activeStreams];
         // Receiver ring sequences
-        Sequence[] sequences = new Sequence[nStreams];
+        Sequence[] sequences = new Sequence[activeStreams];
 
 
         // Create receiver ring barriers
-        SequenceBarrier[] barriers = new SequenceBarrier[nStreams];
+        SequenceBarrier[] barriers = new SequenceBarrier[activeStreams];
 
-        for (int i = 0; i < nStreams; i++) {
+        for (int i = 0; i < activeStreams; i++) {
             ringBuffers[i] = createSingleProducer(
                     new SRingRawEventFactory(eMode, byteSize, false), maxRingItems,
                     new SpinCountBackoffWaitStrategy(30000, new LiteBlockingWaitStrategy()));
@@ -89,7 +92,7 @@ public class SReceiveDecodeAggregate extends Thread {
             ringBuffers[i].addGatingSequences(sequences[i]);
 
             // Create the receiver
-            receivers[i] = new SReceiverDecoder(initPort + i, i,
+            receivers[i] = new SReceiverDecoder(activePorts.get(i),i,
                     ringBuffers[i], streamFrameLimit, eMode, byteSize);
         }
         // RingBuffer in which Aggregator will get empty events and fill them with data aggregated
@@ -115,7 +118,7 @@ public class SReceiveDecodeAggregate extends Thread {
 
     @Override
     public void run() {
-        for (int i = 0; i < nStreams; i++) {
+        for (int i = 0; i < activeStreams; i++) {
             System.out.println("DDD starting stream receiver = " + i);
             receivers[i].start();
         }
@@ -203,7 +206,7 @@ public class SReceiveDecodeAggregate extends Thread {
     }
 
     public void close() {
-        for (int i = 0; i < nStreams; i++) {
+        for (int i = 0; i < activeStreams; i++) {
             receivers[i].exit();
         }
         aggregator.exit();

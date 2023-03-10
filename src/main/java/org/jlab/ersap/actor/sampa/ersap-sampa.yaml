@@ -14,10 +14,10 @@ services:
 configuration:
   global:
     fec_count: 3
-    fec: "1, 2, 3"
   io-services:
     reader:
       port: 6000
+      fec: "1, 2, 3"
     writer:
       file_output: "false"
   services:

@@ -14,6 +14,8 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.ByteOrder;
 import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.StringTokenizer;
 import java.util.concurrent.Executors;
 import java.util.function.Consumer;
 
@@ -31,8 +33,7 @@ import java.util.function.Consumer;
 public class SampaDASSourceEngine extends AbstractEventReaderService<SReceiveDecodeAggregate> {
     private static final String SMP_PORT = "port";
     // Total number of Front End Cards (FEC), assuming that each FEC has 2 GBT streams
-    private static final int SMP_STREAMS = 6;
-
+    private static String FEC = "fec";
     private Process tReadoutProcess;
 
 
@@ -81,11 +82,42 @@ public class SampaDASSourceEngine extends AbstractEventReaderService<SReceiveDec
     protected SReceiveDecodeAggregate createReader(Path file, JSONObject opts)
             throws EventReaderException {
         int initialPort = opts.has(SMP_PORT) ? opts.getInt(SMP_PORT) : 6000;
+        ArrayList<Integer> activePorts = new ArrayList<>();
+        if (opts.has(FEC)) {
+            String fec =opts.getString(FEC);
+            String [] tokens = fec.split(",");
+            for (String token : tokens) {
+                switch (token) {
+                    case "1":
+                        activePorts.add(initialPort + 0);
+                        activePorts.add(initialPort + 1);
+                        break;
+                    case "2":
+                        activePorts.add(initialPort + 2);
+                        activePorts.add(initialPort + 3);
+                        break;
+                    case "3":
+                        activePorts.add(initialPort + 4);
+                        activePorts.add(initialPort + 5);
+                        break;
+                    case "4":
+                        activePorts.add(initialPort + 6);
+                        activePorts.add(initialPort + 7);
+                        break;
+                    case "5":
+                        activePorts.add(initialPort + 8);
+                        activePorts.add(initialPort + 9);
+                        break;
+                }
+            }
+        }
+
+
         // This is the initial port, assuming that treadout will send each link/stream data to
         // sequential ports starting from initialPort (e.g. 6000, 6001, 6002, etc.)
         try {
             SReceiveDecodeAggregate v =
-                    new SReceiveDecodeAggregate(EMode.DAS, SMP_STREAMS, initialPort);
+                    new SReceiveDecodeAggregate(EMode.DAS, activePorts);
             // start up receivers and aggregator
             v.start();
 
