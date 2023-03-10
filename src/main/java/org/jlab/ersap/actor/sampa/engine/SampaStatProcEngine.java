@@ -42,14 +42,14 @@ public class SampaStatProcEngine implements Engine {
             JSONObject data = new JSONObject(source);
             if (data.has(VERBOSE)) {
                 verbose = data.getString(VERBOSE).equalsIgnoreCase("true");
-                System.out.println("DDDDDDDDDDDD -1");
             }
             if (data.has(FEC_COUNT)) {
-                System.out.println("DDDDDDDDDDDD -2");
 
                 fecCount = data.getInt(FEC_COUNT);
                 // Each FEC has 2 GBT stream, each having 80 channel data
                 int chNum = 80 * fecCount * 2;
+                System.out.println("DDDDDDDDDDDD - "+chNum);
+
                 dasStat  = new DasStreamStatistics(chNum);
             }
 
@@ -62,6 +62,8 @@ public class SampaStatProcEngine implements Engine {
 
         ByteBuffer bb = (ByteBuffer)input.getData();
         ByteBuffer[] data = null;
+        System.out.println("DDDDDDDDDDDD - ");
+
         try {
             data = DasDataType.deserialize(bb);
         } catch (ErsapException e) {
