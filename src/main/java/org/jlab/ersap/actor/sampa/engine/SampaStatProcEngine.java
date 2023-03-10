@@ -41,6 +41,8 @@ public class SampaStatProcEngine implements Engine {
             JSONObject data = new JSONObject(source);
             if (data.has(VERBOSE)) {
                 if (data.has(FEC_COUNT)) {
+                    System.out.println("DDD DDD ==================== ");
+
                     fecCount = data.getInt(FEC_COUNT);
                     // Each FEC has 2 GBT stream, each having 80 channel data
                     int chNum = 80 * fecCount * 2;
@@ -62,7 +64,6 @@ public class SampaStatProcEngine implements Engine {
         } catch (ErsapException e) {
             e.printStackTrace();
         }
-        System.out.println("DDD DDD ");
         if(verbose) {
             dasStat.calculateStats(data);
             dasStat.printStats(System.out, true);
