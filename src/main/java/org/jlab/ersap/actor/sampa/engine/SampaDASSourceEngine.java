@@ -31,7 +31,7 @@ import java.util.function.Consumer;
 public class SampaDASSourceEngine extends AbstractEventReaderService<SReceiveDecodeAggregate> {
     private static final String SMP_PORT = "port";
     // Total number of Front End Cards (FEC), assuming that each FEC has 2 GBT streams
-    private static final int SMP_STREAMS = 10;
+    private static final int SMP_STREAMS = 6;
 
     private Process tReadoutProcess;
 

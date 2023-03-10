@@ -174,11 +174,8 @@ public class SReceiveDecodeAggregate extends Thread {
      * @throws InterruptedException if thread interrupted.
      */
     private ByteBuffer getSerializedData() throws InterruptedException {
-        System.out.println( "DDDDD - 1");
 
         SRingRawEvent item = get();
-
-        System.out.println( "DDDDD - 2");
 
         // Serialize this data here. By doing the copy here,
         // the put() can be done immediately, greatly simplifying
