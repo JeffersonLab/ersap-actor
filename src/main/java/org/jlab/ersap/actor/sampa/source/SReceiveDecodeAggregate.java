@@ -123,7 +123,7 @@ public class SReceiveDecodeAggregate extends Thread {
         while (running) {
             try {
                 ByteBuffer b = getSerializedData();
-
+                System.out.println( "DDDDD "+b.limit());
                 if (b != null) pool.add(b);
             } catch (Exception e) {
                 e.printStackTrace();
@@ -196,7 +196,6 @@ public class SReceiveDecodeAggregate extends Thread {
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
-            System.out.println("DDDD pool is empty");
         }
         return pool.poll();
     }
