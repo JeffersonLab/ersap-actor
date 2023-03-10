@@ -86,7 +86,7 @@ public class CodaETReader implements ISourceReader {
             }
             idCount++;
 
-            // Id associated with this buffer in this fifo entry.
+            // ID associated with this buffer in this fifo entry.
             // Not useful if only 1 buffer in each fifo entry as is the case here.
             bufId = mevs[i].getFifoId();
 
