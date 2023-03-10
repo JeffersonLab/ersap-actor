@@ -123,7 +123,6 @@ public class SReceiveDecodeAggregate extends Thread {
         while (running) {
             try {
                 ByteBuffer b = getSerializedData();
-                System.out.println( "DDDDD "+b.limit());
                 if (b != null) pool.add(b);
             } catch (Exception e) {
                 e.printStackTrace();
@@ -181,11 +180,15 @@ public class SReceiveDecodeAggregate extends Thread {
         // the put() can be done immediately, greatly simplifying
         // the engine code to wrap this class.
         ByteBuffer bb = null;
+        System.out.println( "DDDDD - 1");
+
         try {
             bb = DasDataType.serialize(item.getData());
         } catch (ErsapException e) {/* never happen */}
 
         put();
+        System.out.println( "DDDDD - 2");
+
         return bb;
     }
 
