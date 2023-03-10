@@ -16,6 +16,7 @@ import org.jlab.epsci.ersap.base.error.ErsapException;
 import org.jlab.epsci.ersap.engine.Engine;
 import org.jlab.epsci.ersap.engine.EngineData;
 import org.jlab.epsci.ersap.engine.EngineDataType;
+import org.jlab.epsci.ersap.util.report.JsonUtils;
 import org.jlab.ersap.actor.datatypes.DasDataType;
 import org.jlab.ersap.actor.sampa.proc.DasStreamStatistics;
 import org.json.JSONObject;
@@ -40,16 +41,18 @@ public class SampaStatProcEngine implements Engine {
             String source = (String) input.getData();
             JSONObject data = new JSONObject(source);
             if (data.has(VERBOSE)) {
-                if (data.has(FEC_COUNT)) {
-                    System.out.println("DDD DDD ==================== ");
-
-                    fecCount = data.getInt(FEC_COUNT);
-                    // Each FEC has 2 GBT stream, each having 80 channel data
-                    int chNum = 80 * fecCount * 2;
-                    dasStat  = new DasStreamStatistics(chNum);
-                }
                 verbose = data.getString(VERBOSE).equalsIgnoreCase("true");
+                System.out.println("DDDDDDDDDDDD -1");
             }
+            if (data.has(FEC_COUNT)) {
+                System.out.println("DDDDDDDDDDDD -2");
+
+                fecCount = data.getInt(FEC_COUNT);
+                // Each FEC has 2 GBT stream, each having 80 channel data
+                int chNum = 80 * fecCount * 2;
+                dasStat  = new DasStreamStatistics(chNum);
+            }
+
         }
         return null;
     }
