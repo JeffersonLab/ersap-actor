@@ -112,7 +112,11 @@ public class SampaHistogramProcEngine implements Engine {
                 if (histTitles.contains(title)) {
                     short[] _sData = new short[sampleLimit];
                     for (int sample = 0; sample < sampleLimit; sample++) {
-                        _sData[sample] = data[channel].getShort(2 * sample);
+                        try {
+                            _sData[sample] = data[channel].getShort(2 * sample);
+                        } catch (IndexOutOfBoundsException e){
+                            e.printStackTrace();
+                        }
                     }
                     histogram.update(title, _sData);
                     ;
