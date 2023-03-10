@@ -21,13 +21,15 @@ import java.util.StringTokenizer;
  * Experimental Physics Software and Computing Infrastructure Group
  * 12000, Jefferson Ave, Newport News, VA 23606
  * Phone : (757)-269-7100
- *
+ * <p>
  * This class is for 6 stream SAMPA readout system, i.e. 3 FEC readout cards (each with 2 links)
  *
  * @author gurjyan on 9/29/22
  * @project ersap-sampa
  */
 public class SampaHistogramProcEngine implements Engine {
+    private static String FEC_COUNT = "fec_count";
+    private int fecCount;
     private static String FRAME_TITLE = "frame_title";
     private String frameTitle;
     private static String FRAME_WIDTH = "frame_width";
@@ -47,14 +49,19 @@ public class SampaHistogramProcEngine implements Engine {
 
     private DasHistogram histogram;
 
-    private int linkNum = 6;
-    private int chNum = 80 * linkNum;
+    private int chNum;
 
     @Override
     public EngineData configure(EngineData input) {
         if (input.getMimeType().equalsIgnoreCase(EngineDataType.JSON.mimeType())) {
-        String source = (String) input.getData();
-        JSONObject opts = new JSONObject(source);        if (opts.has(FRAME_TITLE)) {
+            String source = (String) input.getData();
+            JSONObject opts = new JSONObject(source);
+            if (opts.has(FEC_COUNT)) {
+                fecCount = opts.getInt(FEC_COUNT);
+                // Each FEC has 2 GBT stream, each having 80 channel data
+                chNum = 80 * fecCount * 2;
+            }
+            if (opts.has(FRAME_TITLE)) {
                 frameTitle = opts.getString(FRAME_TITLE);
             }
             if (opts.has(FRAME_WIDTH)) {
@@ -95,19 +102,20 @@ public class SampaHistogramProcEngine implements Engine {
 
     @Override
     public EngineData execute(EngineData input) {
-        ByteBuffer bb = (ByteBuffer)input.getData();
+        ByteBuffer bb = (ByteBuffer) input.getData();
         ByteBuffer[] data;
         try {
             data = DasDataType.deserialize(bb);
-            int sampleLimit = data[0].limit()/2;
+            int sampleLimit = data[0].limit() / 2;
             for (int channel = 0; channel < chNum; channel++) {
                 String title = String.valueOf(channel);
-                if(histTitles.contains(title)) {
+                if (histTitles.contains(title)) {
                     short[] _sData = new short[sampleLimit];
                     for (int sample = 0; sample < sampleLimit; sample++) {
-                       _sData[sample] =  data[channel].getShort(2 * sample);
+                        _sData[sample] = data[channel].getShort(2 * sample);
                     }
-                    histogram.update(title, _sData);                 ;
+                    histogram.update(title, _sData);
+                    ;
                 }
             }
 

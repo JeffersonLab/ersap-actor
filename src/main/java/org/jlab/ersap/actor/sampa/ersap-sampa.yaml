@@ -12,9 +12,11 @@ services:
   - class: org.jlab.ersap.actor.sampa.engine.SampaHistogramProcEngine
     name: SMPHistogram
 configuration:
+  global:
+    fec_count: 3
+    fec: "1, 2, 3"
   io-services:
     reader:
-      stream_count: 6
       port: 6000
     writer:
       file_output: "false"

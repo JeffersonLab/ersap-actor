@@ -24,9 +24,11 @@ import java.nio.ByteBuffer;
 import java.util.Set;
 
 public class SampaStatProcEngine implements Engine {
+    private static String FEC_COUNT = "fec_count";
+    private int fecCount;
     private static final String VERBOSE = "verbose";
     private boolean verbose = false;
-    private DasStreamStatistics dasStat = new DasStreamStatistics(10);
+    private DasStreamStatistics dasStat;
 
 
 
@@ -38,11 +40,13 @@ public class SampaStatProcEngine implements Engine {
             String source = (String) input.getData();
             JSONObject data = new JSONObject(source);
             if (data.has(VERBOSE)) {
-                if (data.getString(VERBOSE).equalsIgnoreCase("true")) {
-                    verbose = true;
-                } else {
-                    verbose = false;
+                if (data.has(FEC_COUNT)) {
+                    fecCount = data.getInt(FEC_COUNT);
+                    // Each FEC has 2 GBT stream, each having 80 channel data
+                    int chNum = 80 * fecCount * 2;
+                    dasStat  = new DasStreamStatistics(chNum);
                 }
+                verbose = data.getString(VERBOSE).equalsIgnoreCase("true");
             }
         }
         return null;

@@ -23,14 +23,12 @@ public class DasStreamStatistics {
     private double[] mean;
     private double[] sdv;
 
-    private int linkNum;
     private int chNum;
 
     FileWriter fileWriter;
 
-    public DasStreamStatistics(int linkNum) {
-        this.linkNum = linkNum;
-        chNum = 80 * linkNum;
+    public DasStreamStatistics(int ChNum) {
+        this.chNum = ChNum;
         mean = new double[chNum];
         sdv = new double[chNum];
         try {

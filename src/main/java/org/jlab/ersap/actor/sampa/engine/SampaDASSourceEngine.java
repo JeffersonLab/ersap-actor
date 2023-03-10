@@ -30,7 +30,8 @@ import java.util.function.Consumer;
  */
 public class SampaDASSourceEngine extends AbstractEventReaderService<SReceiveDecodeAggregate> {
     private static final String SMP_PORT = "port";
-    private static final String SMP_STREAMS = "stream_count";
+    // Total number of Front End Cards (FEC), assuming that each FEC has 2 GBT streams
+    private static final int SMP_STREAMS = 10;
 
     private Process tReadoutProcess;
 
@@ -82,10 +83,9 @@ public class SampaDASSourceEngine extends AbstractEventReaderService<SReceiveDec
         int initialPort = opts.has(SMP_PORT) ? opts.getInt(SMP_PORT) : 6000;
         // This is the initial port, assuming that treadout will send each link/stream data to
         // sequential ports starting from initialPort (e.g. 6000, 6001, 6002, etc.)
-        int streamCount = opts.has(SMP_STREAMS) ? opts.getInt(SMP_STREAMS) : 2;
         try {
             SReceiveDecodeAggregate v =
-                    new SReceiveDecodeAggregate(EMode.DAS, streamCount, initialPort);
+                    new SReceiveDecodeAggregate(EMode.DAS, SMP_STREAMS, initialPort);
             // start up receivers and aggregator
             v.start();
 
