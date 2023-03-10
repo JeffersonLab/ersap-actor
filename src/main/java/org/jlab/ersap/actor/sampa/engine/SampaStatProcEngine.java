@@ -62,6 +62,7 @@ public class SampaStatProcEngine implements Engine {
         } catch (ErsapException e) {
             e.printStackTrace();
         }
+        System.out.println("DDD DDD ");
         if(verbose) {
             dasStat.calculateStats(data);
             dasStat.printStats(System.out, true);
