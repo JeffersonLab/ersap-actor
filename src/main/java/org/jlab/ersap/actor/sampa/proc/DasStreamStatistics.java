@@ -55,12 +55,16 @@ public class DasStreamStatistics {
             variance = 0;
 
             for (int sample = 0; sample < sampleLimit; sample++) {
-                dataPt = data[channel].getShort(2*sample); // ADC sample
+                try {
+                    dataPt = data[channel].getShort(2 * sample); // ADC sample
                 delta = dataPt - m;
                 m  += delta / (sample + 1);
                 M2 += delta * (dataPt - m);
                 variance = M2 / (sample + 1);
-            };
+                } catch (IndexOutOfBoundsException e) {
+                    e.printStackTrace();
+                }
+            }
 
             mean[channel] = m;
             sdv[channel]  = Math.sqrt(variance);
