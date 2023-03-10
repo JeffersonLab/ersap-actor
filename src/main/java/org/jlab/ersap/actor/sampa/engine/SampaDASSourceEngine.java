@@ -88,7 +88,7 @@ public class SampaDASSourceEngine extends AbstractEventReaderService<SReceiveDec
             String [] tokens = fec.split(",");
             for (String token : tokens) {
                 System.out.println("DDDDDDDDDDD "+token);
-                switch (token) {
+                switch (token.trim()) {
                     case "1":
                         activePorts.add(initialPort + 0);
                         activePorts.add(initialPort + 1);
