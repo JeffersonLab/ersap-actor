@@ -1,6 +1,5 @@
 package org.jlab.ersap.actor.sampa.engine;
 
-import com.google.gson.Gson;
 import org.jlab.epsci.ersap.base.error.ErsapException;
 import org.jlab.epsci.ersap.engine.EngineDataType;
 import org.jlab.epsci.ersap.std.services.AbstractEventWriterService;
