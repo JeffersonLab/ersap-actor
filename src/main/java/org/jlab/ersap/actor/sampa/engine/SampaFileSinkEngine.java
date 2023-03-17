@@ -1,11 +1,11 @@
 package org.jlab.ersap.actor.sampa.engine;
 
+import com.google.gson.Gson;
 import org.jlab.epsci.ersap.base.error.ErsapException;
 import org.jlab.epsci.ersap.engine.EngineDataType;
 import org.jlab.epsci.ersap.std.services.AbstractEventWriterService;
 import org.jlab.epsci.ersap.std.services.EventWriterException;
 import org.jlab.ersap.actor.datatypes.DasDataType;
-import org.jlab.ersap.actor.sampa.proc.JsonFileWriter;
 import org.json.JSONObject;
 
 import java.io.FileOutputStream;
@@ -38,6 +38,8 @@ public class SampaFileSinkEngine extends AbstractEventWriterService<FileOutputSt
     private Map<Integer, double[]> frame = new HashMap<>();
     private int chNum;
 
+    private Gson gson = new Gson();
+
 
     @Override
     protected FileOutputStream createWriter(Path file, JSONObject opts)
@@ -54,7 +56,7 @@ public class SampaFileSinkEngine extends AbstractEventWriterService<FileOutputSt
             // Each FEC has 2 GBT stream, each having 80 channel data
             chNum = 80 * opts.getInt(FEC_COUNT) * 2;
         }
-        System.out.println("DDD chNum = "+chNum);
+
         try {
             evt_count = 0;
             f_name = file.toString();
@@ -100,12 +102,10 @@ public class SampaFileSinkEngine extends AbstractEventWriterService<FileOutputSt
                             e.printStackTrace();
                         }
                     }
-                    System.out.printf("channel = "+channel+" data_size = "+dataPts.length);
                     frame.put(channel,dataPts);
                 }
-                JsonFileWriter.printFrame(System.out,frame);
-
-//                writer.write( );
+                System.out.println(gson.toJson(frame));
+                writer.write(gson.toJson(frame).getBytes());
                  if (evt_count >= 1000) {
                     writer.flush();
                     writer.close();

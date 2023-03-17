@@ -20,6 +20,7 @@ configuration:
       fec: "1, 2, 3"
     writer:
       file_output: "false"
+      fec_count: 3
   services:
     SMPStreamTest:
       verbose: "false"
