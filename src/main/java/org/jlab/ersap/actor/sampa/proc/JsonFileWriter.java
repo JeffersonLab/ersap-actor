@@ -23,7 +23,6 @@ public class JsonFileWriter {
         PrintWriter writer = new PrintWriter(out, autoFlush, StandardCharsets.US_ASCII);
 
         for (Integer channel : frame.keySet()) {
-            System.out.println("DDD "+channel);
             writer.print(5);
             writer.write("{\n");
             writer.write("\"channel\" : " + channel);
