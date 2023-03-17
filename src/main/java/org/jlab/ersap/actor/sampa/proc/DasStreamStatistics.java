@@ -27,15 +27,17 @@ public class DasStreamStatistics {
 
     FileWriter fileWriter;
 
-    public DasStreamStatistics(int ChNum) {
+    public DasStreamStatistics(int ChNum, boolean pedestalFileOutput) {
         this.chNum = ChNum;
         mean = new double[chNum];
         sdv = new double[chNum];
-        try {
-            String user_data = System.getenv("ERSAP_USER_DATA");
-            fileWriter = new FileWriter(user_data+"/data/output/pedestals.dat");
-        } catch (IOException e) {
-            throw new RuntimeException(e);
+        if(pedestalFileOutput) {
+            try {
+                String user_data = System.getenv("ERSAP_USER_DATA");
+                fileWriter = new FileWriter(user_data + "/data/output/pedestals.dat");
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
         }
     }
 

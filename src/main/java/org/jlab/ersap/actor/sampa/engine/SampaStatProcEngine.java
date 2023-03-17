@@ -49,7 +49,11 @@ public class SampaStatProcEngine implements Engine {
                 // Each FEC has 2 GBT stream, each having 80 channel data
                 int chNum = 80 * fecCount * 2;
 
-                dasStat  = new DasStreamStatistics(chNum);
+                if(verbose) {
+                    dasStat = new DasStreamStatistics(chNum, true);
+                } else {
+                    dasStat = new DasStreamStatistics(chNum, false);
+                }
             }
 
         }
