@@ -54,7 +54,7 @@ public class SampaFileSinkEngine extends AbstractEventWriterService<FileOutputSt
             // Each FEC has 2 GBT stream, each having 80 channel data
             chNum = 80 * opts.getInt(FEC_COUNT) * 2;
         }
-
+        System.out.println("DDD chNum = "+chNum);
         try {
             evt_count = 0;
             f_name = file.toString();
@@ -100,9 +100,9 @@ public class SampaFileSinkEngine extends AbstractEventWriterService<FileOutputSt
                             e.printStackTrace();
                         }
                     }
+                    System.out.printf("channel = "+channel+" data_size = "+dataPts.length);
                     frame.put(channel,dataPts);
                 }
-                System.out.println("DDD " + frame.size());
                 JsonFileWriter.printFrame(System.out,frame);
 
 //                writer.write( );
