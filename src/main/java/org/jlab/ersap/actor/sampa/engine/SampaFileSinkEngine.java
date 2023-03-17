@@ -102,6 +102,7 @@ public class SampaFileSinkEngine extends AbstractEventWriterService<FileOutputSt
                     }
                     frame.put(channel,dataPts);
                 }
+                System.out.println("DDD " + frame.size());
                 JsonFileWriter.printFrame(System.out,frame);
 
 //                writer.write( );
