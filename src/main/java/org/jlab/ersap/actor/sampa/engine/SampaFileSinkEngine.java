@@ -6,6 +6,7 @@ import org.jlab.epsci.ersap.engine.EngineDataType;
 import org.jlab.epsci.ersap.std.services.AbstractEventWriterService;
 import org.jlab.epsci.ersap.std.services.EventWriterException;
 import org.jlab.ersap.actor.datatypes.DasDataType;
+import org.jlab.ersap.actor.sampa.proc.JsonFileWriter;
 import org.json.JSONObject;
 
 import java.io.FileOutputStream;
@@ -37,8 +38,6 @@ public class SampaFileSinkEngine extends AbstractEventWriterService<FileOutputSt
 
     private Map<Integer, double[]> frame = new HashMap<>();
     private int chNum;
-
-    private Gson gson = new Gson();
 
 
     @Override
@@ -104,8 +103,9 @@ public class SampaFileSinkEngine extends AbstractEventWriterService<FileOutputSt
                     }
                     frame.put(channel,dataPts);
                 }
-                System.out.println(gson.toJson(frame));
-                writer.write(gson.toJson(frame).getBytes());
+                JsonFileWriter.printFrame(System.out,frame);
+
+//                writer.write( );
                  if (evt_count >= 1000) {
                     writer.flush();
                     writer.close();
