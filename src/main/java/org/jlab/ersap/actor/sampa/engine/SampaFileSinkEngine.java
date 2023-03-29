@@ -105,7 +105,7 @@ public class SampaFileSinkEngine extends AbstractEventWriterService<FileOutputSt
                     frame.put(channel,dataPts);
                 }
                 writer.write(gson.toJson(frame).getBytes());
-                 if (evt_count >= 1000) {
+                 if (evt_count >= 100) {
                     writer.flush();
                     writer.close();
                     f_count++;

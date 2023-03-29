@@ -119,7 +119,6 @@ public class SampaHistogramProcEngine implements Engine {
                         }
                     }
                     histogram.update(title, _sData);
-                    ;
                 }
             }
 

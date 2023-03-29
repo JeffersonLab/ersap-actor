@@ -28,7 +28,7 @@ public class DasHistogram {
                         int histBins, double histMin, double histMax) {
 
         // Create frame
-        JFrame frame = new JFrame("ERSAP: Sum");
+        JFrame frame = new JFrame("ERSAP");
         frame.setSize(600, 600);
 
         // Create panel with the grid layout
