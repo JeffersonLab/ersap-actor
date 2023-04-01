@@ -33,7 +33,7 @@ public class SReceiveDecodeAggregate extends Thread {
     private int activeStreams;
 
     // Max ring items
-    private final static int maxRingItems = 4096;
+    private final static int maxRingItems = 1048576;
 
     // Aggregated RingBuffer for data transfer between aggregator and this object.
     private final RingBuffer<SRingRawEvent> aggRingBuffer;
