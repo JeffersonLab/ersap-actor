@@ -76,7 +76,7 @@ artifacts {
 publishing {
     publications {
         maven(MavenPublication) {
-            groupId = 'org.jalb.ersap.coda'
+            groupId = 'org.jalb.ersap.actor'
             artifactId = 'library'
             version = '1.0'
             from components.java
