@@ -8,31 +8,31 @@ package org.jlab.ersap.actor.sampa.source.recagg;
  * 12000, Jefferson Ave, Newport News, VA 23606
  * Phone : (757)-269-7100
  *
- * @author timmer & gurjyan on 8/31/22
+ * @author gurjyan on 8/31/22
  * @project ersap-sampa
  */
-import com.lmax.disruptor.RingBuffer;
-import org.jlab.ersap.actor.sampa.EMode;
-import org.jlab.ersap.actor.sampa.source.decoder.DasDecoder;
-import org.jlab.ersap.actor.sampa.source.decoder.DspDecoder;
-import org.jlab.ersap.actor.sampa.source.decoder.IDecoder;
-import org.jlab.ersap.actor.sampa.source.ring.SRingRawEvent;
+        import com.lmax.disruptor.RingBuffer;
+        import org.jlab.ersap.actor.sampa.EMode;
+        import org.jlab.ersap.actor.sampa.source.decoder.DasDecoder;
+        import org.jlab.ersap.actor.sampa.source.decoder.DspDecoder;
+        import org.jlab.ersap.actor.sampa.source.decoder.IDecoder;
+        import org.jlab.ersap.actor.sampa.source.ring.SRingRawEvent;
 
-import java.io.BufferedInputStream;
-import java.io.DataInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.ServerSocket;
-import java.net.Socket;
-import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
+        import java.io.BufferedInputStream;
+        import java.io.DataInputStream;
+        import java.io.IOException;
+        import java.io.InputStream;
+        import java.net.ServerSocket;
+        import java.net.Socket;
+        import java.nio.ByteBuffer;
+        import java.nio.ByteOrder;
 
 
 /**
  * This class is designed to be a TCP server which accepts a single connection from
  * a client that is sending sampa data in either DAS or DSP mode.
  */
-public class SReceiverDecoder extends Thread {
+public class SFileReaderDecoder extends Thread {
 
     /** Input data stream carrying data from the client. */
     private DataInputStream dataInputStream;
@@ -52,7 +52,7 @@ public class SReceiverDecoder extends Thread {
     private final int[] data = new int[4];
 
     /** Type of data coming from SAMPA board. */
-    private final EMode EMode;
+    private final org.jlab.ersap.actor.sampa.EMode EMode;
 
     /** Object used to decode the data. */
     private final IDecoder iDecoder;
@@ -92,7 +92,7 @@ public class SReceiverDecoder extends Thread {
      * @param EMode type of data coming over TCP client's socket.
      * @param byteSize  size in bytes of each raw event's internal buffer.
      */
-    public SReceiverDecoder(int sampaPort,
+    public SFileReaderDecoder(int sampaPort,
                             int streamId,
                             RingBuffer<SRingRawEvent> ringBuffer,
                             int streamFrameLimit,

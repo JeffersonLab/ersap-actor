@@ -8,7 +8,7 @@ package org.jlab.ersap.actor.sampa.source.ring;
  * 12000, Jefferson Ave, Newport News, VA 23606
  * Phone : (757)-269-7100
  *
- * @author gurjyan on 8/31/22
+ * @author timmer & gurjyan on 8/31/22
  * @project ersap-sampa
  */
 
