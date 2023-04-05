@@ -145,12 +145,12 @@ public class SFileReaderDecoder {
             SRingRawEvent rawEvent = new SRingRawEvent(DAS);
             do {
                 rawEvent.reset();
-                System.out.println("DDD: P1");
+                System.out.println("DDD: P1 "+ streamFrameLimit);
 
                 // Fill event with data until it's full or hits the frame limit
                 do {
-                    if(iDecoder.isFull())
-                    System.out.println("DDD: "+ isDAS+" "+iDecoder.isFull());
+//                    if(iDecoder.isFull())
+//                    System.out.println("DDD: "+ isDAS+" "+iDecoder.isFull());
 
                     processOneFrame(rawEvent);
                     frameCount++;
