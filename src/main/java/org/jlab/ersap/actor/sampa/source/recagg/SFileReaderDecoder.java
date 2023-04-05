@@ -144,12 +144,9 @@ public class SFileReaderDecoder {
         try {
             SRingRawEvent rawEvent = new SRingRawEvent(DAS);
                 rawEvent.reset();
-                System.out.println("DDD: P1 "+ streamFrameLimit +" "+ frameCount);
 
                 // Fill event with data until it's full or hits the frame limit
                 do {
-//                    if(iDecoder.isFull())
-//                    System.out.println("DDD: P2 "+ isDAS+" "+iDecoder.isFull());
 
                     processOneFrame(rawEvent);
                     frameCount++;
@@ -183,7 +180,6 @@ public class SFileReaderDecoder {
 
             bb = DasDataType.serialize(rawEvent.getData());
 
-            System.out.println("DDD P3");
         } catch (Exception e) {
             e.printStackTrace();
         }
