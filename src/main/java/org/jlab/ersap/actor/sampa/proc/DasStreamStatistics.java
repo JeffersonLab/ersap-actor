@@ -28,7 +28,8 @@ public class DasStreamStatistics {
     FileWriter fileWriter;
 
     public DasStreamStatistics(int ChNum, boolean pedestalFileOutput) {
-        this.chNum = ChNum;
+//        this.chNum = ChNum; vhg for debug
+        this.chNum = 80;
         mean = new double[chNum];
         sdv = new double[chNum];
         if(pedestalFileOutput) {
@@ -51,8 +52,7 @@ public class DasStreamStatistics {
         // How much data do we have?
         int sampleLimit = data[0].limit()/2;
 
-//        for (int channel = 0; channel < chNum; channel++) { //vg for debug
-        for (int channel = 0; channel < 80; channel++) {
+        for (int channel = 0; channel < chNum; channel++) {
             m = 0;
             M2 = 0;
             variance = 0;
