@@ -170,7 +170,7 @@ public class SFileReaderDecoder {
                     }
                 } else {
                     ((DasDecoder) iDecoder).transferData(rawEvent);
-                    //if (streamId == 2) System.out.println("Transferred str2 at framecount = " + frameCount);
+                    //if (streamId == 1) System.out.println("Transferred str2 at framecount = " + frameCount);
                 }
 
                 // Print out
@@ -185,6 +185,7 @@ public class SFileReaderDecoder {
         } catch (Exception e) {
             e.printStackTrace();
         }
+        System.out.println("DDD "+bb.limit());
         return bb;
     }
 
