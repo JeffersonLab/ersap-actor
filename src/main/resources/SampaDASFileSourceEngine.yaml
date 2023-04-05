@@ -1,0 +1,11 @@
+---
+name: SampaDASFileSourceEngine
+engine: org.jlab.ersap.actor.sampa.engine.SampaDASFileSourceEngine
+type: java
+
+author: Vardan
+email: gurjyan@jlab.org
+
+version: 0.1
+description:
+  Reades binary file, created by the ALICE treadout program.
