@@ -149,7 +149,7 @@ public class SFileReaderDecoder {
 
                 // Fill event with data until it's full or hits the frame limit
                 do {
-                    System.out.println("DDD: P2");
+                    System.out.println("DDD: "+ isDAS+" "+iDecoder.isFull());
 
                     processOneFrame(rawEvent);
                     frameCount++;
