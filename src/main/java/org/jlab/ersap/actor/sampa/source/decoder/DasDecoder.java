@@ -304,7 +304,7 @@ public class DasDecoder implements IDecoder {
             // Since each frame produces 4, 5-bit values / ByteBuffer, we need 32/4 = 8 frames of data to
             // hold a sync pattern.
 
-//System.out.println("\ndecodeSerial: Don't have a sync yet\n");
+System.out.println("\ndecodeSerial: Don't have a sync yet\n");
 
             // Update gotSync by looking for syncs
             getSyncCount();
