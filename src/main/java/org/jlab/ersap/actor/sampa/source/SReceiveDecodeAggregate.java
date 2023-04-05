@@ -119,7 +119,6 @@ public class SReceiveDecodeAggregate extends Thread {
     @Override
     public void run() {
         for (int i = 0; i < activeStreams; i++) {
-            System.out.println("DDD starting stream receiver = " + i);
             receivers[i].start();
         }
         aggregator.start();

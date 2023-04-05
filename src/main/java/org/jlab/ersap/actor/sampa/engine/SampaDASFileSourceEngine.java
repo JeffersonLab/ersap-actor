@@ -39,7 +39,6 @@ public class SampaDASFileSourceEngine extends AbstractEventReaderService<SFileRe
 
     @Override
     protected Object readEvent(int i) throws EventReaderException {
-        System.out.println("DDD: Read event...");
         return reader.getProcess();
     }
 

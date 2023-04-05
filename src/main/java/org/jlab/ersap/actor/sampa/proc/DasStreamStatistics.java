@@ -57,7 +57,6 @@ public class DasStreamStatistics {
             M2 = 0;
             variance = 0;
 
-//            System.out.println("DDD channel = "+channel +" samples = "+sampleLimit);
             try {
                 for (int sample = 0; sample < sampleLimit; sample++) {
                     try {
