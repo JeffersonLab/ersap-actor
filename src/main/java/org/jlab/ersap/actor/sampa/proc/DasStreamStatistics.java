@@ -69,7 +69,7 @@ public class DasStreamStatistics {
                         e.printStackTrace();
                     }
                 }
-            } catch (Exception e) {
+            } catch (ArrayIndexOutOfBoundsException e) {
 
             }
             mean[channel] = m;
