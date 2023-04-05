@@ -12,6 +12,8 @@ package org.jlab.ersap.actor.sampa.source.recagg;
  * @project ersap-sampa
  */
 
+import org.jlab.epsci.ersap.base.error.ErsapException;
+import org.jlab.ersap.actor.datatypes.DasDataType;
 import org.jlab.ersap.actor.sampa.EMode;
 import org.jlab.ersap.actor.sampa.source.decoder.DasDecoder;
 import org.jlab.ersap.actor.sampa.source.decoder.DspDecoder;
@@ -21,6 +23,8 @@ import org.jlab.ersap.actor.sampa.source.ring.SRingRawEvent;
 import java.io.*;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+
+import static org.jlab.ersap.actor.sampa.EMode.DAS;
 
 
 /**
@@ -57,7 +61,7 @@ public class SFileReaderDecoder {
     /**
      * Type of data coming from SAMPA board.
      */
-    private final org.jlab.ersap.actor.sampa.EMode EMode;
+    private final EMode EMode;
 
     /**
      * Object used to decode the data.
@@ -79,8 +83,8 @@ public class SFileReaderDecoder {
      */
     private final boolean isDSP;
 
-    public SFileReaderDecoder( String fileName,
-                               int streamId,
+    public SFileReaderDecoder(String fileName,
+                              int streamId,
                               int streamFrameLimit,
                               EMode EMode,
                               int byteSize) {
@@ -134,11 +138,11 @@ public class SFileReaderDecoder {
         }
     }
 
-    public void getProcess() {
+    public ByteBuffer getProcess() {
         int frameCount = 0;
-
+        ByteBuffer bb = null;
         try {
-            SRingRawEvent rawEvent = new SRingRawEvent(EMode.DAS);
+            SRingRawEvent rawEvent = new SRingRawEvent(DAS);
             do {
                 rawEvent.reset();
 
@@ -176,10 +180,12 @@ public class SFileReaderDecoder {
 
                 // Loop until we run into our given limit of frames
             } while ((streamFrameLimit == 0) || (frameCount < streamFrameLimit));
+            bb = DasDataType.serialize(rawEvent.getData());
+
         } catch (Exception e) {
             e.printStackTrace();
         }
-        exit();
+        return bb;
     }
 
     public void exit() {
@@ -188,5 +194,9 @@ public class SFileReaderDecoder {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    public void close() {
+        exit();
     }
 }
