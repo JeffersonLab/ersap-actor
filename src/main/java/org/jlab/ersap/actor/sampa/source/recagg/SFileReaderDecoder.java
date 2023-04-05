@@ -11,96 +11,80 @@ package org.jlab.ersap.actor.sampa.source.recagg;
  * @author gurjyan on 8/31/22
  * @project ersap-sampa
  */
-        import com.lmax.disruptor.RingBuffer;
-        import org.jlab.ersap.actor.sampa.EMode;
-        import org.jlab.ersap.actor.sampa.source.decoder.DasDecoder;
-        import org.jlab.ersap.actor.sampa.source.decoder.DspDecoder;
-        import org.jlab.ersap.actor.sampa.source.decoder.IDecoder;
-        import org.jlab.ersap.actor.sampa.source.ring.SRingRawEvent;
 
-        import java.io.BufferedInputStream;
-        import java.io.DataInputStream;
-        import java.io.IOException;
-        import java.io.InputStream;
-        import java.net.ServerSocket;
-        import java.net.Socket;
-        import java.nio.ByteBuffer;
-        import java.nio.ByteOrder;
+import org.jlab.ersap.actor.sampa.EMode;
+import org.jlab.ersap.actor.sampa.source.decoder.DasDecoder;
+import org.jlab.ersap.actor.sampa.source.decoder.DspDecoder;
+import org.jlab.ersap.actor.sampa.source.decoder.IDecoder;
+import org.jlab.ersap.actor.sampa.source.ring.SRingRawEvent;
+
+import java.io.*;
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 
 
 /**
- * This class is designed to be a TCP server which accepts a single connection from
- * a client that is sending sampa data in either DAS or DSP mode.
+ * This class is designed to read a binary file create by the treadout ALICE program
+ * decode it and preset it to the SampaDASFileSourceEngine actor
  */
-public class SFileReaderDecoder extends Thread {
-
-    /** Input data stream carrying data from the client. */
-    private DataInputStream dataInputStream;
-
-    /** ID number of the data stream. */
-    private final int streamId;
-
-    private int sampaPort;
-
-    /** Buffer used to read a single frame of data. */
-    private final ByteBuffer frameBuffer;
-
-    /** Array wrapped by frameBuffer. */
-    private final byte[] frameArray = new byte[16];
-
-    /** Int array holding frame data in word form. */
-    private final int[] data = new int[4];
-
-    /** Type of data coming from SAMPA board. */
-    private final org.jlab.ersap.actor.sampa.EMode EMode;
-
-    /** Object used to decode the data. */
-    private final IDecoder iDecoder;
-
-    /** Total number of frames consumed before printing stats and exiting. */
-    private final int streamFrameLimit;
-
-    /** TCP server socket. */
-    private ServerSocket serverSocket;
-
-    /** Is the incoming data format DAS? */
-    private final boolean isDAS;
-
-    /** Is the incoming data format DSP? */
-    private final boolean isDSP;
-
-
-    //--------------------------------
-    // Disruptor stuff
-    //--------------------------------
-
-    /** Output disruptor ring buffer. */
-    private final RingBuffer<SRingRawEvent> ringBuffer;
-
-    /** Current spot in the ring from which an item was claimed. */
-    private long sequenceNumber;
-
+public class SFileReaderDecoder {
 
     /**
-     * Constructor.
-     *
-     * @param sampaPort TCP server port.
-     * @param streamId  data stream id number.
-     * @param ringBuffer disruptor's ring buffer used to pass the data received here on
-     *                   to an aggregator and from there it's passed to a data consumer.
-     * @param streamFrameLimit total number of frames consumed before printing stats and exiting.
-     * @param EMode type of data coming over TCP client's socket.
-     * @param byteSize  size in bytes of each raw event's internal buffer.
+     * Input data stream carrying data from the client.
      */
-    public SFileReaderDecoder(int sampaPort,
-                            int streamId,
-                            RingBuffer<SRingRawEvent> ringBuffer,
-                            int streamFrameLimit,
-                            EMode EMode,
-                            int byteSize) {
+    private DataInputStream dataInputStream;
 
-        this.sampaPort = sampaPort;
-        this.ringBuffer = ringBuffer;
+    /**
+     * ID number of the data stream.
+     */
+    private final int streamId;
+
+    /**
+     * Buffer used to read a single frame of data.
+     */
+    private final ByteBuffer frameBuffer;
+
+    /**
+     * Array wrapped by frameBuffer.
+     */
+    private final byte[] frameArray = new byte[16];
+
+    /**
+     * Int array holding frame data in word form.
+     */
+    private final int[] data = new int[4];
+
+    /**
+     * Type of data coming from SAMPA board.
+     */
+    private final org.jlab.ersap.actor.sampa.EMode EMode;
+
+    /**
+     * Object used to decode the data.
+     */
+    private final IDecoder iDecoder;
+
+    /**
+     * Total number of frames consumed before printing stats and exiting.
+     */
+    private final int streamFrameLimit;
+
+    /**
+     * Is the incoming data format DAS?
+     */
+    private final boolean isDAS;
+
+    /**
+     * Is the incoming data format DSP?
+     */
+    private final boolean isDSP;
+
+    public SFileReaderDecoder( String fileName,
+                               int streamId,
+                              int streamFrameLimit,
+                              EMode EMode,
+                              int byteSize) {
+
         this.streamId = streamId;
         this.streamFrameLimit = streamFrameLimit;
         this.EMode = EMode;
@@ -114,39 +98,24 @@ public class SFileReaderDecoder extends Thread {
             iDecoder = new DspDecoder(verbose);
             isDSP = true;
             isDAS = false;
-        }
-        else {
+        } else {
             iDecoder = new DasDecoder(false, streamId, byteSize);
             isDAS = true;
             isDSP = false;
         }
+
+        try {
+            dataInputStream = new DataInputStream(new FileInputStream(fileName));
+        } catch (FileNotFoundException e) {
+            throw new RuntimeException(e);
+        }
     }
-
-    /**
-     * Get the next available item in ring buffer for writing data.
-     *
-     * @return next available item in ring buffer.
-     * @throws InterruptedException if thread interrupted.
-     */
-    private SRingRawEvent get()  {
-
-        sequenceNumber = ringBuffer.next();
-        return ringBuffer.get(sequenceNumber);
-    }
-
-
-    /**
-     * Place full rawEvent back into ring buffer for aggregator to receive.
-     */
-    private void publish() {
-        ringBuffer.publish(sequenceNumber);
-    }
-
 
     /**
      * Process one frame of data and place update rawEvent
+     *
      * @param rawEvent event to update (write data into it if DSP, or track frames if DAS).
-     * @throws IOException   if error reading data.
+     * @throws IOException if error reading data.
      */
     public void processOneFrame(SRingRawEvent rawEvent) throws IOException {
         frameBuffer.clear();
@@ -160,33 +129,17 @@ public class SFileReaderDecoder extends Thread {
 
         try {
             iDecoder.decodeSerial(data, rawEvent);
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
-    public void run() {
-        // Connecting to the sampa stream source
-        try {
-            serverSocket = new ServerSocket(sampaPort);
-            System.out.println("SAMPA stream receiver is listening on port " + sampaPort);
-            Socket socket = serverSocket.accept();
-            System.out.println("SAMPA stream receiver connected on port = " + sampaPort);
-            InputStream input = socket.getInputStream();
-            dataInputStream = new DataInputStream(new BufferedInputStream(input, 65536));
-        }
-        catch (IOException e) {
-            e.printStackTrace();
-            return;
-        }
-
+    public void getProcess() {
         int frameCount = 0;
 
         try {
+            SRingRawEvent rawEvent = new SRingRawEvent(EMode.DAS);
             do {
-                // Get an empty item from ring
-                SRingRawEvent rawEvent = get();
                 rawEvent.reset();
 
                 // Fill event with data until it's full or hits the frame limit
@@ -199,9 +152,9 @@ public class SFileReaderDecoder extends Thread {
                     // to pass them to the rawEvent.
                     // We also need to account for any frame limit specified on the command line.
 
-                } while ( !((isDAS && iDecoder.isFull()) ||
-                        (isDSP && rawEvent.isFull())     ||
-                        ((streamFrameLimit != 0) && (frameCount >= streamFrameLimit))) );
+                } while (!((isDAS && iDecoder.isFull()) ||
+                        (isDSP && rawEvent.isFull()) ||
+                        ((streamFrameLimit != 0) && (frameCount >= streamFrameLimit))));
 
                 if (isDSP) {
                     if (rawEvent.isFull()) {
@@ -211,8 +164,7 @@ public class SFileReaderDecoder extends Thread {
                         //int blockCount = sampaDecoder.getBlockCount();
                         //if (streamId == 2 && (blockCount % 1000 == 0)) System.out.println("Raw event full, set block num to " + blockCount);
                     }
-                }
-                else {
+                } else {
                     ((DasDecoder) iDecoder).transferData(rawEvent);
                     //if (streamId == 2) System.out.println("Transferred str2 at framecount = " + frameCount);
                 }
@@ -222,29 +174,19 @@ public class SFileReaderDecoder extends Thread {
 //                rawEvent.calculateStats();
 //                rawEvent.printStats(System.out, false);
 
-                // Make the buffer available for consumers
-                publish();
-
                 // Loop until we run into our given limit of frames
             } while ((streamFrameLimit == 0) || (frameCount < streamFrameLimit));
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
-
         exit();
     }
-
-
 
     public void exit() {
         try {
             dataInputStream.close();
-            serverSocket.close();
-        }
-        catch (IOException e) {
+        } catch (IOException e) {
             e.printStackTrace();
         }
-        this.interrupt();
     }
 }
