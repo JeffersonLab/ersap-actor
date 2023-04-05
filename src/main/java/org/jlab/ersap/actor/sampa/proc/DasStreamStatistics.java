@@ -28,8 +28,8 @@ public class DasStreamStatistics {
     FileWriter fileWriter;
 
     public DasStreamStatistics(int ChNum, boolean pedestalFileOutput) {
-        this.chNum = ChNum;
-//        this.chNum = 80; //vhg for debug
+//        this.chNum = ChNum;
+        this.chNum = 80; //vhg for debug
         mean = new double[chNum];
         sdv = new double[chNum];
         if(pedestalFileOutput) {
