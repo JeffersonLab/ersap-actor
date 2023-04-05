@@ -51,24 +51,25 @@ public class DasStreamStatistics {
         // How much data do we have?
         int sampleLimit = data[0].limit()/2;
 
-        for (int channel = 0; channel < chNum; channel++) {
+//        for (int channel = 0; channel < chNum; channel++) { //vg for debug
+        for (int channel = 0; channel < 80; channel++) {
             m = 0;
             M2 = 0;
             variance = 0;
 
-            System.out.println("DDD channel = "+channel +" samples = "+sampleLimit);
+//            System.out.println("DDD channel = "+channel +" samples = "+sampleLimit);
             try {
-//                for (int sample = 0; sample < sampleLimit; sample++) {
-//                    try {
-//                        dataPt = data[channel].getShort(2 * sample); // ADC sample
-//                        delta = dataPt - m;
-//                        m += delta / (sample + 1);
-//                        M2 += delta * (dataPt - m);
-//                        variance = M2 / (sample + 1);
-//                    } catch (IndexOutOfBoundsException e) {
-//                        e.printStackTrace();
-//                    }
-//                }
+                for (int sample = 0; sample < sampleLimit; sample++) {
+                    try {
+                        dataPt = data[channel].getShort(2 * sample); // ADC sample
+                        delta = dataPt - m;
+                        m += delta / (sample + 1);
+                        M2 += delta * (dataPt - m);
+                        variance = M2 / (sample + 1);
+                    } catch (IndexOutOfBoundsException e) {
+                        e.printStackTrace();
+                    }
+                }
             } catch (ArrayIndexOutOfBoundsException e) {
 
             }
