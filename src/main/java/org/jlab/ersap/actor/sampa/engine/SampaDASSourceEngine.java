@@ -159,7 +159,7 @@ public class SampaDASSourceEngine extends AbstractEventReaderService<SReceiveDec
 
     @Override
     protected Object readEvent(int eventNumber) throws EventReaderException {
-        System.out.println("DDD event request");
+//        System.out.println("DDD event request");
         return reader.getEvent();
     }
 
