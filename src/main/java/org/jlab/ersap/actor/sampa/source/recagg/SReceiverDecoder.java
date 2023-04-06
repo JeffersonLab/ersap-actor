@@ -184,12 +184,10 @@ public class SReceiverDecoder extends Thread {
         int frameCount = 0;
 
         try {
-            // Get an empty item from ring
-            SRingRawEvent rawEvent = get(); // vg 04.05.23
 
             do {
                 // Get an empty item from ring
-//                SRingRawEvent rawEvent = get(); //vg 04.05.23
+                SRingRawEvent rawEvent = get();
                 rawEvent.reset();
 
                 // Fill event with data until it's full or hits the frame limit
