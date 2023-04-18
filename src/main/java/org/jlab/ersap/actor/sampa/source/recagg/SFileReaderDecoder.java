@@ -12,7 +12,6 @@ package org.jlab.ersap.actor.sampa.source.recagg;
  * @project ersap-sampa
  */
 
-import org.jlab.epsci.ersap.base.error.ErsapException;
 import org.jlab.ersap.actor.datatypes.DasDataType;
 import org.jlab.ersap.actor.sampa.EMode;
 import org.jlab.ersap.actor.sampa.source.decoder.DasDecoder;
@@ -175,8 +174,8 @@ public class SFileReaderDecoder {
 
                 // Print out
 //                rawEvent.printData(System.out, streamId, false);
-//                rawEvent.calculateStats();
-//                rawEvent.printStats(System.out, false);
+                rawEvent.calculateStats();
+                rawEvent.printStats(System.out, false);
 
             bb = DasDataType.serialize(rawEvent.getData());
 
