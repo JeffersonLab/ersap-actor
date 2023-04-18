@@ -44,11 +44,12 @@ public class SampaStatProcEngine implements Engine {
                 verbose = data.getString(VERBOSE).equalsIgnoreCase("true");
             }
             if (data.has(FEC_COUNT)) {
-
+                int chNum = 80;
                 fecCount = data.getInt(FEC_COUNT);
-                // Each FEC has 2 GBT stream, each having 80 channel data
-                int chNum = 80 * fecCount * 2;
-
+                if(fecCount > 0) {
+                    // Each FEC has 2 GBT stream, each having 80 channel data
+                    chNum = 80 * fecCount * 2;
+                }
                 if(verbose) {
                     dasStat = new DasStreamStatistics(chNum, true);
                 } else {

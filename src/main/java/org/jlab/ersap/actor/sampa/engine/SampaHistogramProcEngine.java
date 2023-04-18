@@ -58,8 +58,12 @@ public class SampaHistogramProcEngine implements Engine {
             JSONObject opts = new JSONObject(source);
             if (opts.has(FEC_COUNT)) {
                 fecCount = opts.getInt(FEC_COUNT);
-                // Each FEC has 2 GBT stream, each having 80 channel data
-                chNum = 80 * fecCount * 2;
+                if (fecCount == 0) {
+                    chNum = 80;
+                } else {
+                    // Each FEC has 2 GBT stream, each having 80 channel data
+                    chNum = 80 * fecCount * 2;
+                }
             }
             if (opts.has(FRAME_TITLE)) {
                 frameTitle = opts.getString(FRAME_TITLE);

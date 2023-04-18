@@ -46,7 +46,7 @@ public class SampaFileSinkEngine extends AbstractEventWriterService<FileOutputSt
             throws EventWriterException {
 
         if (opts.has(FILE_OUTPUT)) {
-            if(opts.getString(FILE_OUTPUT).equalsIgnoreCase("true")) {
+            if (opts.getString(FILE_OUTPUT).equalsIgnoreCase("true")) {
                 file_output = true;
             } else {
                 file_output = false;
@@ -54,13 +54,18 @@ public class SampaFileSinkEngine extends AbstractEventWriterService<FileOutputSt
         }
         if (opts.has(FEC_COUNT)) {
             // Each FEC has 2 GBT stream, each having 80 channel data
-            chNum = 80 * opts.getInt(FEC_COUNT) * 2;
+            int fc = opts.getInt(FEC_COUNT);
+            if (fc == 0) {
+                chNum = 80;
+            } else {
+                chNum = 80 * fc * 2;
+            }
         }
 
         try {
             evt_count = 0;
             f_name = file.toString();
-            return new FileOutputStream(f_name+"_"+f_count);
+            return new FileOutputStream(f_name + "_" + f_count);
         } catch (IOException e) {
             throw new EventWriterException(e);
         }
@@ -77,7 +82,7 @@ public class SampaFileSinkEngine extends AbstractEventWriterService<FileOutputSt
 
     @Override
     protected void writeEvent(Object event) throws EventWriterException {
-        if(file_output) {
+        if (file_output) {
             try {
                 evt_count++;
                 ByteBuffer b = (ByteBuffer) event;
@@ -90,9 +95,9 @@ public class SampaFileSinkEngine extends AbstractEventWriterService<FileOutputSt
                 }
                 // How much data do we have?
                 assert data != null;
-                int sampleLimit = data[0].limit()/2;
+                int sampleLimit = data[0].limit() / 2;
 
-                double [] dataPts = new double[sampleLimit];
+                double[] dataPts = new double[sampleLimit];
 
                 for (int channel = 0; channel < chNum; channel++) {
                     for (int sample = 0; sample < sampleLimit; sample++) {
@@ -102,15 +107,15 @@ public class SampaFileSinkEngine extends AbstractEventWriterService<FileOutputSt
                             e.printStackTrace();
                         }
                     }
-                    frame.put(channel,dataPts);
+                    frame.put(channel, dataPts);
                 }
                 writer.write(gson.toJson(frame).getBytes());
-                 if (evt_count >= 100) {
+                if (evt_count >= 100) {
                     writer.flush();
                     writer.close();
                     f_count++;
                     writer = new FileOutputStream(f_name + "_" + f_count);
-                    System.out.println("INFO File = "+ f_name + "_" + f_count);
+                    System.out.println("INFO File = " + f_name + "_" + f_count);
                     evt_count = 0;
                 }
             } catch (IOException e) {
