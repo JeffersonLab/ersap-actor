@@ -77,7 +77,7 @@ public class CodaETReader implements ISourceReader {
 
         idCount = 0;
 
-        // reading event data, iterate thru each event in a single fifo entry (1 in this case)
+        // reading event data, iterate through each event in a single fifo entry (1 in this case)
         for (int i = 0; i < entryCap; i++) {
             // Does this buffer have any data? (Set by producer)
             if (!mevs[i].hasFifoData()) {
