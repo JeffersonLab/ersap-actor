@@ -72,22 +72,18 @@ public class Awtbc {
                 if (tItem_0.getTime() - tItem_1.getTime() <= clusterTimeWindow) {
                     out.add(tItem_0);
                     out.add(tItem_1);
-                }
-            }
-            if (isExact) {
-                if (out.size() == clusterEvents) {
-                    return out;
+                    if (out.size() == clusterEvents) {
+                        return out;
+                    }
                 } else {
-                    return null;
-                }
-            } else {
-                if (out.size() >= clusterEvents) {
-                    return out;
-                } else {
-                    return null;
+                    // remove all if the size is less than the requested number of hits
+                    if (out.size() < clusterEvents) {
+                        out.clear();
+                    }
                 }
             }
         }
+        return null;
     }
 
 }
