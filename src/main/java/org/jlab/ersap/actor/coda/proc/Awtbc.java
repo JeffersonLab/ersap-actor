@@ -69,18 +69,28 @@ public class Awtbc {
             for (int i = 0; i < AdaptiveWindow.size(); i++) {
                 IStreamItem tItem_0 = AdaptiveWindow.get(i);
                 IStreamItem tItem_1 = AdaptiveWindow.get(i + 1);
-                if (tItem_0.getTime() - tItem_1.getTime() <= clusterTimeWindow) {
+
+                // We check if ID's of two neighbour items are not the same,
+                // and that the time distance between them are within clusterTimeWindow
+                if ((tItem_0.getId() != tItem_1.getId()) &&
+                        (tItem_0.getTime() - tItem_1.getTime() <= clusterTimeWindow)) {
                     out.add(tItem_0);
                     out.add(tItem_1);
+
+                    // If we find a cluster
                     if (out.size() == clusterEvents) {
+                        // Remove elements from the adaptive window
+                        for (int j = 0; j < out.size(); j++) {
+                            AdaptiveWindow.remove(j);
+                        }
+                        // Return the cluster
                         return out;
                     }
-                } else {
-                    // remove all if the size is less than the requested number of hits
-                    if (out.size() < clusterEvents) {
-                        out.clear();
-                    }
                 }
+            }
+            // Remove elements from the adaptive window, except the last one.
+            for (int j = 0; j < AdaptiveWindow.size()-1; j++) {
+                AdaptiveWindow.remove(j);
             }
         }
         return null;
