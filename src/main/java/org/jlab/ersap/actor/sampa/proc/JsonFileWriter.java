@@ -15,6 +15,7 @@ import java.util.Map;
  *
  * @author gurjyan on 3/17/23
  * @project ersap-coda
+ * @deprecated
  */
 public class JsonFileWriter {
 

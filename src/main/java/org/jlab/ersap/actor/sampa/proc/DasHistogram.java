@@ -59,5 +59,11 @@ public class DasHistogram {
                 histograms.get(name).fill(s);
             }
         }
+    }    public void update(String name, double[] data) {
+        if (histograms.containsKey(name)) {
+            for (double s : data) {
+                histograms.get(name).fill(s);
+            }
+        }
     }
 }
