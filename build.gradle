@@ -67,18 +67,16 @@ test {
 task sourcesJar(type: Jar, dependsOn: classes) {
     archiveClassifier = 'sources'
     from sourceSets.main.allSource
+}
+
+//tasks.named('jar') {
 //    manifest {
-//        attributes["Manifest-Version"] = "1.0"
-//        attributes["Main-Class"] = "org.jlab.ersap.actor.sampa.engine.SampaHitIdentificationEngine"
+//        attributes('Implementation-Title': project.name,
+//                'Implementation-Version': project.version,
+//                'Main-Class': "org.jlab.ersap.actor.sampa.engine.SampaHitIdentificationEngine")
 //    }
-}
-tasks.named('jar') {
-    manifest {
-        attributes('Implementation-Title': project.name,
-                'Implementation-Version': project.version,
-        'Main-Class': "org.jlab.ersap.actor.sampa.engine.SampaHitIdentificationEngine")
-    }
-}
+//}
+
 artifacts {
 //    archives javadocJar
     archives sourcesJar
