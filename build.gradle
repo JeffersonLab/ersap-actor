@@ -75,7 +75,8 @@ task sourcesJar(type: Jar, dependsOn: classes) {
 tasks.named('jar') {
     manifest {
         attributes('Implementation-Title': project.name,
-                'Implementation-Version': project.version)
+                'Implementation-Version': project.version,
+        'Main-Class': "org.jlab.ersap.actor.sampa.engine.SampaHitIdentificationEngine")
     }
 }
 artifacts {
