@@ -1,5 +1,7 @@
 package org.jlab.ersap.actor.sampa.engine;
 
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import org.jlab.epsci.ersap.base.ErsapUtil;
 import org.jlab.epsci.ersap.base.error.ErsapException;
 import org.jlab.epsci.ersap.engine.Engine;
@@ -7,12 +9,14 @@ import org.jlab.epsci.ersap.engine.EngineData;
 import org.jlab.epsci.ersap.engine.EngineDataType;
 import org.jlab.ersap.actor.datatypes.DasDataType;
 import org.jlab.ersap.actor.sampa.proc.DasHistogram;
+import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
 import java.nio.ByteBuffer;
-import java.util.ArrayList;
-import java.util.Set;
-import java.util.StringTokenizer;
+import java.util.*;
 
 /**
  * Copyright (c) 2021, Jefferson Science Associates, all rights reserved.
@@ -126,24 +130,24 @@ public class SampaHitIdentificationEngine implements Engine {
                                 // This is a hit, read all hit samples and add it to the histogram.
 //                                sdv = Math.sqrt(variance);
                                 int hitSample = sample;
-                                System.out.println("Start of a hit on the channel = "+ channel+" at the sample = " + hitSample);
+                                System.out.println("Start of a hit on the channel = " + channel + " at the sample = " + hitSample);
                                 do {
                                     hitSample++;
                                     dataPt = data[channel].getShort(2 * hitSample);
                                     // Add the hit sample to the histogram array.
                                     // Subtract pedestal mean value.
                                     _sData[hitSample] = dataPt - m;
-                                } while(dataPt <= thr_estimate);
-                                System.out.println("End of a hit on the channel = "+ channel+" at the sample = " + hitSample);
+                                } while (dataPt <= thr_estimate);
+                                System.out.println("End of a hit on the channel = " + channel + " at the sample = " + hitSample);
                                 sample = hitSample;
                             } else {
                                 // This is estimated threshold, calculate mean and sdv.
                                 delta = dataPt - m;
-                                m  += delta / (sample + 1);
+                                m += delta / (sample + 1);
                                 M2 += delta * (dataPt - m);
                                 variance = M2 / (sample + 1);
                             }
-                        } catch (IndexOutOfBoundsException e){
+                        } catch (IndexOutOfBoundsException e) {
                             e.printStackTrace();
                         }
                     }
@@ -202,5 +206,37 @@ public class SampaHitIdentificationEngine implements Engine {
     @Override
     public void destroy() {
 
+    }
+
+    public static void main(String[] args) throws IOException, JSONException {
+        String jsonFileName = args[0];
+        BufferedReader reader;
+        Gson gson = new Gson();
+        try {
+            reader = new BufferedReader(new FileReader(jsonFileName));
+            StringBuilder stringBuilder = new StringBuilder();
+            int c = 0;
+            do {
+                c = reader.read();
+                String character = Integer.toString(c);
+                if (character.equals("}")) {
+                    String streamUnit = stringBuilder.toString();
+                    //parse json
+                    HashMap<String, double[]> obj
+                            = gson.fromJson(streamUnit, new TypeToken<HashMap<String, double[]>>() {
+                    }.getType());
+
+                    for (Map.Entry<String, double[]> entry : obj.entrySet()) {
+                        System.out.println("Key = " + entry.getKey() +
+                                ", Value = " + Arrays.toString(entry.getValue()));
+                    }
+                } else {
+                    stringBuilder.append(character);
+                }
+            } while (reader.read() != -1);
+            reader.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 }
