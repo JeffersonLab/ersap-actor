@@ -102,7 +102,9 @@ public class SampaFileSinkEngine extends AbstractEventWriterService<FileOutputSt
                 for (int channel = 0; channel < chNum; channel++) {
                     for (int sample = 0; sample < sampleLimit; sample++) {
                         try {
-                            dataPts[sample] = data[channel].getShort(2 * sample); // ADC sample
+                            if(data[channel].getShort(2 * sample) > 0) {
+                                dataPts[sample] = data[channel].getShort(2 * sample); // ADC sample
+                            }
                         } catch (IndexOutOfBoundsException e) {
                             e.printStackTrace();
                         }
@@ -110,6 +112,7 @@ public class SampaFileSinkEngine extends AbstractEventWriterService<FileOutputSt
                     frame.put(channel, dataPts);
                 }
                 writer.write(gson.toJson(frame).getBytes());
+                writer.write("\n".getBytes());
                 if (evt_count >= 100) {
                     writer.flush();
                     writer.close();

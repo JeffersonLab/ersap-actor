@@ -1,7 +1,9 @@
 package org.jlab.ersap.actor.sampa.engine;
 
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
+import com.google.gson.stream.JsonReader;
 import org.jlab.epsci.ersap.base.ErsapUtil;
 import org.jlab.epsci.ersap.base.error.ErsapException;
 import org.jlab.epsci.ersap.engine.Engine;
@@ -9,12 +11,14 @@ import org.jlab.epsci.ersap.engine.EngineData;
 import org.jlab.epsci.ersap.engine.EngineDataType;
 import org.jlab.ersap.actor.datatypes.DasDataType;
 import org.jlab.ersap.actor.sampa.proc.DasHistogram;
+import org.jlab.ersap.actor.sampa.proc.SampaDasGson;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.Reader;
 import java.nio.ByteBuffer;
 import java.util.*;
 
@@ -210,33 +214,22 @@ public class SampaHitIdentificationEngine implements Engine {
 
     public static void main(String[] args) throws IOException, JSONException {
         String jsonFileName = args[0];
-        BufferedReader reader;
+        System.out.printf(jsonFileName);
         Gson gson = new Gson();
-        try {
-            reader = new BufferedReader(new FileReader(jsonFileName));
-            StringBuilder stringBuilder = new StringBuilder();
-            int c = 0;
-            do {
-                c = reader.read();
-                String character = Integer.toString(c);
-                if (character.equals("}")) {
-                    String streamUnit = stringBuilder.toString();
-                    //parse json
-                    HashMap<String, double[]> obj
-                            = gson.fromJson(streamUnit, new TypeToken<HashMap<String, double[]>>() {
-                    }.getType());
 
-                    for (Map.Entry<String, double[]> entry : obj.entrySet()) {
-                        System.out.println("Key = " + entry.getKey() +
-                                ", Value = " + Arrays.toString(entry.getValue()));
-                    }
-                } else {
-                    stringBuilder.append(character);
-                }
-            } while (reader.read() != -1);
-            reader.close();
-        } catch (IOException e) {
-            e.printStackTrace();
+        JsonReader jsonReader = new JsonReader(new FileReader(jsonFileName));
+
+        jsonReader.beginArray();
+
+        while (jsonReader.hasNext()) {
+            System.out.printf("DDD");
+            Map<Integer, double[]> samples = gson.fromJson(jsonReader, Map.class);
+            for (Integer s : samples.keySet()) {
+                System.out.println(s);
+            }
         }
+        jsonReader.endArray();
+        jsonReader.close();
+
     }
 }
