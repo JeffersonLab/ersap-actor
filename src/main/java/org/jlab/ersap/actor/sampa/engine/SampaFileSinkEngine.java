@@ -105,10 +105,10 @@ public class SampaFileSinkEngine extends AbstractEventWriterService<FileOutputSt
                 for (int channel = 0; channel < chNum; channel++) {
                     for (int sample = 0; sample < sampleLimit; sample++) {
                         try {
-//                            if(data[channel].getShort(2 * sample) > 0) {
+                            if(data[channel].getShort(2 * sample) > 0) {
                                 dataPts.add((double) data[channel].getShort(2 * sample));
 //                                dataPts[sample] = data[channel].getShort(2 * sample); // ADC sample
-//                            }
+                            }
                         } catch (IndexOutOfBoundsException e) {
                             e.printStackTrace();
                         }
