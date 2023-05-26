@@ -116,6 +116,7 @@ public class SampaFileSinkEngine extends AbstractEventWriterService<FileOutputSt
                     double[] arr = dataPts.stream().mapToDouble(Double::doubleValue).toArray();
                     dataPts.clear();
                     frame.put(channel, arr);
+                    System.out.println("DDD "+channel);
                 }
                 writer.write(gson.toJson(frame).getBytes());
                 writer.write("\n".getBytes());
