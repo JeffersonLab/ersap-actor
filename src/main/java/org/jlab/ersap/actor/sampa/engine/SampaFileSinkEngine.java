@@ -12,7 +12,9 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -97,19 +99,22 @@ public class SampaFileSinkEngine extends AbstractEventWriterService<FileOutputSt
                 assert data != null;
                 int sampleLimit = data[0].limit() / 2;
 
-                double[] dataPts = new double[sampleLimit];
+//                double[] dataPts = new double[sampleLimit];
+                List<Double> dataPts = new ArrayList<>();
 
                 for (int channel = 0; channel < chNum; channel++) {
                     for (int sample = 0; sample < sampleLimit; sample++) {
                         try {
-                            if(data[channel].getShort(2 * sample) > 0) {
-                                dataPts[sample] = data[channel].getShort(2 * sample); // ADC sample
-                            }
+//                            if(data[channel].getShort(2 * sample) > 0) {
+                                dataPts.add((double) data[channel].getShort(2 * sample));
+//                                dataPts[sample] = data[channel].getShort(2 * sample); // ADC sample
+//                            }
                         } catch (IndexOutOfBoundsException e) {
                             e.printStackTrace();
                         }
                     }
-                    frame.put(channel, dataPts);
+                    double[] arr = dataPts.stream().mapToDouble(Double::doubleValue).toArray();
+                    frame.put(channel, arr);
                 }
                 writer.write(gson.toJson(frame).getBytes());
                 writer.write("\n".getBytes());
