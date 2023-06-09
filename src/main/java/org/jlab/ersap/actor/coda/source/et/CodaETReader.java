@@ -41,6 +41,8 @@ public class CodaETReader implements ISourceReader {
     private long t1 = 0L, t2 = 0L, time, totalT = 0L, count = 0L, totalCount = 0L, bytes = 0L, totalBytes = 0L;
     private double rate, avgRate;
 
+    private int entryBufEvtCount;
+
     public CodaETReader(String etName) {
         EtSystemOpenConfig config = new EtSystemOpenConfig();
         try {
@@ -67,45 +69,55 @@ public class CodaETReader implements ISourceReader {
         }
     }
 
+    /**
+     * Gets a single event from an ET entry buffer
+     *
+     * @return event as a ByteBuffer
+     * @throws IOException
+     * @throws EtDeadException
+     * @throws EtClosedException
+     * @throws EtException
+     */
+    private ByteBuffer getEtEvent() throws IOException, EtDeadException, EtClosedException, EtException {
+
+        idCount++;
+
+        // ID associated with this buffer in this fifo entry.
+        // Not useful if only 1 buffer in each fifo entry as is the case here.
+        bufId = mevs[entryBufEvtCount].getFifoId();
+
+        // Get event's data buffer
+        ByteBuffer buf = mevs[entryBufEvtCount].getDataBuffer();
+        // Data length in bytes
+        len = mevs[entryBufEvtCount].getLength();
+        bytes += len;
+        totalBytes += len;
+
+        // Put events back into ET system
+        fifo.putEntry(entry);
+        count += idCount;
+
+        // Increment ET entry buffer event count
+        entryBufEvtCount++;
+        return buf;
+    }
+
     @Override
     public Object nextEvent() {
         ByteBuffer buf = null;
-        // get events from ET system
         try {
-            fifo.getEntry(entry);
-        mevs = entry.getBuffers();
-
-        idCount = 0;
-
-        // reading event data, iterate through each event in a single fifo entry (1 in this case)
-        for (int i = 0; i < entryCap; i++) {
-            // Does this buffer have any data? (Set by producer)
-            if (!mevs[i].hasFifoData()) {
-                // Once we hit a buffer with no data, there is no further data
-                break;
+            if ((mevs == null) || (!mevs[entryBufEvtCount].hasFifoData())) {
+                // Get events ( ET buffer) from ET system
+                fifo.getEntry(entry);
+                mevs = entry.getBuffers();
+                idCount = 0;
+                entryBufEvtCount = 0;
             }
-            idCount++;
-
-            // ID associated with this buffer in this fifo entry.
-            // Not useful if only 1 buffer in each fifo entry as is the case here.
-            bufId = mevs[i].getFifoId();
-
-            // Get event's data buffer
-            buf = mevs[i].getDataBuffer();
-            // Data length in bytes
-            len = mevs[i].getLength();
-            bytes += len;
-            totalBytes += len;
-
-            // put events back into ET system
-                fifo.putEntry(entry);
-
-            count += idCount;
-        }
+            // Get and return a single event from the ET entry buffer
+            buf = getEtEvent();
         } catch (EtException | EtDeadException | EtClosedException | EtWakeUpException | IOException e) {
             e.printStackTrace();
         }
-
         // @todo How to convert byteBuffer into EvioEvent before returning?
         return buf;
     }
@@ -127,15 +139,15 @@ public class CodaETReader implements ISourceReader {
         sys.close();
     }
 
-    private void printStatistics(){
+    private void printStatistics() {
         // calculate the event rate
         t2 = System.currentTimeMillis();
         time = t2 - t1;
 
         if (time > 5000) {
             // reset things if necessary
-            if ( (totalCount >= (Long.MAX_VALUE - count)) ||
-                    (totalT >= (Long.MAX_VALUE - time)) )  {
+            if ((totalCount >= (Long.MAX_VALUE - count)) ||
+                    (totalT >= (Long.MAX_VALUE - time))) {
                 bytes = totalBytes = totalT = totalCount = count = 0L;
                 t1 = t2;
                 return;
@@ -150,7 +162,7 @@ public class CodaETReader implements ISourceReader {
                     " Hz,    avg = " + String.format("%.3g", avgRate));
 
             // Data rates
-            rate    = ((double) bytes) / time;
+            rate = ((double) bytes) / time;
             avgRate = ((double) totalBytes) / totalT;
             System.out.println("  Data = " + String.format("%.3g", rate) +
                     " kB/s,  avg = " + String.format("%.3g", avgRate) + "\n");

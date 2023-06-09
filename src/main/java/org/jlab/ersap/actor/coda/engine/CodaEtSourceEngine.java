@@ -21,29 +21,34 @@ import java.nio.file.Path;
  * @project ersap-actor
  */
 public class CodaEtSourceEngine extends AbstractEventReaderService<CodaETReader> {
+    private static final String ET_NAME = "et_name";
+    private String etName;
     @Override
     protected CodaETReader createReader(Path path, JSONObject jsonObject) throws EventReaderException {
-        return null;
+        if (jsonObject.has(ET_NAME)) {
+            etName = jsonObject.getString(ET_NAME);
+        }
+        return new CodaETReader(etName);
     }
 
     @Override
     protected void closeReader() {
-
+reader.close();
     }
 
     @Override
     protected int readEventCount() throws EventReaderException {
-        return 0;
+        return reader.getEventCount();
     }
 
     @Override
     protected ByteOrder readByteOrder() throws EventReaderException {
-        return null;
+        return reader.getByteOrder();
     }
 
     @Override
     protected Object readEvent(int i) throws EventReaderException {
-        return null;
+        return reader.nextEvent();
     }
 
     @Override
