@@ -1,0 +1,11 @@
+---
+name: PrintStdIOEngine
+engine: org.jlab.ersap.actor.helloworld.engine.PrintStdIOEngine
+type: java
+
+author: vhg
+email: gurjyan@jlab.org
+
+version: 0.1
+description:
+  Simple stdout.

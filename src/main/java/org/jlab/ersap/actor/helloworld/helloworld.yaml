@@ -1,0 +1,13 @@
+---
+io-services:
+  reader:
+    class: org.jlab.ersap.actor.helloworld.engine.RandomNumGenEngine
+    name: Source
+  writer:
+    class: org.jlab.ersap.actor.helloworld.engine.PrintStdIOEngine
+    name: Sink
+services:
+  - class: org.jlab.ersap.actor.helloworld.engine.HelloWorldEngine
+    name: HelloWorld
+mime-types:
+  - binary/data-sampa
