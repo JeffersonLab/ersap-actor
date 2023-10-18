@@ -67,7 +67,6 @@ public class HelloWorldEngine implements Engine {
 
     @Override
     public void reset() {
-
     }
 
     @Override
