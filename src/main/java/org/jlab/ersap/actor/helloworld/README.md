@@ -54,7 +54,7 @@ Follow these steps to set up and run the ERSAP Hello World project:
 
    ```bash
    # Deploy the Source Actor
-   cd ersap-java/src/main/java/org/jlab/ersap/actor/helloworld.yaml $ERSAP_USER_DATA/config/services.yaml
+   cp ersap-java/src/main/java/org/jlab/ersap/actor/helloworld.yaml $ERSAP_USER_DATA/config/services.yaml
     ```
 
 5. Start the application:
