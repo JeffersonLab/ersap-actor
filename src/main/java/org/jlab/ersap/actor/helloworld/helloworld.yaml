@@ -9,5 +9,9 @@ io-services:
 services:
   - class: org.jlab.ersap.actor.helloworld.engine.HelloWorldEngine
     name: HelloWorld
+configuration:
+  io-services:
+    reader:
+      inputFile: your_full_path
 mime-types:
   - binary/data-sampa
