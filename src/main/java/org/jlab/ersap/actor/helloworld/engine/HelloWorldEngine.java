@@ -20,13 +20,19 @@ public class HelloWorldEngine implements Engine {
 
     @Override
     public EngineData execute(EngineData input) {
-        if (input.getMimeType().equalsIgnoreCase(EngineDataType.STRING.mimeType())) {
-            EngineData out = new EngineData();
-            out.setData(EngineDataType.STRING,hw.defineHelloWorld((Integer)input.getData()));
-            return out;
-        } else {
+        // Todo: Here you are using the old engine that expects integer defines the language
+        //       to return Hello World. Here simply you are casting String to integer which
+        //       will throw a runtime exception. You have to write some other toy processor that takes
+        //       String or int (your file contains integers) does something with that event/data
+        //       quantum from a file and returns the result.
+        //       here I commented out the engine and simply return the input.
+//        if (input.getMimeType().equalsIgnoreCase(EngineDataType.STRING.mimeType())) {
+//            EngineData out = new EngineData();
+//            out.setData(EngineDataType.STRING,hw.defineHelloWorld((Integer)input.getData()));
+//            return out;
+//        } else {
             return input;
-        }
+//        }
     }
 
     @Override

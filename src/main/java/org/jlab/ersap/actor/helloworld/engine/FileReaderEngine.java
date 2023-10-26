@@ -29,7 +29,7 @@ public class FileReaderEngine extends AbstractEventReaderService<AyanFileReader>
 
     @Override
     protected int readEventCount() throws EventReaderException {
-        return 0;
+        return Integer.MAX_VALUE;
     }
 
     @Override
