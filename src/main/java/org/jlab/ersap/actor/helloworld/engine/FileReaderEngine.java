@@ -42,6 +42,6 @@ public class FileReaderEngine extends AbstractEventReaderService<AyanFileReader>
 
     @Override
     protected EngineDataType getDataType() {
-        return null;
+        return EngineDataType.
     }
 }
