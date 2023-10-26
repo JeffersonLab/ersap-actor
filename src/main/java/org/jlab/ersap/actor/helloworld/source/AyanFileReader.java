@@ -20,8 +20,15 @@ public class AyanFileReader {
     }
 
     public String readFileContent() {
+        // Todo: Note that this is streaming pipeline.
+        //       Added an option to inform user about the ned of the file
+        //       Otherwise you will see an "empty engine result" ErsapException thrown
          try {
-            return br.readLine();
+             String l = br.readLine();
+             if (l == null) {
+                 l = "end_of_file";
+             }
+             return l;
         } catch (IOException e){
             e.printStackTrace();
         }
