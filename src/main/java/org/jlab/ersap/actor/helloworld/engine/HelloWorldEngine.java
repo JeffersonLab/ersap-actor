@@ -20,7 +20,7 @@ public class HelloWorldEngine implements Engine {
 
     @Override
     public EngineData execute(EngineData input) {
-        if (input.getMimeType().equalsIgnoreCase(EngineDataType.SINT64.mimeType())) {
+        if (input.getMimeType().equalsIgnoreCase(EngineDataType.STRING.mimeType())) {
             EngineData out = new EngineData();
             out.setData(EngineDataType.STRING,hw.defineHelloWorld((Integer)input.getData()));
             return out;
@@ -36,7 +36,7 @@ public class HelloWorldEngine implements Engine {
 
     @Override
     public Set<EngineDataType> getInputDataTypes() {
-        return ErsapUtil.buildDataTypes(EngineDataType.SINT64,
+        return ErsapUtil.buildDataTypes(EngineDataType.STRING,
                 EngineDataType.JSON);
     }
 

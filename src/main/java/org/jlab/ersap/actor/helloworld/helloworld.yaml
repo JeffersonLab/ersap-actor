@@ -1,7 +1,7 @@
 ---
 io-services:
   reader:
-    class: org.jlab.ersap.actor.helloworld.engine.RandomNumGenEngine
+    class: org.jlab.ersap.actor.helloworld.engine.FileReaderEngine
     name: Source
   writer:
     class: org.jlab.ersap.actor.helloworld.engine.PrintStdIOEngine
@@ -12,6 +12,6 @@ services:
 configuration:
   io-services:
     reader:
-      inputFile: your_full_path
+      inputFile: /Users/ayan/Desktop/SRO_RTDP/data/input/abc.txt
 mime-types:
   - binary/data-sampa
