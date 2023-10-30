@@ -125,10 +125,10 @@ public class SFileReaderDecoder {
 
         // clear gbt_frame: 4, 4-byte words
 //        dataInputStream.readFully(frameArray);
-        data[3] = dataInputStream.readInt();
-        data[2] = dataInputStream.readInt();
+        data[0] = dataInputStream.readInt();
         data[1] = dataInputStream.readInt();
-        data[0] =dataInputStream.readInt();
+        data[2] = dataInputStream.readInt();
+        data[3] = dataInputStream.readInt();
 
 //        data[3] = frameBuffer.getInt();
 //        data[2] = frameBuffer.getInt();
