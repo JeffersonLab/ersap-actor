@@ -124,16 +124,16 @@ public class SFileReaderDecoder {
         frameBuffer.clear();
 
         // clear gbt_frame: 4, 4-byte words
-        dataInputStream.readFully(frameArray);
-//        System.out.println("1: "+ dataInputStream.readInt());
-//        System.out.println("2: "+ dataInputStream.readInt());
-//        System.out.println("3: "+ dataInputStream.readInt());
-//        System.out.println("4: "+ dataInputStream.readInt());
-        System.out.println("DDD Good");
-        data[3] = frameBuffer.getInt();
-        data[2] = frameBuffer.getInt();
-        data[1] = frameBuffer.getInt();
-        data[0] = frameBuffer.getInt();
+//        dataInputStream.readFully(frameArray);
+        data[3] = dataInputStream.readInt();
+        data[2] = dataInputStream.readInt();
+        data[1] = dataInputStream.readInt();
+        data[0] =dataInputStream.readInt();
+
+//        data[3] = frameBuffer.getInt();
+//        data[2] = frameBuffer.getInt();
+//        data[1] = frameBuffer.getInt();
+//        data[0] = frameBuffer.getInt();
 
         try {
             iDecoder.decodeSerial(data, rawEvent);
