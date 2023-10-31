@@ -137,12 +137,12 @@ public class SFileReaderDecoder {
         data[1] = frameBuffer.getInt();
         data[0] = frameBuffer.getInt();
 
-        for (int i=0;i<4; i++) System.out.println(data[i]);
-        try {
-            Thread.sleep(1000);
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
-        }
+//        for (int i=0;i<4; i++) System.out.println(data[i]);
+//        try {
+//            Thread.sleep(1000);
+//        } catch (InterruptedException e) {
+//            throw new RuntimeException(e);
+//        }
 
 
         try {
