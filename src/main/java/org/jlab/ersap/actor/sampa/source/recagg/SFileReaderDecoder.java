@@ -131,12 +131,7 @@ public class SFileReaderDecoder {
         data[2] = frameBuffer.getInt();
         data[1] = frameBuffer.getInt();
         data[0] = frameBuffer.getInt();
-        System.out.println("DDD ");
-        try {
-            Thread.sleep(1);
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
-        }
+
         try {
             iDecoder.decodeSerial(data, rawEvent);
         } catch (Exception e) {
