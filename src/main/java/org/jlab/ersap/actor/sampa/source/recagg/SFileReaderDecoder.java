@@ -188,9 +188,9 @@ public class SFileReaderDecoder {
                 }
 
                 // Print out
-//                rawEvent.printData(System.out, streamId, false);
-//                rawEvent.calculateStats();
-//                rawEvent.printStats(System.out, false);
+                rawEvent.printData(System.out, streamId, false);
+                rawEvent.calculateStats();
+                rawEvent.printStats(System.out, false);
 
             bb = DasDataType.serialize(rawEvent.getData());
 
