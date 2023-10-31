@@ -12,11 +12,12 @@ import java.nio.file.Path;
 
 public class SampaDASFileSourceEngine extends AbstractEventReaderService<SFileReaderDecoder> {
 
-    private static final String SMP_FILE = "smpFile";
+    private static final String FRAME_COUNT = "frameCount";
+    private int frameCount;
     @Override
     protected SFileReaderDecoder createReader(Path path, JSONObject opts) throws EventReaderException {
-        if (opts.has(SMP_FILE)) {
-            String smpFile = opts.getString(SMP_FILE);
+        if (opts.has(FRAME_COUNT)) {
+             frameCount = opts.getInt(FRAME_COUNT);
 //            return new SFileReaderDecoder(smpFile, 1, 0, EMode.DAS,8192);
             return new SFileReaderDecoder(path.toFile().getAbsolutePath(), 1, 4000, EMode.DAS,8192); // vg 10.31.23
         }
@@ -31,7 +32,7 @@ public class SampaDASFileSourceEngine extends AbstractEventReaderService<SFileRe
     @Override
     protected int readEventCount() throws EventReaderException {
 //        return Integer.MAX_VALUE;
-        return 3;
+        return frameCount/4000;
     }
 
     @Override
