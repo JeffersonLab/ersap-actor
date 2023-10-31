@@ -30,7 +30,7 @@ public class SampaDASFileSourceEngine extends AbstractEventReaderService<SFileRe
     @Override
     protected int readEventCount() throws EventReaderException {
 //        return Integer.MAX_VALUE;
-        return 400;
+        return 4000;
     }
 
     @Override

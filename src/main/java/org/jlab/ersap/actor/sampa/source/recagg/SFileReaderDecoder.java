@@ -124,9 +124,12 @@ public class SFileReaderDecoder {
     public void processOneFrame(SRingRawEvent rawEvent) throws IOException {
         frameBuffer.clear();
 
-        // clear gbt_frame: 4, 4-byte words
-        dataInputStream.readFully(frameArray);
-
+        try {
+            // clear gbt_frame: 4, 4-byte words
+            dataInputStream.readFully(frameArray);
+        } catch (IOException j){
+            System.out.println(j.getMessage());
+        }
         data[3] = frameBuffer.getInt();
         data[2] = frameBuffer.getInt();
         data[1] = frameBuffer.getInt();
@@ -135,8 +138,7 @@ public class SFileReaderDecoder {
         try {
             iDecoder.decodeSerial(data, rawEvent);
         } catch (Exception e) {
-//            e.printStackTrace();
-            System.out.println(e.getMessage());
+            e.printStackTrace();
         }
     }
 
