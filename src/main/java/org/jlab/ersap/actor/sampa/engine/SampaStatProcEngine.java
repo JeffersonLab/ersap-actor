@@ -73,6 +73,7 @@ public class SampaStatProcEngine implements Engine {
             e.printStackTrace();
         }
         if(verbose) {
+            System.out.println("DDD in verbose");
             dasStat.calculateStats(data);
             dasStat.printStats(System.out, false);
         }

@@ -128,8 +128,8 @@ public class SFileReaderDecoder {
             // clear gbt_frame: 4, 4-byte words
             dataInputStream.readFully(frameArray);
         } catch (IOException j){
-//            System.out.println(j.getMessage());
-            j.printStackTrace();
+//            j.printStackTrace();
+            return;
         }
         data[3] = frameBuffer.getInt();
         data[2] = frameBuffer.getInt();
