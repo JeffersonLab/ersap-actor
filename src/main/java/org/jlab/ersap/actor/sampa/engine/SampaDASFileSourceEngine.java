@@ -18,7 +18,6 @@ public class SampaDASFileSourceEngine extends AbstractEventReaderService<SFileRe
         if (opts.has(SMP_FILE)) {
             String smpFile = opts.getString(SMP_FILE);
 //            return new SFileReaderDecoder(smpFile, 1, 0, EMode.DAS,8192);
-            System.out.println("DDD "+path.toFile().getAbsolutePath());
             return new SFileReaderDecoder(path.toFile().getAbsolutePath(), 1, 4000, EMode.DAS,8192); // vg 10.31.23
         }
         return null;
@@ -32,7 +31,7 @@ public class SampaDASFileSourceEngine extends AbstractEventReaderService<SFileRe
     @Override
     protected int readEventCount() throws EventReaderException {
 //        return Integer.MAX_VALUE;
-        return 4000;
+        return 1;
     }
 
     @Override
