@@ -129,8 +129,8 @@ public class SFileReaderDecoder {
             dataInputStream.readFully(frameArray);
         } catch (IOException j){
 //            j.printStackTrace();
-//            System.out.println(j.getMessage());
-//            return;
+            System.out.println(j.getMessage());
+            return;
         }
         data[3] = frameBuffer.getInt();
         data[2] = frameBuffer.getInt();
@@ -187,9 +187,9 @@ public class SFileReaderDecoder {
                 }
 
                 // Print out
-                rawEvent.printData(System.out, streamId, false);
-                rawEvent.calculateStats();
-                rawEvent.printStats(System.out, false);
+//                rawEvent.printData(System.out, streamId, false);
+//                rawEvent.calculateStats();
+//                rawEvent.printStats(System.out, false);
 
             bb = DasDataType.serialize(rawEvent.getData());
 
