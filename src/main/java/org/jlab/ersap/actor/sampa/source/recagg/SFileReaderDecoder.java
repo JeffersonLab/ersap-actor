@@ -129,6 +129,8 @@ public class SFileReaderDecoder {
             dataInputStream.readFully(frameArray);
         } catch (IOException j){
 //            j.printStackTrace();
+            frameBuffer.clear();
+            return;
         }
         data[3] = frameBuffer.getInt();
         data[2] = frameBuffer.getInt();
