@@ -129,8 +129,8 @@ public class SFileReaderDecoder {
             dataInputStream.readFully(frameArray);
         } catch (IOException j){
 //            j.printStackTrace();
-            frameBuffer.clear();
-            return;
+//            System.out.println(j.getMessage());
+//            return;
         }
         data[3] = frameBuffer.getInt();
         data[2] = frameBuffer.getInt();
@@ -164,7 +164,6 @@ public class SFileReaderDecoder {
 
                     processOneFrame(rawEvent);
                     frameCount++;
-                    System.out.println("DDD "+frameCount +" streamLimit = "+streamFrameLimit);
                     // In DSP mode, the rawEvent becomes full once "block" number of frames have been stored in it.
                     // In DAS mode, the decoder becomes full when it cannot hold any more raw data bytes and needs
                     // to pass them to the rawEvent.

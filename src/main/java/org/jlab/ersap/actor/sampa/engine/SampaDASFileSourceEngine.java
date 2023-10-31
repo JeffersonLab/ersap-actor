@@ -17,8 +17,7 @@ public class SampaDASFileSourceEngine extends AbstractEventReaderService<SFileRe
     protected SFileReaderDecoder createReader(Path path, JSONObject opts) throws EventReaderException {
         if (opts.has(SMP_FILE)) {
             String smpFile = opts.getString(SMP_FILE);
-//            return new SFileReaderDecoder(smpFile, 1, 0, EMode.DAS,8192);
-            return new SFileReaderDecoder(smpFile, 1, 4000, EMode.DAS,8192);
+            return new SFileReaderDecoder(smpFile, 1, 0, EMode.DAS,8192);
         }
         return null;
     }
