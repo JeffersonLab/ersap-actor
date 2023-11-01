@@ -27,12 +27,15 @@ public class DasStreamStatistics {
 
     FileWriter fileWriter;
 
+    private boolean pedestalFileOutput;
+
     public DasStreamStatistics(int ChNum, boolean pedestalFileOutput) {
 //        this.chNum = ChNum;
-        this.chNum = 80; //vhg for debug
+        this.chNum = 80;
         mean = new double[chNum];
         sdv = new double[chNum];
-        if(pedestalFileOutput) {
+        this.pedestalFileOutput = pedestalFileOutput;
+        if (pedestalFileOutput) {
             try {
                 String user_data = System.getenv("ERSAP_USER_DATA");
                 fileWriter = new FileWriter(user_data + "/data/output/pedestals.dat");
@@ -50,7 +53,7 @@ public class DasStreamStatistics {
         reset();
 
         // How much data do we have?
-        int sampleLimit = data[0].limit()/2;
+        int sampleLimit = data[0].limit() / 2;
 
         for (int channel = 0; channel < chNum; channel++) {
             m = 0;
@@ -61,7 +64,7 @@ public class DasStreamStatistics {
                 for (int sample = 0; sample < sampleLimit; sample++) {
                     try {
                         dataPt = data[channel].getShort(2 * sample); // ADC sample
-                        if (dataPt > 0 ) {
+                        if (dataPt > 0) {
                             delta = dataPt - m;
                             m += delta / (sample + 1);
                             M2 += delta * (dataPt - m);
@@ -75,7 +78,7 @@ public class DasStreamStatistics {
 
             }
             mean[channel] = m;
-            sdv[channel]  = Math.sqrt(variance);
+            sdv[channel] = Math.sqrt(variance);
         }
 
     }
@@ -123,11 +126,14 @@ public class DasStreamStatistics {
         // write to the pedestals file
         try {
 
-        for (int channel = 0; channel < chNum; channel++) {
-            fileWriter.write(String.valueOf(channel)); fileWriter.write(" ");
-            fileWriter.write(String.valueOf(mean[channel])); fileWriter.write(" ");
-            fileWriter.write(String.valueOf(sdv[channel]));fileWriter.write("\n");
-        }
+            for (int channel = 0; channel < chNum; channel++) {
+                fileWriter.write(String.valueOf(channel));
+                fileWriter.write(" ");
+                fileWriter.write(String.valueOf(mean[channel]));
+                fileWriter.write(" ");
+                fileWriter.write(String.valueOf(sdv[channel]));
+                fileWriter.write("\n");
+            }
             fileWriter.write("\n");
         } catch (IOException e) {
             throw new RuntimeException(e);
@@ -135,10 +141,22 @@ public class DasStreamStatistics {
 
     }
 
-    private void reset(){
+    public void fileClose() {
+        if (pedestalFileOutput) {
+            try {
+                fileWriter.flush();
+                fileWriter.close();
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }
+    }
+
+    private void reset() {
         Arrays.fill(mean, 0);
         Arrays.fill(sdv, 0);
     }
+
     public double[] getMean() {
         return mean;
     }

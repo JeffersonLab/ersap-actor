@@ -29,7 +29,6 @@ import java.util.Map;
  * @project ersap-sampa
  */
 public class SampaFileSinkEngine extends AbstractEventWriterService<FileOutputStream> {
-    private int evt_count;
     private String f_name;
     private static String FILE_OUTPUT = "file_output";
     private boolean file_output = false;
@@ -37,7 +36,7 @@ public class SampaFileSinkEngine extends AbstractEventWriterService<FileOutputSt
     private static String FEC_COUNT = "fec_count";
 
     private Map<Integer, double[]> frame = new HashMap<>();
-    private int chNum;
+    private int chNum = 80;
 
     private Gson gson = new Gson();
 
@@ -53,18 +52,8 @@ public class SampaFileSinkEngine extends AbstractEventWriterService<FileOutputSt
                 file_output = false;
             }
         }
-        if (opts.has(FEC_COUNT)) {
-            // Each FEC has 2 GBT stream, each having 80 channel data
-            int fc = opts.getInt(FEC_COUNT);
-            if (fc == 0) {
-                chNum = 80;
-            } else {
-                chNum = 80 * fc * 2;
-            }
-        }
 
         try {
-            evt_count = 0;
             f_name = file.toString();
             return new FileOutputStream(f_name);
         } catch (IOException e) {
@@ -86,7 +75,6 @@ public class SampaFileSinkEngine extends AbstractEventWriterService<FileOutputSt
     protected void writeEvent(Object event) throws EventWriterException {
         if (file_output) {
             try {
-                evt_count++;
                 ByteBuffer b = (ByteBuffer) event;
                 ByteBuffer[] data = null;
 
@@ -119,7 +107,7 @@ public class SampaFileSinkEngine extends AbstractEventWriterService<FileOutputSt
                 }
                 writer.write(gson.toJson(frame).getBytes());
                 writer.write("\n".getBytes());
-            } catch (IOException e) {
+             } catch (IOException e) {
                 e.printStackTrace();
             }
         }
