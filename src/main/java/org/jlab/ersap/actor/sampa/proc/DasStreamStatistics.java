@@ -83,6 +83,7 @@ public class DasStreamStatistics {
     public void printStats(OutputStream out, boolean json) {
 
         boolean autoFlush = true;
+        /*
         PrintWriter writer = new PrintWriter(out, autoFlush, StandardCharsets.US_ASCII);
 
         writer.print(5);
@@ -118,7 +119,7 @@ public class DasStreamStatistics {
         }
         writer.write((json ? "\n}" : ""));
         writer.write("\n");
-
+*/
         // write to the pedestals file
         try {
 

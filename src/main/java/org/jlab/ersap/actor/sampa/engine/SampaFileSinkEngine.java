@@ -30,7 +30,6 @@ import java.util.Map;
  */
 public class SampaFileSinkEngine extends AbstractEventWriterService<FileOutputStream> {
     private int evt_count;
-    private int f_count;
     private String f_name;
     private static String FILE_OUTPUT = "file_output";
     private boolean file_output = false;
@@ -67,7 +66,7 @@ public class SampaFileSinkEngine extends AbstractEventWriterService<FileOutputSt
         try {
             evt_count = 0;
             f_name = file.toString();
-            return new FileOutputStream(f_name + "_" + f_count);
+            return new FileOutputStream(f_name);
         } catch (IOException e) {
             throw new EventWriterException(e);
         }
@@ -115,22 +114,10 @@ public class SampaFileSinkEngine extends AbstractEventWriterService<FileOutputSt
                     }
                     double[] arr = dataPts.stream().mapToDouble(Double::doubleValue).toArray();
                     dataPts.clear();
-//                    System.out.println("===============================");
-//                    System.out.println("DDD channel = "+ channel);
-//                    System.out.println(arr);
-//                    System.out.println("===============================");
                     frame.put(channel, arr);
                 }
                 writer.write(gson.toJson(frame).getBytes());
                 writer.write("\n".getBytes());
-                if (evt_count >= 100) {
-                    writer.flush();
-                    writer.close();
-                    f_count++;
-                    writer = new FileOutputStream(f_name + "_" + f_count);
-                    System.out.println("INFO File = " + f_name + "_" + f_count);
-                    evt_count = 0;
-                }
             } catch (IOException e) {
                 e.printStackTrace();
             }
