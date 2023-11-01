@@ -129,7 +129,7 @@ public class SFileReaderDecoder {
             dataInputStream.readFully(frameArray);
         } catch (IOException j){
 //            j.printStackTrace();
-            System.out.println(j.getMessage());
+            System.out.println("End of File");
             return;
         }
         data[3] = frameBuffer.getInt();
