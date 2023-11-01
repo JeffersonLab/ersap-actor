@@ -134,6 +134,7 @@ public class DasStreamStatistics {
                 fileWriter.write("\n");
             }
             fileWriter.write("\n");
+            fileWriter.flush();
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
