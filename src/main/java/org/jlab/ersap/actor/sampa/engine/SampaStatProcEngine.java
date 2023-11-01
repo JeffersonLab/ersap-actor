@@ -41,16 +41,12 @@ public class SampaStatProcEngine implements Engine {
         if (input.getMimeType().equalsIgnoreCase(EngineDataType.JSON.mimeType())) {
             String source = (String) input.getData();
             JSONObject data = new JSONObject(source);
-            if (data.has(VERBOSE)) {
-                verbose = data.getString(VERBOSE).equalsIgnoreCase("true");
-            }
-
-            if (verbose) {
+            if (data.has(VERBOSE) && data.getString(VERBOSE).equalsIgnoreCase("true")) {
                 dasStat = new DasStreamStatistics(chNum, true);
+                verbose = true;
             } else {
                 dasStat = new DasStreamStatistics(chNum, false);
             }
-
         }
 
         return null;
@@ -119,5 +115,6 @@ public class SampaStatProcEngine implements Engine {
 
     @Override
     public void destroy() {
+        dasStat.fileClose();
     }
 }
