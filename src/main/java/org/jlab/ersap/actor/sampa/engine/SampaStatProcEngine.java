@@ -65,7 +65,7 @@ public class SampaStatProcEngine implements Engine {
         }
         if(verbose) {
             dasStat.calculateStats(data);
-            dasStat.printStats(System.out, false);
+            dasStat.printStats(System.out, true);
         }
         return input;
     }

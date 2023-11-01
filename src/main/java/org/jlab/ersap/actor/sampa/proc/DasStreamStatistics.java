@@ -30,8 +30,7 @@ public class DasStreamStatistics {
     private boolean pedestalFileOutput;
 
     public DasStreamStatistics(int ChNum, boolean pedestalFileOutput) {
-//        this.chNum = ChNum;
-        this.chNum = 80;
+        this.chNum = ChNum;
         mean = new double[chNum];
         sdv = new double[chNum];
         this.pedestalFileOutput = pedestalFileOutput;
@@ -86,7 +85,7 @@ public class DasStreamStatistics {
     public void printStats(OutputStream out, boolean json) {
 
         boolean autoFlush = true;
-        /*
+
         PrintWriter writer = new PrintWriter(out, autoFlush, StandardCharsets.US_ASCII);
 
         writer.print(5);
@@ -122,7 +121,7 @@ public class DasStreamStatistics {
         }
         writer.write((json ? "\n}" : ""));
         writer.write("\n");
-*/
+
         // write to the pedestals file
         try {
 
