@@ -31,6 +31,7 @@ public class SampaStatProcEngine implements Engine {
     private boolean verbose = false;
     private DasStreamStatistics dasStat;
 
+    private int chNum = 80;
 
 
     @Override
@@ -43,21 +44,15 @@ public class SampaStatProcEngine implements Engine {
             if (data.has(VERBOSE)) {
                 verbose = data.getString(VERBOSE).equalsIgnoreCase("true");
             }
-            if (data.has(FEC_COUNT)) {
-                int chNum = 80;
-                fecCount = data.getInt(FEC_COUNT);
-                if(fecCount > 0) {
-                    // Each FEC has 2 GBT stream, each having 80 channel data
-                    chNum = 80 * fecCount * 2;
-                }
-                if(verbose) {
-                    dasStat = new DasStreamStatistics(chNum, true);
-                } else {
-                    dasStat = new DasStreamStatistics(chNum, false);
-                }
+
+            if (verbose) {
+                dasStat = new DasStreamStatistics(chNum, true);
+            } else {
+                dasStat = new DasStreamStatistics(chNum, false);
             }
 
         }
+
         return null;
     }
 
