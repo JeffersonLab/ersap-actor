@@ -1,0 +1,10 @@
+name: StreamReaderEngine
+engine: org.jlab.ersap.actor.helloworld.engine.StreamReaderEngine
+type: java
+
+author: AR
+email: ayan@jlab.org
+
+version: 0.1
+description:
+  Simple engine that reads data from a port
