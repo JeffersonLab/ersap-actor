@@ -11,10 +11,11 @@ import java.nio.ByteOrder;
 import java.nio.file.Path;
 
 public class StreamReaderEngine extends AbstractEventReaderService<AyanStreamReader> {
-    private static final String PORT = "5555";
+    private static final String PORT = "port";
     @Override
     protected AyanStreamReader createReader(Path path, JSONObject jsonObject) throws EventReaderException {
-        return new AyanStreamReader(PORT);
+        int initialPort = jsonObject.has(PORT) ? jsonObject.getInt(PORT) : 6000;
+        return new AyanStreamReader(String.valueOf(initialPort));
        // return null;
     }
 
