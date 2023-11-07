@@ -1,0 +1,11 @@
+---
+name: BulkPrintStdIOEngine
+engine: org.jlab.ersap.actor.helloworld.engine.BulkPrintStdIOEngine
+type: java
+
+author: vhg
+email: gurjyan@jlab.org
+
+version: 0.1
+description:
+  Simple stdout.
