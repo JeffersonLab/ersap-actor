@@ -39,12 +39,17 @@ repositories {
     maven {
         url 'https://clasweb.jlab.org/clas12maven/'
     }
+    maven {
+        url 'https://clasweb.jlab.org/clas12maven/j4np/maven/j4np/'
+    }
     mavenCentral()
     mavenLocal()
 }
 
 dependencies {
     implementation 'org.jlab.epsci:ersap-java:1.0-SNAPSHOT'
+    implementation  group: 'j4np', name: 'j4np-ui', version: '1.0.7'
+    implementation  group: 'j4np', name: 'j4np-parent', version: '1.0.7'
     implementation 'com.google.code.findbugs:findbugs-annotations:3.0.1'
     api 'org.json:json:20220320'
 //    implementation 'com.lmax:disruptor:3.4.0'
