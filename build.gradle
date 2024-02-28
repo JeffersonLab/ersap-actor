@@ -37,6 +37,19 @@ sourceSets {
 
 repositories {
     maven {
+        url 'https://clasweb.jlab.org/clas12maven//j4np/maven/'
+    }
+}
+
+dependencies {
+    implementation  group: 'j4np', name: 'j4np-ui', version: '1.0.7'
+    implementation  group: 'j4np', name: 'j4np-parent', version: '1.0.7'
+}
+
+
+
+repositories {
+    maven {
         url 'https://clasweb.jlab.org/clas12maven/'
     }
     mavenCentral()
