@@ -4,7 +4,8 @@ import j4np.hipo5.data.Bank;
 import j4np.hipo5.io.HipoReader;
 
 public class HipoEventSplitter {
-    public static void main(){
+
+    public static void main(String[] args){
         HipoReader r = new HipoReader("infile.h5");
 
         // Get ADC data banks
