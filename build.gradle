@@ -39,7 +39,7 @@ repositories {
         url 'https://clasweb.jlab.org/clas12maven/'
     }
     maven {
-        url 'https://clasweb.jlab.org/clas12maven/j4np/maven/j4np/'
+        url 'https://clasweb.jlab.org/clas12maven/j4np/maven/'
     }
     mavenCentral()
     mavenLocal()
