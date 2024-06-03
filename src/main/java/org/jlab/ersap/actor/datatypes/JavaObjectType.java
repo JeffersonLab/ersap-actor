@@ -23,7 +23,7 @@ import java.nio.ByteBuffer;
 public class JavaObjectType {
     private JavaObjectType() { }
 
-    private static class JavaMapSerializer implements ErsapSerializer {
+    private static class JavaSerializer implements ErsapSerializer {
 
         @Override
         public ByteBuffer write(Object data) throws ErsapException {

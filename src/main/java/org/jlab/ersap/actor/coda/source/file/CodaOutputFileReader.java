@@ -4,14 +4,13 @@ import org.jlab.coda.jevio.EvioBank;
 import org.jlab.coda.jevio.EvioEvent;
 import org.jlab.coda.jevio.EvioException;
 import org.jlab.coda.jevio.EvioReader;
+import org.jlab.ersap.actor.util.FADCHit;
+import org.jlab.ersap.actor.util.FadcUtil;
 import org.jlab.ersap.actor.util.ISourceReader;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
-import java.nio.IntBuffer;
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -170,22 +169,10 @@ public class CodaOutputFileReader implements ISourceReader {
 
 
     public static List<FADCHit> fADCPayloadDecoder(Long frame_time_ns, int payloadId, byte[] ba) {
-        List<FADCHit> hits = new ArrayList<>();
-        IntBuffer intBuf =
-                ByteBuffer.wrap(ba)
-                        .order(ByteOrder.BIG_ENDIAN)
-                        .asIntBuffer();
-        int[] pData = new int[intBuf.remaining()];
-        intBuf.get(pData);
-        for (int i : pData) {
-            int q = (i >> 0) & 0x1FFF;
-            int channel = (i >> 13) & 0x000F;
-            long v = ((i >> 17) & 0x3FFF) * 4;
-            long ht = frame_time_ns + v;
-            hits.add(new FADCHit(1, payloadId, channel, q, ht));
-        }
-        return hits;
+        return  FadcUtil.parseFadcPayload(frame_time_ns, payloadId, ba);
     }
+
+
 
     public static void main(String[] args) {
         try {

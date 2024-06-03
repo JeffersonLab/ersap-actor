@@ -1,15 +1,25 @@
 package org.jlab.ersap.actor.coda.source.et;
 
+import org.jetbrains.annotations.NotNull;
 import org.jlab.coda.et.*;
 import org.jlab.coda.et.exception.EtClosedException;
 import org.jlab.coda.et.exception.EtDeadException;
 import org.jlab.coda.et.exception.EtException;
 import org.jlab.coda.et.exception.EtWakeUpException;
+import org.jlab.coda.jevio.EvioBank;
+import org.jlab.coda.jevio.EvioEvent;
+import org.jlab.coda.jevio.EvioException;
+import org.jlab.coda.jevio.EvioReader;
+import org.jlab.ersap.actor.util.FADCHit;
+import org.jlab.ersap.actor.util.FadcUtil;
 import org.jlab.ersap.actor.util.ISourceReader;
+import org.jlab.ersap.actor.util.RocTimeSliceBank;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Copyright (c) 2021, Jefferson Science Associates, all rights reserved.
@@ -19,7 +29,7 @@ import java.nio.ByteOrder;
  * 12000, Jefferson Ave, Newport News, VA 23606
  * Phone : (757)-269-7100
  *
- * @author gurjyan on 2/13/23
+ * @author gurjyan on 2/13/23, based on Carl Timmer's code
  * @project ersap-coda
  * <p>
  * <p>
@@ -115,11 +125,11 @@ public class CodaETReader implements ISourceReader {
             }
             // Get and return a single event from the ET entry buffer
             buf = getEtEvent();
-        } catch (EtException | EtDeadException | EtClosedException | EtWakeUpException | IOException e) {
+            return FadcUtil.parseEtEvent(buf);
+        } catch (Exception e) {
             e.printStackTrace();
+            throw new RuntimeException();
         }
-        // @todo How to convert byteBuffer into EvioEvent before returning?
-        return buf;
     }
 
     @Override
@@ -129,8 +139,7 @@ public class CodaETReader implements ISourceReader {
 
     @Override
     public ByteOrder getByteOrder() {
-        // @todo how to get byte ordering from the ET entry?
-        return null;
+        return FadcUtil.currentDataByteOrder;
     }
 
     @Override
@@ -172,4 +181,7 @@ public class CodaETReader implements ISourceReader {
         }
 
     }
+    
+
+
 }
