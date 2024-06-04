@@ -1,25 +1,17 @@
 package org.jlab.ersap.actor.coda.source.et;
 
-import org.jetbrains.annotations.NotNull;
 import org.jlab.coda.et.*;
+import org.jlab.coda.et.enums.Mode;
+import org.jlab.coda.et.enums.Modify;
 import org.jlab.coda.et.exception.EtClosedException;
 import org.jlab.coda.et.exception.EtDeadException;
 import org.jlab.coda.et.exception.EtException;
-import org.jlab.coda.et.exception.EtWakeUpException;
-import org.jlab.coda.jevio.EvioBank;
-import org.jlab.coda.jevio.EvioEvent;
-import org.jlab.coda.jevio.EvioException;
-import org.jlab.coda.jevio.EvioReader;
-import org.jlab.ersap.actor.util.FADCHit;
 import org.jlab.ersap.actor.util.FadcUtil;
 import org.jlab.ersap.actor.util.ISourceReader;
-import org.jlab.ersap.actor.util.RocTimeSliceBank;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Copyright (c) 2021, Jefferson Science Associates, all rights reserved.
@@ -39,19 +31,19 @@ import java.util.List;
 public class CodaETReader implements ISourceReader {
 
     private EtSystem sys;
-    private EtFifo fifo;
-    private EtFifoEntry entry;
-    private int entryCap;
-    private int idCount;
+
+    EtAttachment att;
+    private String statName = "ESAPStation";
+    int chunk = 10;
 
     // array of events
     private EtEvent[] mevs;
 
-    private int len, bufId;
+    private int len;
     private long t1 = 0L, t2 = 0L, time, totalT = 0L, count = 0L, totalCount = 0L, bytes = 0L, totalBytes = 0L;
     private double rate, avgRate;
 
-    private int entryBufEvtCount;
+    private int entryBufEvtCount=0;
 
     public CodaETReader(String etName) {
         EtSystemOpenConfig config = new EtSystemOpenConfig();
@@ -65,11 +57,12 @@ public class CodaETReader implements ISourceReader {
             sys.open();
             System.out.println("Connect to local ET");
 
-            fifo = new EtFifo(sys);
+            // Create station after all other stations
+            EtStationConfig statConfig = new EtStationConfig();
+            EtStation stat = sys.createStation(statConfig, statName, EtConstants.end, EtConstants.end);
 
-            entry = new EtFifoEntry(sys, fifo);
-
-            entryCap = fifo.getEntryCapacity();
+            // Attach to new station
+            att = sys.attach(stat);
 
             // keep track of time
             t1 = System.currentTimeMillis();
@@ -90,12 +83,6 @@ public class CodaETReader implements ISourceReader {
      */
     private ByteBuffer getEtEvent() throws IOException, EtDeadException, EtClosedException, EtException {
 
-        idCount++;
-
-        // ID associated with this buffer in this fifo entry.
-        // Not useful if only 1 buffer in each fifo entry as is the case here.
-        bufId = mevs[entryBufEvtCount].getFifoId();
-
         // Get event's data buffer
         ByteBuffer buf = mevs[entryBufEvtCount].getDataBuffer();
         // Data length in bytes
@@ -103,12 +90,9 @@ public class CodaETReader implements ISourceReader {
         bytes += len;
         totalBytes += len;
 
-        // Put events back into ET system
-        fifo.putEntry(entry);
-        count += idCount;
-
         // Increment ET entry buffer event count
         entryBufEvtCount++;
+
         return buf;
     }
 
@@ -116,16 +100,25 @@ public class CodaETReader implements ISourceReader {
     public Object nextEvent() {
         ByteBuffer buf = null;
         try {
-            if ((mevs == null) || (!mevs[entryBufEvtCount].hasFifoData())) {
-                // Get events ( ET buffer) from ET system
-                fifo.getEntry(entry);
-                mevs = entry.getBuffers();
-                idCount = 0;
+            if ((mevs == null) || (entryBufEvtCount == mevs.length)) {
+
+                // Put events back into ET system if we're done with all chunk of them
+                if ((entryBufEvtCount > 0) && (mevs != null) && (entryBufEvtCount == mevs.length)) {
+                    sys.putEvents(att, mevs);
+                    count += entryBufEvtCount;
+                }
+
+                // Get chunk more events (ET buffer) from ET system
+                mevs = sys.getEvents(att, Mode.SLEEP, Modify.ANYTHING, 0, chunk);
                 entryBufEvtCount = 0;
             }
+
             // Get and return a single event from the ET entry buffer
             buf = getEtEvent();
+
             return FadcUtil.parseEtEvent(buf);
+
+
         } catch (Exception e) {
             e.printStackTrace();
             throw new RuntimeException();
@@ -144,7 +137,6 @@ public class CodaETReader implements ISourceReader {
 
     @Override
     public void close() {
-        fifo.close();
         sys.close();
     }
 
@@ -179,9 +171,5 @@ public class CodaETReader implements ISourceReader {
             bytes = count = 0L;
             t1 = System.currentTimeMillis();
         }
-
     }
-    
-
-
 }
