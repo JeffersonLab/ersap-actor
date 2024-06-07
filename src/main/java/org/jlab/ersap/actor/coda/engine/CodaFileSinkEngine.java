@@ -13,6 +13,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.StringTokenizer;
 
@@ -29,25 +30,25 @@ import java.util.StringTokenizer;
  */
 public class CodaFileSinkEngine extends AbstractEventWriterService<FileWriter> {
     private static String FRAME_TITLE = "frame_title";
-    private String frameTitle;
+    private String frameTitle = "ERSAP";
     private static String FRAME_WIDTH = "frame_width";
-    private int frameWidth;
+    private int frameWidth = 1400;
     private static String FRAME_HEIGHT = "frame_height";
-    private int frameHeight;
+    private int frameHeight = 1200;
     private static String HIST_TITLES = "hist_titles";
-    private ArrayList<String> histTitles;
+    private ArrayList<String> histTitles = new ArrayList<>(Arrays.asList("1-2-0", "1-2-1", "1-2-3", "1-2-1&2"));;
     private static String HIST_TITLES2 = "hist_titles2";
     private ArrayList<String> histTitles2;
     private static String HIST_BINS = "hist_bins";
-    private int histBins;
+    private int histBins = 100;
     private static String HIST_MIN = "hist_min";
-    private double histMin;
+    private double histMin = 0;
     private static String HIST_MAX = "hist_max";
-    private double histMax;
+    private double histMax = 8000;
     private static String GRID_SIZE = "grid_size";
     private int gridSize;
     private static String SCATTER_RESET = "scatter_reset";
-    private boolean scatterReset;
+    private boolean scatterReset = true;
 
     private LiveHistogram liveHist;
 
@@ -125,6 +126,7 @@ public class CodaFileSinkEngine extends AbstractEventWriterService<FileWriter> {
                 System.out.println("DDD ------------ Frame = "+bank.getFrameNumber());
                 for (FADCHit hit : hits) {
                     System.out.println(hit);
+                    liveHist.update(hit.getName(),hit);
                 }
                 System.out.println("DDD ------------ Time  = "+bank.getTimeStamp());
             }
