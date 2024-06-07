@@ -87,7 +87,7 @@ public class FadcUtil {
                 int payloadId = dataBank.getHeader().getTag();
                 int payloadLength = dataBank.getHeader().getLength();
 
-                System.out.println("payload ID = " + payloadId+" length = "+payloadLength);
+//                System.out.println("payload ID = " + payloadId+" length = "+payloadLength);
                 byte[] byteData = dataBank.getRawBytes();
                 hits = FadcUtil.parseFADCPayload(timestamp, payloadId, byteData);
 //                System.out.println("DDD ------------ DDD");
