@@ -170,7 +170,7 @@ public class CodaETReader implements ISourceReader, Runnable {
 
     @Override
     public int getEventCount() {
-        return -1; // unbounded/streaming
+        return Integer.MAX_VALUE;
     }
 
     @Override
