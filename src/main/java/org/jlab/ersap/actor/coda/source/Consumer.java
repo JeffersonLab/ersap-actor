@@ -48,6 +48,7 @@ public class Consumer {
     public ByteBuffer getEvent() throws Exception {
         RingEvent event = get();
         ByteBuffer b = event.getPayloadBuffer();
+        System.out.println("DDD : " + b.array().length);
         put();
         return b;
     }

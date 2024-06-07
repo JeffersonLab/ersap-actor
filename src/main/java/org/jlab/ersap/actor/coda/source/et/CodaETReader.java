@@ -228,7 +228,7 @@ public class CodaETReader implements ISourceReader, Runnable {
                     // Get an empty item from ring
                     RingEvent event = getRing();
                     byte[] payload = nextEtEvent();
-                    System.out.println("DDD: "+payload.length);
+//                    System.out.println("DDD: "+payload.length);
                     event.setPayload(payload);
                     // Make the buffer available for consumers
                     publishRing();
