@@ -55,14 +55,16 @@ public class EventIdentificationEngine implements Engine {
         Set<IStreamItem> result = new HashSet<>();
 
         List<RocTimeSliceBanks> data;
+        // Decoding
         try {
             data = FadcUtil.parseEtEvent((ByteBuffer)engineData.getData());
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
-        for (RocTimeSliceBanks rsb : data) {
-            result.addAll(awtbc.findCluster(rsb.getHits()));
-        }
+        // Clustering
+//        for (RocTimeSliceBanks rsb : data) {
+//            result.addAll(awtbc.findCluster(rsb.getHits()));
+//        }
         out.setData(JavaObjectType.JOBJ, result);
 //        System.out.println("DDD============DDD");
 //        for (IStreamItem evt : result) {
