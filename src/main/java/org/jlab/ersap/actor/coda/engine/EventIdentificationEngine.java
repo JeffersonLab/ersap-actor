@@ -46,8 +46,6 @@ public class EventIdentificationEngine implements Engine {
             multiplicity = data.has(MULTIPLICITY) ? data.getInt(MULTIPLICITY) : 2;
         }
         awtbc = new Awtbc(multiplicity, slidingWindow, false);
-        System.exit(2);
-
         return null;
     }
 
