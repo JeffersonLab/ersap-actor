@@ -42,9 +42,9 @@ public class FadcUtil {
             return null;
         }
 
-        if (evTag == 0xff60) {
-            System.out.println("Found built streaming event");
-        }
+//        if (evTag == 0xff60) {
+//            System.out.println("Found built streaming event");
+//        }
 
         // Go one level down ->
         int childCount = ev.getChildCount();
