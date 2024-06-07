@@ -11,7 +11,7 @@ public class RingEvent {
     public RingEvent() {
         payload = new byte[100000];
         payloadBuffer = ByteBuffer.wrap(payload);
-        payloadBuffer.order(ByteOrder.LITTLE_ENDIAN);
+        payloadBuffer.order(ByteOrder.BIG_ENDIAN);
     }
 
     public byte[] getPayload() {
@@ -21,7 +21,7 @@ public class RingEvent {
     public void setPayload(byte[] payload) {
         this.payload = payload;
         payloadBuffer = ByteBuffer.wrap(payload);
-        payloadBuffer.order(ByteOrder.LITTLE_ENDIAN);
+        payloadBuffer.order(ByteOrder.BIG_ENDIAN);
     }
 
     public ByteBuffer getPayloadBuffer() {
