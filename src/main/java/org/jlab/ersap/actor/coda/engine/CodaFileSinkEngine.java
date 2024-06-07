@@ -3,6 +3,8 @@ package org.jlab.ersap.actor.coda.engine;
 import org.jlab.epsci.ersap.engine.EngineDataType;
 import org.jlab.epsci.ersap.std.services.AbstractEventWriterService;
 import org.jlab.epsci.ersap.std.services.EventWriterException;
+import org.jlab.ersap.actor.datatypes.JavaObjectType;
+import org.jlab.utils.JsonUtils;
 import org.json.JSONObject;
 
 import java.io.FileWriter;
@@ -42,10 +44,11 @@ public class CodaFileSinkEngine extends AbstractEventWriterService<FileWriter> {
 
     @Override
     protected void writeEvent(Object event) throws EventWriterException {
+        System.out.println("DDDDDDDDDDDDDDDDDDDD");
     }
 
     @Override
     protected EngineDataType getDataType() {
-        return EngineDataType.BYTES;
+        return JavaObjectType.JOBJ;
     }
 }
