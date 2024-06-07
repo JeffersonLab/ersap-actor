@@ -30,7 +30,7 @@ public class FadcUtil {
     public static RocTimeSliceBanks parseRocTimeSliceBank(EvioEvent ev) throws Exception{
 
         int evTag = ev.getHeader().getTag();
-        System.out.println("DDD "+Integer.toHexString(evTag));
+//        System.out.println("DDD "+Integer.toHexString(evTag));
         if (evTag == 0xffd1) {
             System.out.println("Skip over PRESTART event");
             return null;
@@ -90,11 +90,11 @@ public class FadcUtil {
                 System.out.println("payload ID = " + payloadId+" length = "+payloadLength);
                 byte[] byteData = dataBank.getRawBytes();
                 hits = FadcUtil.parseFADCPayload(timestamp, payloadId, byteData);
-                System.out.println("DDD ------------ DDD");
-                for (FADCHit h : hits) {
-                    System.out.println(h);
-                }
-                System.out.println("DDD ------------ DDD");
+//                System.out.println("DDD ------------ DDD");
+//                for (FADCHit h : hits) {
+//                    System.out.println(h);
+//                }
+//                System.out.println("DDD ------------ DDD");
             }
             rocTimeSliceBank.setHits(hits);
         }

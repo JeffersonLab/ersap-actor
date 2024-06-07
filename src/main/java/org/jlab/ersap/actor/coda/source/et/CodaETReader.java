@@ -229,25 +229,6 @@ public class CodaETReader implements ISourceReader, Runnable {
     @Override
     public void run() {
         while (running.get()) {
-
- // ============= Using RingBuffer ===============
-//            long remainingCapacity = ringBuffer.remainingCapacity();
-//            double stress = 100 - ((remainingCapacity * 100.0) / maxRingItems);
-//            if (stress <= 50) {
-//                try {
-//                    // Get an empty item from ring
-//                    RingEvent event = getRing();
-//                    byte[] payload = nextEtEvent();
-////                    System.out.println("DDD: "+payload.length);
-//                    event.setPayload(payload);
-//                    // Make the buffer available for consumers
-//                    publishRing();
-//                } catch (InterruptedException e) {
-//                    e.printStackTrace();
-//                    System.out.println(e.getMessage());
-//                    System.exit(1);
-//                }
-//            }
             try {
                 enqueue(nextEtBuffer());
             } catch (InterruptedException e) {

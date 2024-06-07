@@ -53,7 +53,7 @@ public class EventIdentificationEngine implements Engine {
     @Override
     public EngineData execute(EngineData engineData) {
         EngineData out = new EngineData();
-
+        System.out.println("DDD============DDD");
         Set<IStreamItem> result = new HashSet<>();
         List<RocTimeSliceBanks> data;
         try {
@@ -65,11 +65,11 @@ public class EventIdentificationEngine implements Engine {
             result.addAll(awtbc.findCluster(rsb.getHits()));
         }
         out.setData(JavaObjectType.JOBJ, result);
-        System.out.println("DDD============DDD");
-        for (IStreamItem evt : result) {
-            System.out.println(evt);
-        }
-        System.out.println("DDD============DDD");
+//        System.out.println("DDD============DDD");
+//        for (IStreamItem evt : result) {
+//            System.out.println(evt);
+//        }
+//        System.out.println("DDD============DDD");
         return out;
     }
 
