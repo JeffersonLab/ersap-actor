@@ -54,7 +54,7 @@ public class FadcUtil {
 
 
         // First bank is Time Info Bank (TIB) with frame and timestamp
-        EvioBank b = (EvioBank) ev.getChildAt(0);
+        EvioBank b = (EvioBank) ev.getChildAt(0).getChildAt(0);
         int[] intData = b.getIntData();
         int frame = intData[0];
         long timestamp = ((((long) intData[1]) & 0x00000000ffffffffL) +
