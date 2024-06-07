@@ -18,6 +18,7 @@ import java.util.Map;
 
 public class JsonFileWriter {
 
+
     public static void printFrame(OutputStream out, Map<Integer, double[]> frame) {
         boolean autoFlush = true;
         PrintWriter writer = new PrintWriter(out, autoFlush, StandardCharsets.US_ASCII);
