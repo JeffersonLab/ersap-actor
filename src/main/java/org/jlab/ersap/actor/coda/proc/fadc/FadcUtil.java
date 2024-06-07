@@ -89,14 +89,15 @@ public class FadcUtil {
 
 
                 byte[] byteData = dataBank.getRawBytes();
-                if(payloadLength > 1)
-                    System.out.println("payload ID = " + payloadId+" length = "+payloadLength+" byteData_length = "+byteData.length);
-                hits = FadcUtil.parseFADCPayload(timestamp, payloadId, byteData);
-//                System.out.println("DDD ------------ DDD");
-//                for (FADCHit h : hits) {
-//                    System.out.println(h);
-//                }
-//                System.out.println("DDD ------------ DDD");
+                if(payloadLength > 3) {
+                    System.out.println("payload ID = " + payloadId + " length = " + payloadLength + " byteData_length = " + byteData.length);
+                    hits = FadcUtil.parseFADCPayload(timestamp, payloadId, byteData);
+                System.out.println("DDD ------------ DDD");
+                for (FADCHit h : hits) {
+                    System.out.println(h);
+                }
+                System.out.println("DDD ------------ DDD");
+                }
             }
             rocTimeSliceBank.setHits(hits);
         }
