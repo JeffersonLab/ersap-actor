@@ -85,7 +85,9 @@ public class FadcUtil {
                 // Ignore the data type (currently the improper value of 0xf).
                 // Just get the data as bytes
                 int payloadId = dataBank.getHeader().getTag();
-                System.out.println("payload ID = " + payloadId);
+                int payloadLength = dataBank.getHeader().getLength();
+
+                System.out.println("payload ID = " + payloadId+" lenght = "+payloadLength);
                 byte[] byteData = dataBank.getRawBytes();
                 hits = FadcUtil.parseFADCPayload(timestamp, payloadId, byteData);
                 System.out.println("DDD ------------ DDD");
