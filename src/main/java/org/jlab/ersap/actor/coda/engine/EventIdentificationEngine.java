@@ -51,9 +51,9 @@ public class EventIdentificationEngine implements Engine {
 
     @Override
     public EngineData execute(EngineData engineData) {
-        System.out.println("DDD============DDD");
         EngineData out = new EngineData();
         Set<IStreamItem> result = new HashSet<>();
+
         List<RocTimeSliceBanks> data;
         try {
             data = FadcUtil.parseEtEvent((ByteBuffer)engineData.getData());
