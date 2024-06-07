@@ -81,7 +81,7 @@ public class FadcUtil {
 
             // Skip over SIB by starting at 1
             for (int k = 1; k < kids; k++) {
-                EvioSegment dataBank = (EvioSegment) rocTSB.getChildAt(k);
+                EvioBank dataBank = (EvioBank) rocTSB.getChildAt(k);
                 // Ignore the data type (currently the improper value of 0xf).
                 // Just get the data as bytes
                 int payloadId = dataBank.getHeader().getTag();
