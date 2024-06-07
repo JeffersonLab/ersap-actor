@@ -4,6 +4,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jlab.coda.jevio.EvioBank;
 import org.jlab.coda.jevio.EvioEvent;
 import org.jlab.coda.jevio.EvioReader;
+import org.jlab.coda.jevio.EvioSegment;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -53,8 +54,8 @@ public class FadcUtil {
                 System.out.println("Event has " + childCount + " child structures");
 
 
-        // First bank is Time Info Bank (TIB) with frame and timestamp
-        EvioBank b = (EvioBank) ev.getChildAt(0).getChildAt(0);
+        // First bank is Time Info Bank (TSS) with frame and timestamp
+        EvioSegment b = (EvioSegment) ev.getChildAt(0).getChildAt(0);
         int[] intData = b.getIntData();
         int frame = intData[0];
         long timestamp = ((((long) intData[1]) & 0x00000000ffffffffL) +
@@ -65,11 +66,11 @@ public class FadcUtil {
         rocTimeSliceBank.setFrameNumber(frame);
         rocTimeSliceBank.setTimeStamp(timestamp);
 
-        // Loop through all ROC Time Slice Banks (TSB) which come after TIB
+        // Loop through all Aggregation info segments (AIS) which come after TSS
 
         for (int j = 1; j < childCount; j++) {
             // ROC Time SLice Bank
-            EvioBank rocTSB = (EvioBank) ev.getChildAt(j);
+            EvioSegment rocTSB = (EvioSegment) ev.getChildAt(j);
             int kids = rocTSB.getChildCount();
             if (kids < 2) {
                 throw new Exception("Problem: too few child for TSB (" + childCount + ")");
@@ -80,7 +81,7 @@ public class FadcUtil {
 
             // Skip over SIB by starting at 1
             for (int k = 1; k < kids; k++) {
-                EvioBank dataBank = (EvioBank) rocTSB.getChildAt(k);
+                EvioSegment dataBank = (EvioSegment) rocTSB.getChildAt(k);
                 // Ignore the data type (currently the improper value of 0xf).
                 // Just get the data as bytes
                 int payloadId = dataBank.getHeader().getTag();
