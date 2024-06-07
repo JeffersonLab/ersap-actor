@@ -68,7 +68,7 @@ public class CodaETReader implements ISourceReader {
             t1 = System.currentTimeMillis();
         } catch (Exception ex) {
             System.out.println("Error using ET system as consumer");
-            System.out.println(ex.getMessage());
+            ex.printStackTrace();
         }
     }
 
