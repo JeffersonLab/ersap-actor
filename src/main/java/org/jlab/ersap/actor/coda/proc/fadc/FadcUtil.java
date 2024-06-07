@@ -51,7 +51,7 @@ public class FadcUtil {
         if (childCount < 2) {
             throw new Exception("Problem: too few child for event (" + childCount + ")");
         }
-                System.out.println("Event has " + childCount + " child structures");
+//                System.out.println("Event has " + childCount + " child structures");
 
 
         // First bank is Time Info Bank (TSS) with frame and timestamp
@@ -60,7 +60,7 @@ public class FadcUtil {
         int frame = intData[0];
         long timestamp = ((((long) intData[1]) & 0x00000000ffffffffL) +
                 (((long) intData[2]) << 32));
-        System.out.println("  Frame = " + frame + ", TS = " + timestamp);
+//        System.out.println("  Frame = " + frame + ", TS = " + timestamp);
 
         RocTimeSliceBanks rocTimeSliceBank = new RocTimeSliceBanks();
         rocTimeSliceBank.setFrameNumber(frame);
