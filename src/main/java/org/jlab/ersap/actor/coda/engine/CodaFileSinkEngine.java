@@ -4,6 +4,7 @@ import org.jlab.epsci.ersap.engine.EngineDataType;
 import org.jlab.epsci.ersap.std.services.AbstractEventWriterService;
 import org.jlab.epsci.ersap.std.services.EventWriterException;
 import org.jlab.ersap.actor.coda.proc.LiveHistogram;
+import org.jlab.ersap.actor.coda.proc.fadc.RocTimeSliceBanks;
 import org.jlab.ersap.actor.datatypes.JavaObjectType;
 import org.json.JSONObject;
 
@@ -114,6 +115,8 @@ public class CodaFileSinkEngine extends AbstractEventWriterService<FileWriter> {
 
     @Override
     protected void writeEvent(Object event) throws EventWriterException {
+        List<RocTimeSliceBanks> banks = (List<RocTimeSliceBanks>)event;
+
 //        List<VAdcHit> h = (List<VAdcHit>) event;
 //        if(!h.isEmpty()) {
 //            if (scatterReset) liveHist.resetScatter();
