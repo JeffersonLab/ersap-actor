@@ -44,7 +44,6 @@ public class CodaFileSinkEngine extends AbstractEventWriterService<FileWriter> {
 
     @Override
     protected void writeEvent(Object event) throws EventWriterException {
-        System.out.println("DDDDDDDDDDDDDDDDDDDD");
     }
 
     @Override

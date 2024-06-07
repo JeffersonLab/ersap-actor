@@ -74,7 +74,6 @@ public class EventIdentificationEngine implements Engine {
 
     @Override
     public EngineData executeGroup(Set<EngineData> set) {
-        System.out.println("DDD============DDD");
         return null;
     }
 
