@@ -68,7 +68,7 @@ public class FadcUtil {
 
         // Loop through all Aggregation info segments (AIS) which come after TSS
 
-        for (int j = 1; j < childCount; j++) {
+        for (int j = 2; j < childCount; j++) {
             // ROC Time SLice Bank
             EvioBank rocTSB = (EvioBank) ev.getChildAt(j);
             int kids = rocTSB.getChildCount();
