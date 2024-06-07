@@ -53,6 +53,7 @@ public class CodaETReader implements ISourceReader {
             config.setEtName(etName);
             // create ET system object with verbose debugging output
             etSystem = new EtSystem(config);
+            System.out.println("DDDD");
             etSystem.open();
             System.out.println("Connected to ET.");
 
