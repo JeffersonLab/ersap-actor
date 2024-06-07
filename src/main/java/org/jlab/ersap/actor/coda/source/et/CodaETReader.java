@@ -51,7 +51,6 @@ public class CodaETReader implements ISourceReader {
             config.setHost(EtConstants.hostLocal);
             config.setWaitTime(0);
             config.setEtName(etName);
-            config.setConnectRemotely(true);
             // create ET system object with verbose debugging output
             etSystem = new EtSystem(config);
             System.out.println("DDDD");
