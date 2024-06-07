@@ -1,0 +1,23 @@
+---
+io-services:
+  reader:
+    class: org.jlab.ersap.coda.actor.engine.CodaEtSourceEngine
+    name: Source
+  writer:
+    class: org.jlab.ersap.coda.actor.engine.CodaFileSinkEngine
+    name: Sink
+services:
+  - class: org.jlab.ersap.coda.actor.engine.EventIdentificationEngine
+    name: EventId
+configuration:
+  io-services:
+    reader:
+      et_name: "ascvsd"
+      et_station: "ersap"
+  services:
+    EventId:
+      sliding_window: 40
+      multiplicity: 2
+mime-types:
+  - binary/data-evio
+  - binary/data-jobj

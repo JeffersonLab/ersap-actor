@@ -4,8 +4,8 @@ import org.jlab.coda.jevio.EvioBank;
 import org.jlab.coda.jevio.EvioEvent;
 import org.jlab.coda.jevio.EvioException;
 import org.jlab.coda.jevio.EvioReader;
-import org.jlab.ersap.actor.util.FADCHit;
-import org.jlab.ersap.actor.util.FadcUtil;
+import org.jlab.ersap.actor.coda.proc.fadc.FADCHit;
+import org.jlab.ersap.actor.coda.proc.fadc.FadcUtil;
 import org.jlab.ersap.actor.util.ISourceReader;
 
 import java.io.File;
@@ -169,7 +169,7 @@ public class CodaOutputFileReader implements ISourceReader {
 
 
     public static List<FADCHit> fADCPayloadDecoder(Long frame_time_ns, int payloadId, byte[] ba) {
-        return  FadcUtil.parseFadcPayload(frame_time_ns, payloadId, ba);
+        return  FadcUtil.parseFADCPayload(frame_time_ns, payloadId, ba);
     }
 
 

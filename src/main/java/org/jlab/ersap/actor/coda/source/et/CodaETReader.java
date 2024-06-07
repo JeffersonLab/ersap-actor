@@ -3,13 +3,9 @@ package org.jlab.ersap.actor.coda.source.et;
 import org.jlab.coda.et.*;
 import org.jlab.coda.et.enums.Mode;
 import org.jlab.coda.et.enums.Modify;
-import org.jlab.coda.et.exception.EtClosedException;
-import org.jlab.coda.et.exception.EtDeadException;
-import org.jlab.coda.et.exception.EtException;
-import org.jlab.ersap.actor.util.FadcUtil;
+import org.jlab.ersap.actor.coda.proc.fadc.FadcUtil;
 import org.jlab.ersap.actor.util.ISourceReader;
 
-import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 
@@ -21,8 +17,8 @@ import java.nio.ByteOrder;
  * 12000, Jefferson Ave, Newport News, VA 23606
  * Phone : (757)-269-7100
  *
- * @author gurjyan on 2/13/23, based on Carl Timmer's code
- * @project ersap-coda
+ * @author gurjyan and timmer on 6/6/24
+ * {@code} ersap-coda
  * <p>
  * <p>
  * Establishes a connection to the ET running on a local host.
@@ -30,22 +26,24 @@ import java.nio.ByteOrder;
  */
 public class CodaETReader implements ISourceReader {
 
-    private EtSystem sys;
-
-    EtAttachment att;
-    private String statName = "ESAPStation";
+    private EtSystem etSystem;
+    EtAttachment etAttachment;
+    // Number of ET buffers to get from the ET at once.
     int chunk = 10;
-
     // array of events
-    private EtEvent[] mevs;
+    private EtEvent[] etEvents;
+    private int evtCount =0;
 
-    private int len;
-    private long t1 = 0L, t2 = 0L, time, totalT = 0L, count = 0L, totalCount = 0L, bytes = 0L, totalBytes = 0L;
-    private double rate, avgRate;
+    // Variables for statistics
+    private long t1 = 0L;
+    private long totalT = 0L;
+    private long count = 0L;
+    private long totalCount = 0L;
+    private long bytes = 0L;
+    private long totalBytes = 0L;
 
-    private int entryBufEvtCount=0;
 
-    public CodaETReader(String etName) {
+    public CodaETReader(String etName, String etStationName) {
         EtSystemOpenConfig config = new EtSystemOpenConfig();
         try {
             config.setNetworkContactMethod(EtConstants.direct);
@@ -53,22 +51,22 @@ public class CodaETReader implements ISourceReader {
             config.setWaitTime(0);
             config.setEtName(etName);
             // create ET system object with verbose debugging output
-            sys = new EtSystem(config);
-            sys.open();
-            System.out.println("Connect to local ET");
+            etSystem = new EtSystem(config);
+            etSystem.open();
+            System.out.println("Connect to local "+etName+" ET system.");
 
             // Create station after all other stations
             EtStationConfig statConfig = new EtStationConfig();
-            EtStation stat = sys.createStation(statConfig, statName, EtConstants.end, EtConstants.end);
+            EtStation station = etSystem.createStation(statConfig, etStationName, EtConstants.end, EtConstants.end);
 
             // Attach to new station
-            att = sys.attach(stat);
-
+            etAttachment = etSystem.attach(station);
+            System.out.println("Created and attached to the "+ station+" station.");
             // keep track of time
             t1 = System.currentTimeMillis();
         } catch (Exception ex) {
             System.out.println("Error using ET system as consumer");
-            ex.printStackTrace();
+            System.out.println(ex.getMessage());
         }
     }
 
@@ -76,51 +74,44 @@ public class CodaETReader implements ISourceReader {
      * Gets a single event from an ET entry buffer
      *
      * @return event as a ByteBuffer
-     * @throws IOException
-     * @throws EtDeadException
-     * @throws EtClosedException
-     * @throws EtException
      */
-    private ByteBuffer getEtEvent() throws IOException, EtDeadException, EtClosedException, EtException {
+    private ByteBuffer getEtEvent() {
 
         // Get event's data buffer
-        ByteBuffer buf = mevs[entryBufEvtCount].getDataBuffer();
+        ByteBuffer buf = etEvents[evtCount].getDataBuffer();
         // Data length in bytes
-        len = mevs[entryBufEvtCount].getLength();
-        bytes += len;
-        totalBytes += len;
+        // Data length from ET in bytes
+        int dataLength = etEvents[evtCount].getLength();
+        bytes += dataLength;
+        totalBytes += dataLength;
 
         // Increment ET entry buffer event count
-        entryBufEvtCount++;
+        evtCount++;
 
         return buf;
     }
 
     @Override
     public Object nextEvent() {
-        ByteBuffer buf = null;
         try {
-            if ((mevs == null) || (entryBufEvtCount == mevs.length)) {
+            if ((etEvents == null) || (evtCount == etEvents.length)) {
 
                 // Put events back into ET system if we're done with all chunk of them
-                if ((entryBufEvtCount > 0) && (mevs != null) && (entryBufEvtCount == mevs.length)) {
-                    sys.putEvents(att, mevs);
-                    count += entryBufEvtCount;
+                if (evtCount > 0 && etEvents != null) {
+                    etSystem.putEvents(etAttachment, etEvents);
+                    count += evtCount;
                 }
 
                 // Get chunk more events (ET buffer) from ET system
-                mevs = sys.getEvents(att, Mode.SLEEP, Modify.ANYTHING, 0, chunk);
-                entryBufEvtCount = 0;
+                etEvents = etSystem.getEvents(etAttachment, Mode.SLEEP, Modify.ANYTHING, 0, chunk);
+                evtCount = 0;
             }
 
-            // Get and return a single event from the ET entry buffer
-            buf = getEtEvent();
-
-            return FadcUtil.parseEtEvent(buf);
-
+            // Get a single event from the ET entry buffer
+            return FadcUtil.parseEtEvent(getEtEvent());
 
         } catch (Exception e) {
-            e.printStackTrace();
+            System.out.println(e.getMessage());
             throw new RuntimeException();
         }
     }
@@ -132,18 +123,18 @@ public class CodaETReader implements ISourceReader {
 
     @Override
     public ByteOrder getByteOrder() {
-        return FadcUtil.currentDataByteOrder;
+        return FadcUtil.evioDataByteOrder;
     }
 
     @Override
     public void close() {
-        sys.close();
+        etSystem.close();
     }
 
     private void printStatistics() {
         // calculate the event rate
-        t2 = System.currentTimeMillis();
-        time = t2 - t1;
+        long t2 = System.currentTimeMillis();
+        long time = t2 - t1;
 
         if (time > 5000) {
             // reset things if necessary
@@ -154,10 +145,10 @@ public class CodaETReader implements ISourceReader {
                 return;
             }
 
-            rate = 1000.0 * ((double) count) / time;
+            double rate = 1000.0 * ((double) count) / time;
             totalCount += count;
             totalT += time;
-            avgRate = 1000.0 * ((double) totalCount) / totalT;
+            double avgRate = 1000.0 * ((double) totalCount) / totalT;
             // Event rates
             System.out.println("Events = " + String.format("%.3g", rate) +
                     " Hz,    avg = " + String.format("%.3g", avgRate));

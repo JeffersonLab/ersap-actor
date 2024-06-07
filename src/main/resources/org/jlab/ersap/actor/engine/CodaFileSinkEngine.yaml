@@ -1,0 +1,11 @@
+---
+name: SampaFileSinkEngine
+engine: org.jlab.ersap.actor.coda.engine.CodaFileSinkEngine
+type: java
+
+author: vardan
+email: gurjyan@jlab.org
+
+version: 0.1
+description:
+  Writes CODA events to a file.

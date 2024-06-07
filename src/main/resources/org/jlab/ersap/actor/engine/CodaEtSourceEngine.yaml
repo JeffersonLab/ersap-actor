@@ -1,0 +1,11 @@
+---
+name: SampaFileSinkEngine
+engine: org.jlab.ersap.actor.coda.engine.CodaEtSourceEngine
+type: java
+
+author: vardan
+email: gurjyan@jlab.org
+
+version: 0.1
+description:
+   Creates a station ET and reads events from it.

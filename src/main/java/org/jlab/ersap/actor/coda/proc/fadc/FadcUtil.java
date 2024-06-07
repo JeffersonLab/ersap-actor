@@ -1,12 +1,10 @@
-package org.jlab.ersap.actor.util;
+package org.jlab.ersap.actor.coda.proc.fadc;
 
 import org.jetbrains.annotations.NotNull;
 import org.jlab.coda.jevio.EvioBank;
 import org.jlab.coda.jevio.EvioEvent;
-import org.jlab.coda.jevio.EvioException;
 import org.jlab.coda.jevio.EvioReader;
 
-import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.IntBuffer;
@@ -14,39 +12,21 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class FadcUtil {
-    public static ByteOrder currentDataByteOrder = ByteOrder.BIG_ENDIAN;
-    @NotNull
-    public static List<FADCHit> parseFadcPayload(Long frame_time_ns, int payloadId, byte[] ba) {
-        List<FADCHit> hits = new ArrayList<>();
-        IntBuffer intBuf =
-                ByteBuffer.wrap(ba)
-                        .order(ByteOrder.BIG_ENDIAN)
-                        .asIntBuffer();
-        int[] pData = new int[intBuf.remaining()];
-        intBuf.get(pData);
-        for (int i : pData) {
-            int q = (i >> 0) & 0x1FFF;
-            int channel = (i >> 13) & 0x000F;
-            long v = ((i >> 17) & 0x3FFF) * 4;
-            long ht = frame_time_ns + v;
-            hits.add(new FADCHit(1, payloadId, channel, q, ht));
-        }
-        return hits;
-    }
+    public static ByteOrder evioDataByteOrder = ByteOrder.BIG_ENDIAN;
 
     @NotNull
-    public static RocTimeSliceBank[] parseEtEvent(ByteBuffer buf) throws Exception {
+    public static List<RocTimeSliceBanks> parseEtEvent(ByteBuffer buf) throws Exception {
         EvioReader r = new EvioReader(buf);
-        RocTimeSliceBank[] rocTimeSliceBanks = new RocTimeSliceBank[r.getEventCount()];
+        List<RocTimeSliceBanks> banks = new ArrayList<>();
         for (int i = 0; i < r.getEventCount(); i++) {
             EvioEvent event = r.parseNextEvent();
-            currentDataByteOrder = r.getByteOrder();
-            rocTimeSliceBanks[i] = parseRocTimeSliceBank(event);
+            evioDataByteOrder = r.getByteOrder();
+            banks.add(parseRocTimeSliceBank(event));
         }
-        return rocTimeSliceBanks;
+        return banks;
     }
 
-    public static RocTimeSliceBank parseRocTimeSliceBank(EvioEvent ev) throws Exception{
+    public static RocTimeSliceBanks parseRocTimeSliceBank(EvioEvent ev) throws Exception{
 
         int evTag = ev.getHeader().getTag();
         if (evTag == 0xffd1) {
@@ -80,8 +60,8 @@ public class FadcUtil {
                 (((long) intData[2]) << 32));
         System.out.println("  Frame = " + frame + ", TS = " + timestamp);
 
-        RocTimeSliceBank rocTimeSliceBank = new RocTimeSliceBank();
-        rocTimeSliceBank.setFrmaeNumber(frame);
+        RocTimeSliceBanks rocTimeSliceBank = new RocTimeSliceBanks();
+        rocTimeSliceBank.setFrameNumber(frame);
         rocTimeSliceBank.setTimeStamp(timestamp);
 
         // Loop through all ROC Time Slice Banks (TSB) which come after TIB
@@ -105,13 +85,35 @@ public class FadcUtil {
                 int payloadId = dataBank.getHeader().getTag();
                 System.out.println("payload ID = " + payloadId);
                 byte[] byteData = dataBank.getRawBytes();
-                hits = FadcUtil.parseFadcPayload(timestamp, payloadId, byteData);
+                hits = FadcUtil.parseFADCPayload(timestamp, payloadId, byteData);
+                System.out.println("DDD ------------ DDD");
                 for (FADCHit h : hits) {
-                    System.out.println("DDD " + h);
+                    System.out.println(h);
                 }
+                System.out.println("DDD ------------ DDD");
             }
-            rocTimeSliceBank.addRocData(j,hits);
+            rocTimeSliceBank.setHits(hits);
         }
         return rocTimeSliceBank;
     }
+
+    @NotNull
+    public static List<FADCHit> parseFADCPayload(Long frame_time_ns, int payloadId, byte[] ba) {
+        List<FADCHit> hits = new ArrayList<>();
+        IntBuffer intBuf =
+                ByteBuffer.wrap(ba)
+                        .order(ByteOrder.BIG_ENDIAN)
+                        .asIntBuffer();
+        int[] pData = new int[intBuf.remaining()];
+        intBuf.get(pData);
+        for (int i : pData) {
+            int q = (i >> 0) & 0x1FFF;
+            int channel = (i >> 13) & 0x000F;
+            long v = ((i >> 17) & 0x3FFF) * 4;
+            long ht = frame_time_ns + v;
+            hits.add(new FADCHit(1, payloadId, channel, q, ht));
+        }
+        return hits;
+    }
+
 }

@@ -1,0 +1,11 @@
+---
+name: SampaFileSinkEngine
+engine: org.jlab.ersap.actor.coda.engine.CodaFileSourceEngine
+type: java
+
+author: vardan
+email: gurjyan@jlab.org
+
+version: 0.1
+description:
+  Reads events from a CODA file.

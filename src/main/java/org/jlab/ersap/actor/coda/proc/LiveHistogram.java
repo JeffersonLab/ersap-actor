@@ -1,10 +1,9 @@
 package org.jlab.ersap.actor.coda.proc;
 
-import org.jlab.ersap.actor.util.FADCHit;
+import org.jlab.ersap.actor.coda.proc.fadc.FADCHit;
 import twig.data.H1F;
 import twig.data.H2F;
 import twig.data.TDirectory;
-import twig.graphics.TGCanvas;
 import twig.graphics.TGDataCanvas;
 import twig.math.DataFitter;
 import twig.math.F1D;
@@ -117,24 +116,24 @@ public class LiveHistogram {
 
     public void update(String name, FADCHit v) {
         if (histograms.containsKey(name)) {
-            histograms.get(name).fill(v.getCharge());
-            if (v.getSlot() == 19) {
-                scatter.fill(v.getTime(), v.getChannel() + 16);
+            histograms.get(name).fill(v.charge());
+            if (v.slot() == 19) {
+                scatter.fill(v.time(), v.channel() + 16);
             } else {
-                scatter.fill(v.getTime(), v.getChannel());
+                scatter.fill(v.time(), v.channel());
             }
 
         } else if (histograms2.containsKey(name)) {
-            histograms2.get(name).fill(v.getCharge());
-            if (v.getSlot() == 19) {
-                scatter.fill(v.getTime(), v.getChannel() + 16);
+            histograms2.get(name).fill(v.charge());
+            if (v.slot() == 19) {
+                scatter.fill(v.time(), v.channel() + 16);
             } else {
-                scatter.fill(v.getTime(), v.getChannel());
+                scatter.fill(v.time(), v.channel());
             }
         }
 
-        if(v.getSlot() == 0 && v.getChannel() == 0){
-            sumHist.fill(v.getCharge());
+        if(v.slot() == 0 && v.channel() == 0){
+            sumHist.fill(v.charge());
         }
 //        cc.repaint();
     }

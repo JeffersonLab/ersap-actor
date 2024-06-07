@@ -5,7 +5,7 @@ io-services:
     name: Source
   writer:
     class: org.jlab.ersap.coda.engines.AggStoreHistogramEngine
-    name: Sync
+    name: Sink
 services:
   - class: org.jlab.ersap.coda.engines.FAdcIdEngine
     name: Beam

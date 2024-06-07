@@ -12,7 +12,8 @@ package org.jlab.ersap.actor.coda.proc;
  * @project ersap-actor
  */
 public interface IStreamItem {
-    public double getTime();
+    public String getName();
+    public long time();
     public int getId();
-    public double getValue();
+    public int getValue();
 }

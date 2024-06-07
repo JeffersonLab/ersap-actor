@@ -1,12 +1,11 @@
 package org.jlab.ersap.actor.coda.proc;
 
-import org.fusesource.jansi.internal.OSInfo;
+import org.jlab.ersap.actor.coda.proc.fadc.FADCHit;
 
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Copyright (c) 2021, Jefferson Science Associates, all rights reserved.
@@ -35,11 +34,11 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class Awtbc {
 
     private int clusterEvents;
-    private double clusterTimeWindow;
+    private long clusterTimeWindow;
 
     private boolean isExact = false;
 
-    private List<IStreamItem> AdaptiveWindow;
+    private List<FADCHit> AdaptiveWindow;
 
     /**
      * Creates an object of the AWTBC algorithm that looks
@@ -49,51 +48,52 @@ public class Awtbc {
      * @param t time window of the cluster
      * @param c if set true algorithm will perform exact match to n
      */
-    public Awtbc(int n, double t, boolean c) {
+    public Awtbc(int n, long t, boolean c) {
         clusterEvents = n;
         clusterTimeWindow = t;
         AdaptiveWindow = new ArrayList<>();
         isExact = c;
     }
 
-    public Set<IStreamItem> findCluster(IStreamItem item) {
-        if (AdaptiveWindow.size() < clusterEvents) {
-            AdaptiveWindow.add(item);
-        }
-        if (AdaptiveWindow.size() < clusterEvents) {
-            return null;
+    public Set<IStreamItem> findCluster(List<FADCHit> hits) {
+        Set<IStreamItem> out = new HashSet<>();
+        Set<IStreamItem> tmp = new HashSet<>();
+        for (FADCHit hit:hits) {
+            if (AdaptiveWindow.size() < clusterEvents) {
+                AdaptiveWindow.add(hit);
+            } else {
+                // loop to remove elements that have larger time than clusterWindowTime
 
-        } else {
-            Set<IStreamItem> out = new HashSet<>();
-            // loop to remove elements that have larger time than clusterWindowTime
-            for (int i = 0; i < AdaptiveWindow.size(); i++) {
-                IStreamItem tItem_0 = AdaptiveWindow.get(i);
-                IStreamItem tItem_1 = AdaptiveWindow.get(i + 1);
+                for (int i = 0; i < AdaptiveWindow.size(); i++) {
+                    IStreamItem tItem_0 = AdaptiveWindow.get(i);
+                    IStreamItem tItem_1 = AdaptiveWindow.get(i + 1);
 
-                // We check if ID's of two neighbour items are not the same,
-                // and that the time distance between them are within clusterTimeWindow
-                if ((tItem_0.getId() != tItem_1.getId()) &&
-                        (tItem_0.getTime() - tItem_1.getTime() <= clusterTimeWindow)) {
-                    out.add(tItem_0);
-                    out.add(tItem_1);
+                    // We check if ID's of two neighbour items are not the same,
+                    // and that the time distance between them are within clusterTimeWindow
+                    if ((tItem_0.getId() != tItem_1.getId()) &&
+                            (tItem_0.time() - tItem_1.time() <= clusterTimeWindow)) {
+                        tmp.add(tItem_0);
+                        tmp.add(tItem_1);
 
-                    // If we find a cluster
-                    if (out.size() == clusterEvents) {
-                        // Remove elements from the adaptive window
-                        for (int j = 0; j < out.size(); j++) {
-                            AdaptiveWindow.remove(j);
+                        // If we find a cluster
+                        if (tmp.size() == clusterEvents) {
+                            // Remove elements from the adaptive window
+                            for (int j = 0; j < out.size(); j++) {
+                                AdaptiveWindow.remove(j);
+                            }
+                            out.addAll(tmp);
+                            tmp.clear();
                         }
-                        // Return the cluster
-                        return out;
                     }
                 }
-            }
-            // Remove elements from the adaptive window, except the last one.
-            for (int j = 0; j < AdaptiveWindow.size()-1; j++) {
-                AdaptiveWindow.remove(j);
+                // Remove elements from the adaptive window, except the last one.
+//                for (int j = 0; j < AdaptiveWindow.size() - 1; j++) {
+//                    AdaptiveWindow.remove(j);
+//                }
+                AdaptiveWindow.clear();
             }
         }
-        return null;
+        return out;
     }
 
 }

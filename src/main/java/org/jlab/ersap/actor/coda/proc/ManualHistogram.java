@@ -1,6 +1,6 @@
 package org.jlab.ersap.actor.coda.proc;
 
-import org.jlab.ersap.actor.util.FADCHit;
+import org.jlab.ersap.actor.coda.proc.fadc.FADCHit;
 import twig.data.H2F;
 import twig.graphics.TGDataCanvas;
 
@@ -35,10 +35,10 @@ public class ManualHistogram {
     }
 
     public void update(String name, FADCHit v) {
-        if (v.getSlot() == 19) {
-            scatter.fill(v.getTime(), v.getChannel() + 16);
+        if (v.slot() == 19) {
+            scatter.fill(v.time(), v.channel() + 16);
         } else {
-            scatter.fill(v.getTime(), v.getChannel());
+            scatter.fill(v.time(), v.channel());
         }
     }
     public void repaint() {
