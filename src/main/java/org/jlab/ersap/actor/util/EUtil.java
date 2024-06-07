@@ -14,7 +14,7 @@ package org.jlab.ersap.actor.util;
 import java.io.*;
 
 
-public class O2B2O {
+public class EUtil {
     public static byte[] toByteArray(Object obj) throws IOException {
         byte[] bytes = null;
         ByteArrayOutputStream bos = null;
@@ -53,6 +53,13 @@ public class O2B2O {
             }
         }
         return obj;
+    }
+
+    public static byte[] copyBytes(byte[] src) {
+
+        byte[] copy = new byte[src.length];
+        System.arraycopy(src, 0, copy, 0, src.length);
+        return copy;
     }
 
 }

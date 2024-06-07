@@ -1,13 +1,21 @@
 package org.jlab.ersap.actor.coda.source.et;
 
+import com.lmax.disruptor.*;
 import org.jlab.coda.et.*;
 import org.jlab.coda.et.enums.Mode;
 import org.jlab.coda.et.enums.Modify;
 import org.jlab.ersap.actor.coda.proc.fadc.FadcUtil;
+import org.jlab.ersap.actor.coda.source.Consumer;
+import org.jlab.ersap.actor.coda.source.RingEvent;
+import org.jlab.ersap.actor.coda.source.RingEventFactory;
 import org.jlab.ersap.actor.util.ISourceReader;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+import java.util.concurrent.atomic.AtomicBoolean;
+
+import static com.lmax.disruptor.RingBuffer.createSingleProducer;
+import static org.jlab.ersap.actor.util.EUtil.copyBytes;
 
 /**
  * Copyright (c) 2021, Jefferson Science Associates, all rights reserved.
@@ -24,7 +32,7 @@ import java.nio.ByteOrder;
  * Establishes a connection to the ET running on a local host.
  * That is, one ET for each node that is responsible for running the ERSAP program.
  */
-public class CodaETReader implements ISourceReader {
+public class CodaETReader implements ISourceReader, Runnable {
 
     private EtSystem etSystem;
     EtAttachment etAttachment;
@@ -42,19 +50,36 @@ public class CodaETReader implements ISourceReader {
     private long bytes = 0L;
     private long totalBytes = 0L;
 
+    private final RingBuffer<RingEvent> ringBuffer;
+    private long sequenceNumber;
+    private final long maxRingItems;
 
-    public CodaETReader(String etName, String etStationName) {
+    private final Consumer consumer;
+
+    private AtomicBoolean running = new AtomicBoolean(true);
+
+    public CodaETReader(String etName, int etPort, String etStationName, int maxRingItems) {
+        // RingBuffer staff
+        ringBuffer = createSingleProducer(new RingEventFactory(), maxRingItems,
+                new YieldingWaitStrategy());
+        Sequence sequence = new Sequence(Sequencer.INITIAL_CURSOR_VALUE);
+        SequenceBarrier sequenceBarrier = ringBuffer.newBarrier();
+        ringBuffer.addGatingSequences(sequence);
+        consumer = new Consumer(ringBuffer, sequence, sequenceBarrier);
+
+        this.maxRingItems = ringBuffer.remainingCapacity();
+
+        // ET staff
         EtSystemOpenConfig config = new EtSystemOpenConfig();
         System.out.println("Connecting to local "+etName+" ET system.");
         try {
             config.setNetworkContactMethod(EtConstants.direct);
             config.setHost(EtConstants.hostLocal);
-            config.setTcpPort(23911);
+            config.setTcpPort(etPort); // e.g. 23911
             config.setWaitTime(0);
             config.setEtName(etName);
             // create ET system object with verbose debugging output
             etSystem = new EtSystem(config);
-            System.out.println("DDDD");
             etSystem.open();
             System.out.println("Connected to ET.");
 
@@ -71,6 +96,10 @@ public class CodaETReader implements ISourceReader {
             System.out.println("Error using ET system as consumer");
             ex.printStackTrace();
         }
+
+        // Starting ET consumer thread
+        Thread thread = new Thread(this);
+        thread.start();
     }
 
     /**
@@ -78,7 +107,7 @@ public class CodaETReader implements ISourceReader {
      *
      * @return event as a ByteBuffer
      */
-    private ByteBuffer getEtEvent() {
+    private ByteBuffer getEtEntryBuffer() {
 
         // Get event's data buffer
         ByteBuffer buf = etEvents[evtCount].getDataBuffer();
@@ -94,8 +123,9 @@ public class CodaETReader implements ISourceReader {
         return buf;
     }
 
-    @Override
-    public Object nextEvent() {
+
+    public byte[] nextEtEvent() {
+        ByteBuffer bufo;
         try {
             if ((etEvents == null) || (evtCount == etEvents.length)) {
 
@@ -111,11 +141,30 @@ public class CodaETReader implements ISourceReader {
             }
 
             // Get a single event from the ET entry buffer
-            return FadcUtil.parseEtEvent(getEtEvent());
-
+            bufo = getEtEntryBuffer();
+            assert bufo != null;
+            return copyBytes(bufo.array());
         } catch (Exception e) {
             System.out.println(e.getMessage());
             throw new RuntimeException();
+        }
+    }
+
+    private RingEvent getRing() throws InterruptedException {
+        sequenceNumber = ringBuffer.next();
+        return ringBuffer.get(sequenceNumber);
+    }
+
+    private void publishRing() {
+        ringBuffer.publish(sequenceNumber);
+    }
+
+    @Override
+    public Object nextEvent() {
+        try {
+            return consumer.getEvent();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
     }
 
@@ -132,7 +181,9 @@ public class CodaETReader implements ISourceReader {
     @Override
     public void close() {
         etSystem.close();
+        running.set(false);
     }
+
 
     private void printStatistics() {
         // calculate the event rate
@@ -164,6 +215,29 @@ public class CodaETReader implements ISourceReader {
 
             bytes = count = 0L;
             t1 = System.currentTimeMillis();
+        }
+    }
+
+    @Override
+    public void run() {
+        while (running.get()) {
+            long remainingCapacity = ringBuffer.remainingCapacity();
+            double stress = 100 - ((remainingCapacity * 100.0) / maxRingItems);
+            if (stress <= 50) {
+                try {
+                    // Get an empty item from ring
+                    RingEvent event = getRing();
+                    byte[] payload = nextEtEvent();
+                    System.out.println("DDD: "+payload.length);
+                    event.setPayload(payload);
+                    // Make the buffer available for consumers
+                    publishRing();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                    System.out.println(e.getMessage());
+                    System.exit(1);
+                }
+            }
         }
     }
 }

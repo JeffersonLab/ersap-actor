@@ -12,8 +12,10 @@ services:
 configuration:
   io-services:
     reader:
-      et_name: "/tmp/asdsd"
+      et_name: "/tmp/et_experiment_2_ER2"
+      et_port: 23911
       et_station: "ersap"
+      max_ring_items: 131072
   services:
     EventId:
       sliding_window: 40
