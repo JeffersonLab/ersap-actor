@@ -93,8 +93,8 @@ public class CodaFileSinkEngine extends AbstractEventWriterService<FileWriter> {
             scatterReset = true;
         }
 
-        liveHist = new LiveHistogram(frameTitle, histTitles, histTitles2, gridSize,
-                frameWidth, frameHeight, histBins, histMin, histMax);
+//        liveHist = new LiveHistogram(frameTitle, histTitles, histTitles2, gridSize,
+//                frameWidth, frameHeight, histBins, histMin, histMax);
 
         try {
             return new FileWriter(file.toString());
