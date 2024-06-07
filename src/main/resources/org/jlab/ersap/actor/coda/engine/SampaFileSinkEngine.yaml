@@ -3,7 +3,7 @@ name: SampaFileSinkEngine
 engine: org.jlab.ersap.actor.sampa.engine.SampaFileSinkEngine
 type: java
 
-author: ardan
+author: vardan
 email: gurjyan@jlab.org
 
 version: 0.1

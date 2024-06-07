@@ -89,17 +89,17 @@ public class EventIdentificationEngine implements Engine {
 
     @Override
     public String getDescription() {
-        return null;
+        return "Adaptive window event identification";
     }
 
     @Override
     public String getVersion() {
-        return null;
+        return "v1.0";
     }
 
     @Override
     public String getAuthor() {
-        return null;
+        return "gurjyan";
     }
 
     @Override
