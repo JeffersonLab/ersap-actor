@@ -29,6 +29,7 @@ public class FadcUtil {
     public static RocTimeSliceBanks parseRocTimeSliceBank(EvioEvent ev) throws Exception{
 
         int evTag = ev.getHeader().getTag();
+        System.out.println("DDD "+Integer.toHexString(evTag));
         if (evTag == 0xffd1) {
             System.out.println("Skip over PRESTART event");
             return null;
@@ -49,7 +50,7 @@ public class FadcUtil {
         if (childCount < 2) {
             throw new Exception("Problem: too few child for event (" + childCount + ")");
         }
-//                System.out.println("Event has " + childCount + " child structures");
+                System.out.println("Event has " + childCount + " child structures");
 
 
         // First bank is Time Info Bank (TIB) with frame and timestamp
