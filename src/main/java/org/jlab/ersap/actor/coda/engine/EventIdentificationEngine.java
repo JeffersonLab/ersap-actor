@@ -46,14 +46,15 @@ public class EventIdentificationEngine implements Engine {
             multiplicity = data.has(MULTIPLICITY) ? data.getInt(MULTIPLICITY) : 2;
         }
         awtbc = new Awtbc(multiplicity, slidingWindow, false);
+        System.exit(2);
 
         return null;
     }
 
     @Override
     public EngineData execute(EngineData engineData) {
-        EngineData out = new EngineData();
         System.out.println("DDD============DDD");
+        EngineData out = new EngineData();
         Set<IStreamItem> result = new HashSet<>();
         List<RocTimeSliceBanks> data;
         try {
@@ -75,6 +76,7 @@ public class EventIdentificationEngine implements Engine {
 
     @Override
     public EngineData executeGroup(Set<EngineData> set) {
+        System.out.println("DDD============DDD");
         return null;
     }
 
