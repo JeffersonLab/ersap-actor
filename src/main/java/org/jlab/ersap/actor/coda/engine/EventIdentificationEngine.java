@@ -6,10 +6,12 @@ import org.jlab.epsci.ersap.engine.EngineData;
 import org.jlab.epsci.ersap.engine.EngineDataType;
 import org.jlab.ersap.actor.coda.proc.Awtbc;
 import org.jlab.ersap.actor.coda.proc.IStreamItem;
+import org.jlab.ersap.actor.coda.proc.fadc.FadcUtil;
 import org.jlab.ersap.actor.coda.proc.fadc.RocTimeSliceBanks;
 import org.jlab.ersap.actor.datatypes.JavaObjectType;
 import org.json.JSONObject;
 
+import java.nio.ByteBuffer;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -51,8 +53,14 @@ public class EventIdentificationEngine implements Engine {
     @Override
     public EngineData execute(EngineData engineData) {
         EngineData out = new EngineData();
+
         Set<IStreamItem> result = new HashSet<>();
-        List<RocTimeSliceBanks> data = (List<RocTimeSliceBanks>) engineData.getData();
+        List<RocTimeSliceBanks> data;
+        try {
+            data = FadcUtil.parseEtEvent((ByteBuffer)engineData.getData());
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
         for (RocTimeSliceBanks rsb : data) {
             result.addAll(awtbc.findCluster(rsb.getHits()));
         }
