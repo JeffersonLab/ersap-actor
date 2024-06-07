@@ -1,5 +1,5 @@
 ---
-name: SampaFileSinkEngine
+name: CodaFileSinkEngine
 engine: org.jlab.ersap.actor.coda.engine.CodaFileSinkEngine
 type: java
 
