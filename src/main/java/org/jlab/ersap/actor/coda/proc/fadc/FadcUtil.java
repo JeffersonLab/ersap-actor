@@ -70,7 +70,7 @@ public class FadcUtil {
 
         for (int j = 1; j < childCount; j++) {
             // ROC Time SLice Bank
-            EvioSegment rocTSB = (EvioSegment) ev.getChildAt(j);
+            EvioBank rocTSB = (EvioBank) ev.getChildAt(j);
             int kids = rocTSB.getChildCount();
             if (kids < 2) {
                 throw new Exception("Problem: too few child for TSB (" + childCount + ")");
