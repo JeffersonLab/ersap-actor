@@ -68,7 +68,7 @@ public class FadcUtil {
 
         // Loop through all Aggregation info segments (AIS) which come after TSS
 
-        for (int j = 2; j < childCount; j++) {
+        for (int j = 1; j < childCount; j++) {
             // ROC Time SLice Bank
             EvioBank rocTSB = (EvioBank) ev.getChildAt(j);
             int kids = rocTSB.getChildCount();
@@ -87,9 +87,10 @@ public class FadcUtil {
                 int payloadId = dataBank.getHeader().getTag();
                 int payloadLength = dataBank.getHeader().getLength();
 
-                if(payloadLength > 1)
-                System.out.println("payload ID = " + payloadId+" length = "+payloadLength);
+
                 byte[] byteData = dataBank.getRawBytes();
+                if(payloadLength > 1)
+                    System.out.println("payload ID = " + payloadId+" length = "+payloadLength+" byteData_length = "+byteData.length);
                 hits = FadcUtil.parseFADCPayload(timestamp, payloadId, byteData);
 //                System.out.println("DDD ------------ DDD");
 //                for (FADCHit h : hits) {
