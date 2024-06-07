@@ -45,6 +45,7 @@ public class CodaETReader implements ISourceReader {
 
     public CodaETReader(String etName, String etStationName) {
         EtSystemOpenConfig config = new EtSystemOpenConfig();
+        System.out.println("Connecting to local "+etName+" ET system.");
         try {
             config.setNetworkContactMethod(EtConstants.direct);
             config.setHost(EtConstants.hostLocal);
@@ -53,7 +54,7 @@ public class CodaETReader implements ISourceReader {
             // create ET system object with verbose debugging output
             etSystem = new EtSystem(config);
             etSystem.open();
-            System.out.println("Connect to local "+etName+" ET system.");
+            System.out.println("Connected to ET.");
 
             // Create station after all other stations
             EtStationConfig statConfig = new EtStationConfig();
