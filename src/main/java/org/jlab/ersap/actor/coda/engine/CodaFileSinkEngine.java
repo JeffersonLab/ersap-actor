@@ -125,7 +125,7 @@ public class CodaFileSinkEngine extends AbstractEventWriterService<FileWriter> {
                 for (FADCHit hit : hits) {
                     System.out.println(hit);
                 }
-                System.out.println("DDD ------------ DDD"+);
+                System.out.println("DDD ------------ DDD");
             }
         }
 
