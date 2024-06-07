@@ -12,6 +12,8 @@ import org.jlab.ersap.actor.util.ISourceReader;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import static com.lmax.disruptor.RingBuffer.createSingleProducer;
@@ -50,17 +52,21 @@ public class CodaETReader implements ISourceReader, Runnable {
     private long bytes = 0L;
     private long totalBytes = 0L;
 
+    // Ring Buffer
     private final RingBuffer<RingEvent> ringBuffer;
     private long sequenceNumber;
     private final long maxRingItems;
-
     private final Consumer consumer;
+
+    // Queue
+
+    private final BlockingQueue<ByteBuffer> queue;
 
     private AtomicBoolean running = new AtomicBoolean(true);
 
-    public CodaETReader(String etName, int etPort, String etStationName, int maxRingItems) {
+    public CodaETReader(String etName, int etPort, String etStationName, int capacity) {
         // RingBuffer staff
-        ringBuffer = createSingleProducer(new RingEventFactory(), maxRingItems,
+        ringBuffer = createSingleProducer(new RingEventFactory(), capacity,
                 new YieldingWaitStrategy());
         Sequence sequence = new Sequence(Sequencer.INITIAL_CURSOR_VALUE);
         SequenceBarrier sequenceBarrier = ringBuffer.newBarrier();
@@ -68,6 +74,9 @@ public class CodaETReader implements ISourceReader, Runnable {
         consumer = new Consumer(ringBuffer, sequence, sequenceBarrier);
 
         this.maxRingItems = ringBuffer.remainingCapacity();
+
+        // Queue staff
+        this.queue = new LinkedBlockingQueue<>(capacity);
 
         // ET staff
         EtSystemOpenConfig config = new EtSystemOpenConfig();
@@ -149,6 +158,28 @@ public class CodaETReader implements ISourceReader, Runnable {
             throw new RuntimeException();
         }
     }
+   public ByteBuffer nextEtBuffer() {
+        try {
+            if ((etEvents == null) || (evtCount == etEvents.length)) {
+
+                // Put events back into ET system if we're done with all chunk of them
+                if (evtCount > 0 && etEvents != null) {
+                    etSystem.putEvents(etAttachment, etEvents);
+                    count += evtCount;
+                }
+
+                // Get chunk more events (ET buffer) from ET system
+                etEvents = etSystem.getEvents(etAttachment, Mode.SLEEP, Modify.ANYTHING, 0, chunk);
+                evtCount = 0;
+            }
+
+            // Get a single event from the ET entry buffer
+            return  getEtEntryBuffer();
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+            throw new RuntimeException();
+        }
+    }
 
     private RingEvent getRing() throws InterruptedException {
         sequenceNumber = ringBuffer.next();
@@ -162,7 +193,11 @@ public class CodaETReader implements ISourceReader, Runnable {
     @Override
     public Object nextEvent() {
         try {
-            return consumer.getEvent();
+            // ==== Using RingBuffer ====
+            //return consumer.getEvent();
+
+            // ======= Using FIFO ======
+             return dequeue();
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -182,6 +217,13 @@ public class CodaETReader implements ISourceReader, Runnable {
     public void close() {
         etSystem.close();
         running.set(false);
+    }
+    public void enqueue(ByteBuffer buffer) throws InterruptedException {
+        queue.put(buffer); // Blocks if the queue is full
+    }
+
+    public ByteBuffer dequeue() throws InterruptedException {
+        return queue.take(); // Blocks if the queue is empty
     }
 
 
@@ -221,23 +263,32 @@ public class CodaETReader implements ISourceReader, Runnable {
     @Override
     public void run() {
         while (running.get()) {
-            long remainingCapacity = ringBuffer.remainingCapacity();
-            double stress = 100 - ((remainingCapacity * 100.0) / maxRingItems);
-            if (stress <= 50) {
-                try {
-                    // Get an empty item from ring
-                    RingEvent event = getRing();
-                    byte[] payload = nextEtEvent();
-//                    System.out.println("DDD: "+payload.length);
-                    event.setPayload(payload);
-                    // Make the buffer available for consumers
-                    publishRing();
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                    System.out.println(e.getMessage());
-                    System.exit(1);
-                }
+
+ // ============= Using RingBuffer ===============
+//            long remainingCapacity = ringBuffer.remainingCapacity();
+//            double stress = 100 - ((remainingCapacity * 100.0) / maxRingItems);
+//            if (stress <= 50) {
+//                try {
+//                    // Get an empty item from ring
+//                    RingEvent event = getRing();
+//                    byte[] payload = nextEtEvent();
+////                    System.out.println("DDD: "+payload.length);
+//                    event.setPayload(payload);
+//                    // Make the buffer available for consumers
+//                    publishRing();
+//                } catch (InterruptedException e) {
+//                    e.printStackTrace();
+//                    System.out.println(e.getMessage());
+//                    System.exit(1);
+//                }
+//            }
+            try {
+                enqueue(nextEtBuffer());
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
             }
+
+
         }
     }
 }
