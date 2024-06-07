@@ -121,11 +121,12 @@ public class CodaFileSinkEngine extends AbstractEventWriterService<FileWriter> {
             if (scatterReset) liveHist.resetScatter();
             for (RocTimeSliceBanks bank : banks) {
                 List<FADCHit> hits = bank.getHits();
-                System.out.println("DDD ------------ DDD");
+                System.out.println();
+                System.out.println("DDD ------------ Frame = "+bank.getFrameNumber());
                 for (FADCHit hit : hits) {
                     System.out.println(hit);
                 }
-                System.out.println("DDD ------------ DDD");
+                System.out.println("DDD ------------ Time  = "+bank.getTimeStamp());
             }
         }
 
