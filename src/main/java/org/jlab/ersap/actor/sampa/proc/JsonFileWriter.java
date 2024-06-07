@@ -14,9 +14,8 @@ import java.util.Map;
  * Phone : (757)-269-7100
  *
  * @author gurjyan on 3/17/23
- * @project ersap-coda
- * @deprecated
  */
+
 public class JsonFileWriter {
 
     public static void printFrame(OutputStream out, Map<Integer, double[]> frame) {
