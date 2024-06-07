@@ -20,7 +20,7 @@ configuration:
       hist_bins: 100
       hist_min: 100
       hist_max: 8000
-      scatter_reset: true
+      delta_t: 20
       #> grid_size defines a layout for histogram visualization
       #> (e.g. 5 will plot 25 histograms in 5x5 matrix)
       grid_size: 2

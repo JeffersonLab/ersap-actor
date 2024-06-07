@@ -52,6 +52,9 @@ public class CodaFileSinkEngine extends AbstractEventWriterService<FileWriter> {
 
     private LiveHistogram liveHist;
 
+    private static String DELTA_T = "delta_t";
+    private int deltaT = 20;
+
     private List<FADCHit> coinsTimes = new ArrayList<>();
 
     @Override
@@ -139,7 +142,7 @@ public class CodaFileSinkEngine extends AbstractEventWriterService<FileWriter> {
                 for (FADCHit hit : hits) {
                     if(hit.getName().trim().equals("1-2-1")){
                         for (FADCHit h : coinsTimes){
-                            if(hit.time() >= h.time()-20 && hit.time() <= h.time()+20) {
+                            if(hit.time() >= h.time()-deltaT && hit.time() <= h.time()+deltaT) {
                                 liveHist.update("1-2-1&2",new FADCHit(7,7,7,h.charge()+hit.charge(), hit.time()));
                             }
                         }
