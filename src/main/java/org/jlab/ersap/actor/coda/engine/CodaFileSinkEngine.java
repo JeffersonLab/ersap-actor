@@ -36,7 +36,7 @@ public class CodaFileSinkEngine extends AbstractEventWriterService<FileWriter> {
     private static String FRAME_HEIGHT = "frame_height";
     private int frameHeight = 1200;
     private static String HIST_TITLES = "hist_titles";
-    private ArrayList<String> histTitles = new ArrayList<>(Arrays.asList("1-2-0", "1-2-1", "1-2-3", "1-2-1&2"));;
+    private ArrayList<String> histTitles = new ArrayList<>(Arrays.asList("1-2-0", "1-2-1", "1-2-2", "1-2-1&2"));;
     private static String HIST_TITLES2 = "hist_titles2";
     private ArrayList<String> histTitles2;
     private static String HIST_BINS = "hist_bins";
