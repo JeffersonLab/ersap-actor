@@ -1,13 +1,13 @@
 ---
 io-services:
   reader:
-    class: org.jlab.ersap.coda.actor.engine.CodaEtSourceEngine
+    class: org.jlab.ersap.actor.coda.engine.CodaEtSourceEngine
     name: Source
   writer:
-    class: org.jlab.ersap.coda.actor.engine.CodaFileSinkEngine
+    class: org.jlab.ersap.actor.coda.engine.CodaFileSinkEngine
     name: Sink
 services:
-  - class: org.jlab.ersap.coda.actor.engine.EventIdentificationEngine
+  - class: org.jlab.ersap.actor.coda.engine.EventIdentificationEngine
     name: EventId
 configuration:
   io-services:
