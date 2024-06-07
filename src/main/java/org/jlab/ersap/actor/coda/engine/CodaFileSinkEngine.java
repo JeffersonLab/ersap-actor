@@ -46,7 +46,7 @@ public class CodaFileSinkEngine extends AbstractEventWriterService<FileWriter> {
     private static String HIST_MAX = "hist_max";
     private double histMax = 8000;
     private static String GRID_SIZE = "grid_size";
-    private int gridSize = 1;
+    private int gridSize = 2;
     private static String SCATTER_RESET = "scatter_reset";
     private boolean scatterReset = true;
 

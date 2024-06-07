@@ -16,6 +16,14 @@ configuration:
       et_port: 23911
       et_station: "ersap"
       fifo_capacity: 128
+    writer:
+      hist_bins: 100
+      hist_min: 100
+      hist_max: 8000
+      scatter_reset: true
+      #> grid_size defines a layout for histogram visualization
+      #> (e.g. 5 will plot 25 histograms in 5x5 matrix)
+      grid_size: 2
   services:
     EventId:
       sliding_window: 40
