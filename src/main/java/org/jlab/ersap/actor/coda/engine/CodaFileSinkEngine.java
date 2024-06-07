@@ -52,6 +52,8 @@ public class CodaFileSinkEngine extends AbstractEventWriterService<FileWriter> {
 
     private LiveHistogram liveHist;
 
+    private List<FADCHit> coinsTimes = new ArrayList<>();
+
     @Override
     protected FileWriter createWriter(Path file, JSONObject opts) throws EventWriterException {
         if (opts.has(FRAME_TITLE)) {
@@ -118,15 +120,30 @@ public class CodaFileSinkEngine extends AbstractEventWriterService<FileWriter> {
     @Override
     protected void writeEvent(Object event) throws EventWriterException {
         List<RocTimeSliceBanks> banks = (List<RocTimeSliceBanks>)event;
+        coinsTimes.clear();
         if (!banks.isEmpty()) {
             if (scatterReset) liveHist.resetScatter();
             for (RocTimeSliceBanks bank : banks) {
                 List<FADCHit> hits = bank.getHits();
                 System.out.println();
                 System.out.println("DDD ------------ Frame = "+bank.getFrameNumber());
+
                 for (FADCHit hit : hits) {
                     System.out.println(hit);
                     liveHist.update(hit.getName(),hit);
+                    if(hit.getName().trim().equals("1-2-0")){
+                        coinsTimes.add(hit);
+                    }
+                }
+                // Coincidence
+                for (FADCHit hit : hits) {
+                    if(hit.getName().trim().equals("1-2-1")){
+                        for (FADCHit h : coinsTimes){
+                            if(hit.time() >= h.time()-20 && hit.time() <= h.time()+20) {
+                                liveHist.update("1-2-1&2",new FADCHit(7,7,7,h.charge()+hit.charge(), hit.time()));
+                            }
+                        }
+                    }
                 }
                 System.out.println("DDD ------------ Time  = "+bank.getTimeStamp());
             }
