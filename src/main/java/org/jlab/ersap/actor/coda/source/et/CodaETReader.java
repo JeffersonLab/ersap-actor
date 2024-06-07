@@ -49,6 +49,7 @@ public class CodaETReader implements ISourceReader {
         try {
             config.setNetworkContactMethod(EtConstants.direct);
             config.setHost(EtConstants.hostLocal);
+            config.setTcpPort(23911);
             config.setWaitTime(0);
             config.setEtName(etName);
             // create ET system object with verbose debugging output

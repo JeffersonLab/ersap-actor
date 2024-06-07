@@ -12,7 +12,7 @@ services:
 configuration:
   io-services:
     reader:
-      et_name: "ascvsd"
+      et_name: "/tmp/asdsd"
       et_station: "ersap"
   services:
     EventId:
