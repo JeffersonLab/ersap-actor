@@ -65,7 +65,7 @@ public class EventIdentificationEngine implements Engine {
 //        for (RocTimeSliceBanks rsb : data) {
 //            result.addAll(awtbc.findCluster(rsb.getHits()));
 //        }
-        out.setData(JavaObjectType.JOBJ, result);
+        out.setData(JavaObjectType.JOBJ, data);
 //        System.out.println("DDD============DDD");
 //        for (IStreamItem evt : result) {
 //            System.out.println(evt);
