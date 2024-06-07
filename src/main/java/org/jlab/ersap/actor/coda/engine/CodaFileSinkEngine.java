@@ -142,8 +142,14 @@ public class CodaFileSinkEngine extends AbstractEventWriterService<FileWriter> {
                 for (FADCHit hit : hits) {
                     if(hit.getName().trim().equals("1-2-1")){
                         for (FADCHit h : coinsTimes){
-                            if(hit.time() >= h.time()-deltaT && hit.time() <= h.time()+deltaT) {
-                                liveHist.update("1-2-1&2",new FADCHit(7,7,7,h.charge()+hit.charge(), hit.time()));
+                            if(deltaT == 0){
+                                if(hit.time() == h.time()) {
+                                    liveHist.update("1-2-1&2",new FADCHit(7,7,7,h.charge()+hit.charge(), hit.time()));
+                                }
+                            } else {
+                                if (hit.time() >= h.time() - deltaT && hit.time() <= h.time() + deltaT) {
+                                    liveHist.update("1-2-1&2", new FADCHit(7, 7, 7, h.charge() + hit.charge(), hit.time()));
+                                }
                             }
                         }
                     }
