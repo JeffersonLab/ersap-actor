@@ -52,7 +52,7 @@ public class EventIdentificationEngine implements Engine {
     public EngineData execute(EngineData engineData) {
         EngineData out = new EngineData();
         Set<IStreamItem> result = new HashSet<>();
-        List<RocTimeSliceBanks> data = (List<RocTimeSliceBanks>) engineData;
+        List<RocTimeSliceBanks> data = (List<RocTimeSliceBanks>) engineData.getData();
         for (RocTimeSliceBanks rsb : data) {
             result.addAll(awtbc.findCluster(rsb.getHits()));
         }
