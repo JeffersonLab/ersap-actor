@@ -28,7 +28,7 @@ public class CodaEtSourceEngine extends AbstractEventReaderService<CodaETReader>
     private static final String ET_STATION_NAME = "et_station";
     private String etStationName = "ersap";
     private static final String ET_PORT = "et_port";
-    private static final String MAX_RING_ITEMS = "max_ring_items";
+    private static final String FIFO_CAPACITY = "fifo_capacity";
 
     @Override
     protected CodaETReader createReader(Path path, JSONObject jsonObject) throws EventReaderException {
@@ -41,7 +41,7 @@ public class CodaEtSourceEngine extends AbstractEventReaderService<CodaETReader>
         if (jsonObject.has(ET_STATION_NAME)) {
             etStationName = jsonObject.getString(ET_STATION_NAME);
         }
-        int maxRingItems = jsonObject.has(MAX_RING_ITEMS) ? jsonObject.getInt(MAX_RING_ITEMS) : 131072;
+        int maxRingItems = jsonObject.has(FIFO_CAPACITY) ? jsonObject.getInt(FIFO_CAPACITY) : 131072;
         int etPort = jsonObject.has(ET_PORT) ? jsonObject.getInt(ET_PORT) : 23911;
 
         return new CodaETReader(etName, etPort, etStationName, maxRingItems);

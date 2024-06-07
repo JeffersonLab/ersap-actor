@@ -1,13 +1,9 @@
 package org.jlab.ersap.actor.coda.source.et;
 
-import com.lmax.disruptor.*;
 import org.jlab.coda.et.*;
 import org.jlab.coda.et.enums.Mode;
 import org.jlab.coda.et.enums.Modify;
 import org.jlab.ersap.actor.coda.proc.fadc.FadcUtil;
-import org.jlab.ersap.actor.coda.source.Consumer;
-import org.jlab.ersap.actor.coda.source.RingEvent;
-import org.jlab.ersap.actor.coda.source.RingEventFactory;
 import org.jlab.ersap.actor.util.ISourceReader;
 
 import java.nio.ByteBuffer;
@@ -52,29 +48,12 @@ public class CodaETReader implements ISourceReader, Runnable {
     private long bytes = 0L;
     private long totalBytes = 0L;
 
-    // Ring Buffer
-    private final RingBuffer<RingEvent> ringBuffer;
-    private long sequenceNumber;
-    private final long maxRingItems;
-    private final Consumer consumer;
-
     // Queue
-
     private final BlockingQueue<ByteBuffer> queue;
 
     private AtomicBoolean running = new AtomicBoolean(true);
 
     public CodaETReader(String etName, int etPort, String etStationName, int capacity) {
-        // RingBuffer staff
-        ringBuffer = createSingleProducer(new RingEventFactory(), capacity,
-                new YieldingWaitStrategy());
-        Sequence sequence = new Sequence(Sequencer.INITIAL_CURSOR_VALUE);
-        SequenceBarrier sequenceBarrier = ringBuffer.newBarrier();
-        ringBuffer.addGatingSequences(sequence);
-        consumer = new Consumer(ringBuffer, sequence, sequenceBarrier);
-
-        this.maxRingItems = ringBuffer.remainingCapacity();
-
         // Queue staff
         this.queue = new LinkedBlockingQueue<>(capacity);
 
@@ -181,22 +160,9 @@ public class CodaETReader implements ISourceReader, Runnable {
         }
     }
 
-    private RingEvent getRing() throws InterruptedException {
-        sequenceNumber = ringBuffer.next();
-        return ringBuffer.get(sequenceNumber);
-    }
-
-    private void publishRing() {
-        ringBuffer.publish(sequenceNumber);
-    }
-
     @Override
     public Object nextEvent() {
         try {
-            // ==== Using RingBuffer ====
-            //return consumer.getEvent();
-
-            // ======= Using FIFO ======
              return dequeue();
         } catch (Exception e) {
             throw new RuntimeException(e);
