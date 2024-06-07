@@ -28,7 +28,7 @@ import java.util.Set;
  * It utilizes sliding window algorithm to define an event based on the FADC hit multiplicity.
  */
 public class EventIdentificationEngine implements Engine {
-    Awtbc awtbc;
+    private Awtbc awtbc;
     private static final String SLIDING_WINDOW = "sliding_window";
     private long slidingWindow = 40; // in nanoseconds
     private static final String MULTIPLICITY = "multiplicity";
@@ -71,44 +71,42 @@ public class EventIdentificationEngine implements Engine {
     }
 
     @Override
-    public Set<EngineDataType> getInputDataTypes() {
+    public Set<EngineDataType> getInputDataTypes () {
         return ErsapUtil.buildDataTypes(JavaObjectType.JOBJ,
                 EngineDataType.JSON);
     }
 
     @Override
-    public Set<EngineDataType> getOutputDataTypes() {
-
+    public Set<EngineDataType> getOutputDataTypes () {
         return ErsapUtil.buildDataTypes(JavaObjectType.JOBJ);
     }
 
     @Override
-    public Set<String> getStates() {
+    public Set<String> getStates () {
         return null;
     }
 
     @Override
-    public String getDescription() {
-        return "Adaptive window event identification";
+    public String getDescription () {
+        return "fADC data decoder and event identification. EVIO data format";
     }
 
     @Override
-    public String getVersion() {
+    public String getVersion () {
         return "v1.0";
     }
 
     @Override
-    public String getAuthor() {
+    public String getAuthor () {
         return "gurjyan";
     }
 
     @Override
-    public void reset() {
+    public void reset () {
 
     }
 
     @Override
-    public void destroy() {
-
+    public void destroy () {
     }
 }
