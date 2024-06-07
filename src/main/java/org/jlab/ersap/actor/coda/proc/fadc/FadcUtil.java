@@ -22,7 +22,10 @@ public class FadcUtil {
         for (int i = 0; i < r.getEventCount(); i++) {
             EvioEvent event = r.parseNextEvent();
             evioDataByteOrder = r.getByteOrder();
-            banks.add(parseRocTimeSliceBank(event));
+            RocTimeSliceBanks rtsb = parseRocTimeSliceBank(event);
+            if (!rtsb.getHits().isEmpty()) {
+                banks.add(rtsb);
+            }
         }
         return banks;
     }
@@ -92,6 +95,11 @@ public class FadcUtil {
                 if(payloadLength > 3) {
                     System.out.println("payload ID = " + payloadId + " length = " + payloadLength + " byteData_length = " + byteData.length);
                     hits = FadcUtil.parseFADCPayload(timestamp, payloadId, byteData);
+//                System.out.println("DDD ------------ "+k);
+//                for (FADCHit h : hits) {
+//                    System.out.println(h);
+//                }
+//                System.out.println("DDD ------------ "+k);
                 }
             }
             rocTimeSliceBank.setHits(hits);
