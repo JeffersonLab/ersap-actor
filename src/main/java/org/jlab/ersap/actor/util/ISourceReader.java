@@ -11,7 +11,7 @@ import java.nio.ByteOrder;
  * Phone : (757)-269-7100
  *
  * @author gurjyan on 2/13/23
- * @project ersap-coda
+ * @project ersap-actor
  */
 public interface ISourceReader {
     public Object nextEvent();
