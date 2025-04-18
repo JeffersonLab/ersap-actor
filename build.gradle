@@ -39,13 +39,14 @@ sourceSets {
         }
     }
 }
-repositories {
-    maven { url 'https://clasweb.jlab.org/clas12maven/' }
-    maven { url 'https://clasweb.jlab.org/clas12maven/j4np/maven/' }
-    maven { url "https://clojars.org/repo/" }
-    mavenCentral()
-    mavenLocal()
-}
+
+repositories
+        { mavenCentral()
+            maven { url 'https://repo.clojars.org' }
+            maven { url 'https://clasweb.jlab.org/clas12maven/' }
+            maven { url 'https://clasweb.jlab.org/clas12maven/j4np/maven/' }
+            mavenLocal()
+        }
 
 dependencies {
     implementation 'org.jlab.epsci:ersap-java:1.0-SNAPSHOT'
