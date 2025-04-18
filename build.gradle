@@ -3,6 +3,14 @@ plugins {
     id 'maven-publish'
     id 'idea'
 }
+plugins {
+    java
+}
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_17
+    targetCompatibility = JavaVersion.VERSION_17
+}
 
 group 'org.jlab.ersap.actor'
 archivesBaseName = 'ersap-actor'
