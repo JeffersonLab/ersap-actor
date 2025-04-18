@@ -42,10 +42,10 @@ sourceSets {
 
 repositories
         { mavenCentral()
+            mavenLocal()
             maven { url 'https://repo.clojars.org' }
             maven { url 'https://clasweb.jlab.org/clas12maven/' }
             maven { url 'https://clasweb.jlab.org/clas12maven/j4np/maven/' }
-            mavenLocal()
         }
 
 dependencies {
