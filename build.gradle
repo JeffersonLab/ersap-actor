@@ -3,9 +3,6 @@ plugins {
     id 'maven-publish'
     id 'idea'
 }
-plugins {
-    java
-}
 
 java {
     sourceCompatibility = JavaVersion.VERSION_17
