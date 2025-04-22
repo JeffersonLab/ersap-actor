@@ -30,7 +30,7 @@ public class LiveHistogram {
 
     private Map<String, H1F> histograms = new HashMap<>();
     private Map<String, H1F> histograms2 = new HashMap<>();
-    private H1F sumHist;
+    private H1F coincidenceHist;
     private H2F scatter;
     private TGDataCanvas cc;
     private TGDataCanvas ccc;
@@ -104,8 +104,8 @@ public class LiveHistogram {
         frame4.add(ccc);
         frame4.setSize(600, 600);
         ccc.initTimer(600);
-        sumHist = new H1F("sum", 100, 0, 12000);
-        ccc.region().draw(sumHist);
+        coincidenceHist = new H1F("coincidence", 100, 0, 12000);
+        ccc.region().draw(coincidenceHist);
         frame4.setVisible(true);
 
         // create directory
@@ -117,7 +117,7 @@ public class LiveHistogram {
     public void update(String name, FADCHit v) {
         if (histograms.containsKey(name)) {
             histograms.get(name).fill(v.charge());
-            if (v.slot() == 19) {
+            if (v.slot() == 15) {
                 scatter.fill(v.time(), v.channel() + 16);
             } else {
                 scatter.fill(v.time(), v.channel());
@@ -125,7 +125,7 @@ public class LiveHistogram {
 
         } else if (histograms2.containsKey(name)) {
             histograms2.get(name).fill(v.charge());
-            if (v.slot() == 19) {
+            if (v.slot() == 15) {
                 scatter.fill(v.time(), v.channel() + 16);
             } else {
                 scatter.fill(v.time(), v.channel());
@@ -133,7 +133,7 @@ public class LiveHistogram {
         }
 
         if(v.slot() == 0 && v.channel() == 0){
-            sumHist.fill(v.charge());
+            coincidenceHist.fill(v.charge());
         }
 //        cc.repaint();
     }
@@ -143,7 +143,7 @@ public class LiveHistogram {
     }
 
     public void writeHist() {
-        for(String s: sumHist.getStatText()){
+        for(String s: coincidenceHist.getStatText()){
             System.out.println(s);
         }
         fit();
@@ -184,12 +184,12 @@ public class LiveHistogram {
         func.setParLimits(2,0.0,1000);
 
         func.attr().setLineWidth(1);
-        DataFitter.fit(func,sumHist,"N");
+        DataFitter.fit(func, coincidenceHist,"N");
 
         PaveText paveStats = new PaveText(func.getStats("M").toString(),0.05,0.95, false,8);
         paveStats.setNDF(true);
 
-        ccc.region(0).draw(sumHist).draw(func,"same").draw(paveStats);
+        ccc.region(0).draw(coincidenceHist).draw(func,"same").draw(paveStats);
         ccc.repaint();
 
     }
