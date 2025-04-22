@@ -130,6 +130,7 @@ public class CodaFileSinkEngine extends AbstractEventWriterService<FileWriter> {
                 for (FADCHit hit : hits) {
                     System.out.println(hit);
                     liveHist.update(hit.getName(),hit);
+                    liveHist.updateScatter(hit.withTime(hit.time()-bank.getTimeStamp()));
                     if(concidence.contains(hit.getName())){
                         conis.add(hit);
                         conisNames.add(hit.getName());
@@ -142,7 +143,7 @@ public class CodaFileSinkEngine extends AbstractEventWriterService<FileWriter> {
                      StringBuilder title = new StringBuilder();
                    for(FADCHit h: conis) {
                        totlaCharge += h.charge();
-                       time = h.time();
+                       time = h.time() - bank.getTimeStamp();
                        title.append(h.getName()+"&");
                    }
                    String t = String.valueOf(title);

@@ -29,4 +29,9 @@ public record FADCHit(int crate, int slot, int channel, int charge, long time) i
     public int getValue() {
         return charge;
     }
+
+    public FADCHit withTime(long newTime) {
+        return new FADCHit(crate, slot, channel, charge, newTime);
+    }
+
 }
