@@ -29,7 +29,7 @@ import java.util.Map;
 public class LiveHistogram {
 
     private Map<String, H1F> histograms = new HashMap<>();
-    private Map<String, H1F> histograms2 = new HashMap<>();
+//    private Map<String, H1F> histograms2 = new HashMap<>();
     private H1F coincidenceHist;
     private H2F scatter;
     private TGDataCanvas cc;
@@ -38,7 +38,7 @@ public class LiveHistogram {
     private static String ERSAP_USER_DATA;
 
     public LiveHistogram(String frameTitle, ArrayList<String> histTitles,
-                         ArrayList<String> histTitles2,
+                         ArrayList<String> coincidenceTitle,
                          int gridSize, int frameWidth, int frameHeight,
                          int histBins, double histMin, double histMax) {
 
@@ -65,30 +65,30 @@ public class LiveHistogram {
         }
         frame.setVisible(true);
 
-        if (histTitles2 != null) {
-            JFrame frame2 = new JFrame(frameTitle);
-            frame2.setSize(frameWidth, frameHeight);
-            JPanel panel2 = new JPanel();
-            GridLayout gl2 = new GridLayout(gridSize, gridSize);
-            gl2.setHgap(10);
-            gl2.setVgap(10);
-            panel2.setLayout(gl2);
-            frame2.getContentPane().add(panel2);
-
-            // create canvases with associated histograms,
-            // and add them to the panel
-            for (String s : histTitles2) {
-                TGDataCanvas c = new TGDataCanvas();
-                c.setAxisFont(new Font("Avenir", Font.PLAIN, 6));
-                panel2.add(c);
-                c.initTimer(600);
-                H1F hist = new H1F(s, histBins, histMin, histMax);
-                hist.setTitleX(s);
-                histograms2.put(s, hist);
-                c.region().draw(hist);
-            }
-            frame2.setVisible(true);
-        }
+//        if (histTitles2 != null) {
+//            JFrame frame2 = new JFrame(frameTitle);
+//            frame2.setSize(frameWidth, frameHeight);
+//            JPanel panel2 = new JPanel();
+//            GridLayout gl2 = new GridLayout(gridSize, gridSize);
+//            gl2.setHgap(10);
+//            gl2.setVgap(10);
+//            panel2.setLayout(gl2);
+//            frame2.getContentPane().add(panel2);
+//
+//            // create canvases with associated histograms,
+//            // and add them to the panel
+//            for (String s : histTitles2) {
+//                TGDataCanvas c = new TGDataCanvas();
+//                c.setAxisFont(new Font("Avenir", Font.PLAIN, 6));
+//                panel2.add(c);
+//                c.initTimer(600);
+//                H1F hist = new H1F(s, histBins, histMin, histMax);
+//                hist.setTitleX(s);
+//                histograms2.put(s, hist);
+//                c.region().draw(hist);
+//            }
+//            frame2.setVisible(true);
+//        }
 
         JFrame frame3 = new JFrame("ERSAP: channel vs hitTime");
         cc = new TGDataCanvas();
@@ -99,12 +99,19 @@ public class LiveHistogram {
         cc.region().draw(scatter);
         frame3.setVisible(true);
 
-        JFrame frame4 = new JFrame("ERSAP: Sum");
+        JFrame frame4 = new JFrame("ERSAP: Integral");
         ccc = new TGDataCanvas();
         frame4.add(ccc);
         frame4.setSize(600, 600);
         ccc.initTimer(600);
-        coincidenceHist = new H1F("coincidence", 100, 0, 12000);
+        StringBuffer coinTitle = new StringBuffer();
+        for(String t:coincidenceTitle){
+            coinTitle.append(t+"&");
+        }
+        String tt = String.valueOf(coinTitle);
+        String title = tt.substring(0, tt.length() - 1);
+        coincidenceHist = new H1F(title, 100, 0, 12000);
+        histograms.put(title,coincidenceHist);
         ccc.region().draw(coincidenceHist);
         frame4.setVisible(true);
 
@@ -123,19 +130,14 @@ public class LiveHistogram {
                 scatter.fill(v.time(), v.channel());
             }
 
-        } else if (histograms2.containsKey(name)) {
-            histograms2.get(name).fill(v.charge());
-            if (v.slot() == 15) {
-                scatter.fill(v.time(), v.channel() + 16);
-            } else {
-                scatter.fill(v.time(), v.channel());
-            }
+//        } else if (histograms2.containsKey(name)) {
+//            histograms2.get(name).fill(v.charge());
+//            if (v.slot() == 15) {
+//                scatter.fill(v.time(), v.channel() + 16);
+//            } else {
+//                scatter.fill(v.time(), v.channel());
+//            }
         }
-
-        if(v.slot() == 0 && v.channel() == 0){
-            coincidenceHist.fill(v.charge());
-        }
-//        cc.repaint();
     }
 
     public void resetScatter() {
@@ -155,9 +157,9 @@ public class LiveHistogram {
         for (H1F h1 : histograms.values()) {
             histDir.add(ERSAP_USER_DATA + "/data/output", h1);
         }
-        for (H1F h2 : histograms2.values()) {
-            histDir.add(ERSAP_USER_DATA + "/data/output", h2);
-        }
+//        for (H1F h2 : histograms2.values()) {
+//            histDir.add(ERSAP_USER_DATA + "/data/output", h2);
+//        }
         histDir.add(ERSAP_USER_DATA + "/data/output", scatter);
         histDir.write(ERSAP_USER_DATA + "/data/output/hist_desy.twig");
     }
