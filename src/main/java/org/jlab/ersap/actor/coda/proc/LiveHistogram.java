@@ -125,11 +125,7 @@ public class LiveHistogram {
     public void update(String name, FADCHit v) {
         if (histograms.containsKey(name)) {
             histograms.get(name).fill(v.charge());
-            if (v.slot() == 15) {
-                scatter.fill(v.time(), v.channel() + 16);
-            } else {
                 scatter.fill(v.time(), v.channel());
-            }
 
 //        } else if (histograms2.containsKey(name)) {
 //            histograms2.get(name).fill(v.charge());
