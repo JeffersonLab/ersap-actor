@@ -125,6 +125,7 @@ public class LiveHistogram {
     public void update(String name, FADCHit v) {
         if (histograms.containsKey(name)) {
             histograms.get(name).fill(v.charge());
+            System.out.println("DDD =============> "+ v.time()+" "+v.charge());
                 scatter.fill(v.time(), v.channel());
 
 //        } else if (histograms2.containsKey(name)) {
