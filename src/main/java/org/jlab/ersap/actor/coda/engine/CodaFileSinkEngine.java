@@ -29,7 +29,7 @@ public class CodaFileSinkEngine extends AbstractEventWriterService<FileWriter> {
     private static String FRAME_TITLE = "frame_title";
     private String frameTitle = "ERSAP";
     private static String FRAME_WIDTH = "frame_width";
-    private int frameWidth = 1400;
+    private int frameWidth = 1200;
     private static String FRAME_HEIGHT = "frame_height";
     private int frameHeight = 1200;
     private static String HIST_TITLES = "hist_titles";
