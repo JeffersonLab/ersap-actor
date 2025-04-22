@@ -111,6 +111,7 @@ public class LiveHistogram {
         String tt = String.valueOf(coinTitle);
         String title = tt.substring(0, tt.length() - 1);
         coincidenceHist = new H1F(title, 100, 0, 12000);
+        coincidenceHist.setTitleX(title);
         histograms.put(title,coincidenceHist);
         ccc.region().draw(coincidenceHist);
         frame4.setVisible(true);
