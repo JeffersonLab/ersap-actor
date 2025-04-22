@@ -12,10 +12,7 @@ import org.json.JSONObject;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.StringTokenizer;
+import java.util.*;
 
 /**
  * Copyright (c) 2021, Jefferson Science Associates, all rights reserved.
@@ -37,8 +34,8 @@ public class CodaFileSinkEngine extends AbstractEventWriterService<FileWriter> {
     private int frameHeight = 1200;
     private static String HIST_TITLES = "hist_titles";
     private ArrayList<String> histTitles = new ArrayList<>(Arrays.asList("1-2-0", "1-2-1", "1-2-2", "1-2-1&2"));;
-    private static String HIST_TITLES2 = "hist_titles2";
-    private ArrayList<String> histTitles2;
+    private static String COINCIDENCE = "coincidence";
+    private ArrayList<String> concidence;
     private static String HIST_BINS = "hist_bins";
     private int histBins = 100;
     private static String HIST_MIN = "hist_min";
@@ -54,8 +51,6 @@ public class CodaFileSinkEngine extends AbstractEventWriterService<FileWriter> {
 
     private static String DELTA_T = "delta_t";
     private int deltaT = 20;
-
-    private List<FADCHit> coinsTimes = new ArrayList<>();
 
     @Override
     protected FileWriter createWriter(Path file, JSONObject opts) throws EventWriterException {
@@ -76,12 +71,12 @@ public class CodaFileSinkEngine extends AbstractEventWriterService<FileWriter> {
                 histTitles.add(st.nextToken().trim());
             }
         }
-        if (opts.has(HIST_TITLES2)) {
-            histTitles2 = new ArrayList<>();
-            String ht = opts.getString(HIST_TITLES2);
+        if (opts.has(COINCIDENCE)) {
+            concidence = new ArrayList<>();
+            String ht = opts.getString(COINCIDENCE);
             StringTokenizer st = new StringTokenizer(ht, ",");
             while (st.hasMoreTokens()) {
-                histTitles2.add(st.nextToken().trim());
+                concidence.add(st.nextToken().trim());
             }
         }
         if (opts.has(HIST_BINS)) {
@@ -101,7 +96,7 @@ public class CodaFileSinkEngine extends AbstractEventWriterService<FileWriter> {
             scatterReset = true;
         }
 
-        liveHist = new LiveHistogram(frameTitle, histTitles, histTitles2, gridSize,
+        liveHist = new LiveHistogram(frameTitle, histTitles, concidence, gridSize,
                 frameWidth, frameHeight, histBins, histMin, histMax);
 
         try {
@@ -122,8 +117,9 @@ public class CodaFileSinkEngine extends AbstractEventWriterService<FileWriter> {
 
     @Override
     protected void writeEvent(Object event) throws EventWriterException {
+        Set<FADCHit> conis = new HashSet<>();
+        Set<String> conisNames = new HashSet<>();
         List<RocTimeSliceBanks> banks = (List<RocTimeSliceBanks>)event;
-        coinsTimes.clear();
         if (!banks.isEmpty()) {
             if (scatterReset) liveHist.resetScatter();
             for (RocTimeSliceBanks bank : banks) {
@@ -134,38 +130,27 @@ public class CodaFileSinkEngine extends AbstractEventWriterService<FileWriter> {
                 for (FADCHit hit : hits) {
                     System.out.println(hit);
                     liveHist.update(hit.getName(),hit);
-                    if(hit.getName().trim().equals("1-2-0")){
-                        coinsTimes.add(hit);
+                    if(concidence.contains(hit.getName())){
+                        conis.add(hit);
+                        conisNames.add(hit.getName());
                     }
                 }
                 // Coincidence
-                for (FADCHit hit : hits) {
-                    if(hit.getName().trim().equals("1-2-1")){
-                        for (FADCHit h : coinsTimes){
-                            if(deltaT == 0){
-                                if(hit.time() == h.time()) {
-                                    liveHist.update("1-2-1&2",new FADCHit(7,7,7,h.charge()+hit.charge(), hit.time()));
-                                }
-                            } else {
-                                if (hit.time() >= h.time() - deltaT && hit.time() <= h.time() + deltaT) {
-                                    liveHist.update("1-2-1&2", new FADCHit(7, 7, 7, h.charge() + hit.charge(), hit.time()));
-                                }
-                            }
-                        }
-                    }
+                 if(conisNames.containsAll(concidence)){
+                     int totlaCharge = 0;
+                     long time = 0;
+                     StringBuilder title = new StringBuilder();
+                   for(FADCHit h: conis) {
+                       totlaCharge += h.charge();
+                       time = h.time();
+                       title.append(h.getName()+"&");
+                   }
+                   String t = String.valueOf(title);
+                     liveHist.update(t.substring(0, t.length() - 1),new FADCHit(0,0,0,+totlaCharge, time));
                 }
                 System.out.println("DDD ------------ Time  = "+bank.getTimeStamp());
             }
         }
-
-//        List<VAdcHit> h = (List<VAdcHit>) event;
-//        if(!h.isEmpty()) {
-//            if (scatterReset) liveHist.resetScatter();
-//            for (VAdcHit v : h) {
-//                liveHist.update(v.getName().trim(), v);
-//            }
-//        }
-
     }
 
     @Override

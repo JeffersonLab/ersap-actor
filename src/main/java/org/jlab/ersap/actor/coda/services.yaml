@@ -12,7 +12,7 @@ services:
 configuration:
   io-services:
     reader:
-      et_name: "/tmp/et_experiment_2_ER2"
+      et_name: "/tmp/et_SRO_ERSAP"
       et_port: 23911
       et_station: "ersap"
       fifo_capacity: 128
@@ -20,10 +20,11 @@ configuration:
       hist_bins: 100
       hist_min: 100
       hist_max: 8000
-      delta_t: 20
+      hist_titles: "1-15-0,1-15-1,1-15-2,1-15-3,1-15-4,1-15-5,1-15-6,1-15-7,1-15-8,1-15-9,1-15-10,1-15-11,1-15-12,1-15-13,1-15-14,1-15-15"
+      coincidence: "1-15-0,1-15-1"
       #> grid_size defines a layout for histogram visualization
       #> (e.g. 5 will plot 25 histograms in 5x5 matrix)
-      grid_size: 2
+      grid_size: 4
   services:
     EventId:
       sliding_window: 40
