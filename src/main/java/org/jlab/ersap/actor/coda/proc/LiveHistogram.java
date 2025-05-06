@@ -40,7 +40,8 @@ public class LiveHistogram {
     public LiveHistogram(String frameTitle, ArrayList<String> histTitles,
                          ArrayList<String> coincidenceTitle,
                          int gridSize, int frameWidth, int frameHeight,
-                         int histBins, double histMin, double histMax) {
+                         int histBins, double histMin, double histMax,
+                         double scatterYMin, double scatterYMax) {
 
         JFrame frame = new JFrame(frameTitle);
         frame.setSize(frameWidth, frameHeight);
@@ -95,7 +96,7 @@ public class LiveHistogram {
         frame3.add(cc);
         frame3.setSize(600, 600);
         cc.initTimer(600);
-        scatter = new H2F("cvh", 100, 0, 70000, 100, 0, 2000);
+        scatter = new H2F("cvh", 100, 0, 70000, 100, scatterYMin, scatterYMax);
         cc.region().draw(scatter);
         frame3.setVisible(true);
 

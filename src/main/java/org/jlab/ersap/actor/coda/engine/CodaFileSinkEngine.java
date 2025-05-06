@@ -45,7 +45,10 @@ public class CodaFileSinkEngine extends AbstractEventWriterService<FileWriter> {
     private static String GRID_SIZE = "grid_size";
     private int gridSize = 2;
     private static String SCATTER_RESET = "scatter_reset";
+    private static String SCATTER_YMIN = "scatter_y_min";
+    private static String SCATTER_YMAX = "scatter_y_max";
     private boolean scatterReset = true;
+    private double scatter_y_min = 0 , scatter_y_max = 2000;
 
     private LiveHistogram liveHist;
 
@@ -95,9 +98,19 @@ public class CodaFileSinkEngine extends AbstractEventWriterService<FileWriter> {
         if (opts.has(SCATTER_RESET)) {
             scatterReset = true;
         }
+        if (opts.has(SCATTER_YMIN)) {
+            scatter_y_min = opts.getDouble(SCATTER_YMIN);
+        }
+        if (opts.has(SCATTER_YMAX)) {
+            scatter_y_max = opts.getDouble(SCATTER_YMAX);
+        }
 
+
+        if (opts.has(HIST_MIN)) {
+            histMin = opts.getDouble(HIST_MIN);
+        }
         liveHist = new LiveHistogram(frameTitle, histTitles, concidence, gridSize,
-                frameWidth, frameHeight, histBins, histMin, histMax);
+                frameWidth, frameHeight, histBins, histMin, histMax, scatter_y_min, scatter_y_max);
 
         try {
             return new FileWriter(file.toString());
