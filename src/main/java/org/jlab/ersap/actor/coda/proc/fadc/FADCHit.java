@@ -22,7 +22,7 @@ public record FADCHit(int crate, int slot, int channel, int charge, long time) i
 
     @Override
     public int getId() {
-        return crate + slot + channel;
+        return (crate*1000) + (slot*16) + channel;
     }
 
     @Override

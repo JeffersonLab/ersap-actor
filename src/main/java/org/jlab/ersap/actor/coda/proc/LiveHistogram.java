@@ -95,7 +95,7 @@ public class LiveHistogram {
         frame3.add(cc);
         frame3.setSize(600, 600);
         cc.initTimer(600);
-        scatter = new H2F("cvh", 100, 0, 70000, 100, 0, 33);
+        scatter = new H2F("cvh", 100, 0, 70000, 100, 0, 2000);
         cc.region().draw(scatter);
         frame3.setVisible(true);
 
@@ -136,7 +136,7 @@ public class LiveHistogram {
         }
     }
     public void updateScatter(FADCHit v){
-        scatter.fill(v.time(), v.channel());
+        scatter.fill(v.time(), v.getId());
     }
 
     public void resetScatter() {
