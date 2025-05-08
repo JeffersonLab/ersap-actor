@@ -34,4 +34,28 @@ public record FADCHit(int crate, int slot, int channel, int charge, long time) i
         return new FADCHit(crate, slot, channel, charge, newTime);
     }
 
+    @Override
+    public int crate() {
+        return crate;
+    }
+
+    @Override
+    public int slot() {
+        return slot;
+    }
+
+    @Override
+    public int channel() {
+        return channel;
+    }
+
+    @Override
+    public int charge() {
+        return charge;
+    }
+
+    @Override
+    public long time() {
+        return time;
+    }
 }

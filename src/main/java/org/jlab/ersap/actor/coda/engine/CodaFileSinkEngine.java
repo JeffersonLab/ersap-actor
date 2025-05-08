@@ -104,6 +104,9 @@ public class CodaFileSinkEngine extends AbstractEventWriterService<FileWriter> {
         if (opts.has(SCATTER_YMAX)) {
             scatter_y_max = opts.getDouble(SCATTER_YMAX);
         }
+        if (opts.has(DELTA_T)) {
+            deltaT = opts.getInt(DELTA_T);
+        }
 
 
         if (opts.has(HIST_MIN)) {
@@ -128,9 +131,36 @@ public class CodaFileSinkEngine extends AbstractEventWriterService<FileWriter> {
         }
     }
 
-    @Override
+        private  List<List<FADCHit>> findCoincidenceWithinInterval(List<FADCHit> events, long maxInterval) {
+            List<List<FADCHit>> result = new ArrayList<>();
+
+            // Sort events by time
+            events.sort(Comparator.comparingLong(FADCHit::time));
+
+            int n = events.size();
+            for (int i = 0; i < n - 1; i++) {
+                List<FADCHit> group = new ArrayList<>();
+                group.add(events.get(i));
+                for (int j = i + 1; j < n; j++) {
+                    long span = events.get(j).time() - events.get(i).time();
+                    if (span <= maxInterval) {
+                        group.add(events.get(j));
+                    } else {
+                        break; // further events will only increase the span
+                    }
+                }
+
+                if (group.size() == events.size()) {
+                    result.add(new ArrayList<>(group));
+                }
+            }
+
+            return result;
+        }
+
+        @Override
     protected void writeEvent(Object event) throws EventWriterException {
-        Set<FADCHit> conis = new HashSet<>();
+        List<FADCHit> conis = new ArrayList<>();
         Set<String> conisNames = new HashSet<>();
         List<RocTimeSliceBanks> banks = (List<RocTimeSliceBanks>)event;
         if (!banks.isEmpty()) {
@@ -151,16 +181,28 @@ public class CodaFileSinkEngine extends AbstractEventWriterService<FileWriter> {
                 }
                 // Coincidence
                  if(conisNames.containsAll(concidence)){
-                     int totlaCharge = 0;
-                     long time = 0;
+                     int totlaCharge;
+                     long time;
+                     int size;
                      StringBuilder title = new StringBuilder();
-                   for(FADCHit h: conis) {
-                       totlaCharge += h.charge();
-                       time = h.time() - bank.getTimeStamp();
-                       title.append(h.getName()+"&");
-                   }
-                   String t = String.valueOf(title);
-                     liveHist.update(t.substring(0, t.length() - 1),new FADCHit(0,0,0,+totlaCharge, time));
+                     for(String s: conisNames) {
+                         title.append(s+"&");
+                     }
+                     String t = String.valueOf(title);
+                     // find in the frame the groups of required channels that had hits within the specified delta_t
+                     List<List<FADCHit>> coin = findCoincidenceWithinInterval(conis, deltaT);
+                     if(!coin.isEmpty()) {
+                         for (List<FADCHit> l:coin){
+                             totlaCharge = 0;
+                             time = 0;
+                             size = l.size();
+                             for(FADCHit h:l) {
+                                 totlaCharge += h.charge();
+                                 time += h.time() - bank.getTimeStamp();
+                             }
+                             liveHist.update(t.substring(0, t.length() - 1),new FADCHit(0,0,0,+totlaCharge, time/size));
+                         }
+                     }
                 }
                 System.out.println("DDD ------------ Time  = "+bank.getTimeStamp());
             }
