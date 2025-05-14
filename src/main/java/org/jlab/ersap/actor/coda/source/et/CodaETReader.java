@@ -4,7 +4,7 @@ import org.jlab.coda.et.*;
 import org.jlab.coda.et.enums.Mode;
 import org.jlab.coda.et.enums.Modify;
 import org.jlab.ersap.actor.coda.proc.fadc.FadcUtil;
-import org.jlab.ersap.actor.util.ISourceReader;
+import org.jlab.ersap.actor.util.IASource;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -13,7 +13,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import static com.lmax.disruptor.RingBuffer.createSingleProducer;
-import static org.jlab.ersap.actor.util.EUtil.copyBytes;
+import static org.jlab.ersap.actor.util.AUtil.copyBytes;
 
 /**
  * Copyright (c) 2021, Jefferson Science Associates, all rights reserved.
@@ -30,7 +30,7 @@ import static org.jlab.ersap.actor.util.EUtil.copyBytes;
  * Establishes a connection to the ET running on a local host.
  * That is, one ET for each node that is responsible for running the ERSAP program.
  */
-public class CodaETReader implements ISourceReader, Runnable {
+public class CodaETReader implements IASource, Runnable {
 
     private EtSystem etSystem;
     EtAttachment etAttachment;

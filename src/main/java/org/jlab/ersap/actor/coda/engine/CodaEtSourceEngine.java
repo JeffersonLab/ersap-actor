@@ -5,7 +5,7 @@ import org.jlab.epsci.ersap.std.services.AbstractEventReaderService;
 import org.jlab.epsci.ersap.std.services.EventReaderException;
 import org.jlab.ersap.actor.coda.source.et.CodaETReader;
 import org.jlab.ersap.actor.datatypes.JavaObjectType;
-import org.jlab.ersap.actor.util.EConstants;
+import org.jlab.ersap.actor.util.AConstants;
 import org.json.JSONObject;
 
 import java.nio.ByteOrder;
@@ -24,7 +24,7 @@ import java.nio.file.Path;
  */
 public class CodaEtSourceEngine extends AbstractEventReaderService<CodaETReader> {
     private static final String ET_NAME = "et_name";
-    private String etName = EConstants.udf;
+    private String etName = AConstants.udf;
     private static final String ET_STATION_NAME = "et_station";
     private String etStationName = "ersap";
     private static final String ET_PORT = "et_port";

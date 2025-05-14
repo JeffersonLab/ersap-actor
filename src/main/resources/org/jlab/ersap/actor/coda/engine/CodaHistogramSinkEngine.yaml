@@ -1,0 +1,11 @@
+---
+name: CodaHistogramSinkEngine
+engine: org.jlab.ersap.actor.coda.engine.CodaHistogramSinkEngine
+type: java
+
+author: vardan
+email: gurjyan@jlab.org
+
+version: 0.1
+description:
+  Plots histograms from decoded FADC250 data.

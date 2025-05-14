@@ -16,13 +16,13 @@ public class FadcUtil {
     public static ByteOrder evioDataByteOrder = ByteOrder.BIG_ENDIAN;
 
     @NotNull
-    public static List<RocTimeSliceBanks> parseEtEvent(ByteBuffer buf) throws Exception {
+    public static List<RocTimeSliceBank> parseEtEvent(ByteBuffer buf) throws Exception {
         EvioReader r = new EvioReader(buf);
-        List<RocTimeSliceBanks> banks = new ArrayList<>();
+        List<RocTimeSliceBank> banks = new ArrayList<>();
         for (int i = 0; i < r.getEventCount(); i++) {
             EvioEvent event = r.parseNextEvent();
             evioDataByteOrder = r.getByteOrder();
-            RocTimeSliceBanks rtsb = parseRocTimeSliceBank(event);
+            RocTimeSliceBank rtsb = parseRocTimeSliceBank(event);
             if (!rtsb.getHits().isEmpty()) {
                 banks.add(rtsb);
             }
@@ -30,7 +30,7 @@ public class FadcUtil {
         return banks;
     }
 
-    public static RocTimeSliceBanks parseRocTimeSliceBank(EvioEvent ev) throws Exception{
+    public static RocTimeSliceBank parseRocTimeSliceBank(EvioEvent ev) throws Exception{
 
         int evTag = ev.getHeader().getTag();
 //        System.out.println("DDD "+Integer.toHexString(evTag));
@@ -65,7 +65,7 @@ public class FadcUtil {
                 (((long) intData[2]) << 32));
 //        System.out.println("  Frame = " + frame + ", TS = " + timestamp);
 
-        RocTimeSliceBanks rocTimeSliceBank = new RocTimeSliceBanks();
+        RocTimeSliceBank rocTimeSliceBank = new RocTimeSliceBank();
         rocTimeSliceBank.setFrameNumber(frame);
         rocTimeSliceBank.setTimeStamp(timestamp);
 

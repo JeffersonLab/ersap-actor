@@ -1,6 +1,6 @@
 ---
-name: CodaFileSinkEngine
-engine: org.jlab.ersap.actor.coda.engine.CodaFileSinkEngine
+name: CodaSinkEngine
+engine: org.jlab.ersap.actor.coda.engine.CodaSinkEngine
 type: java
 
 author: vardan

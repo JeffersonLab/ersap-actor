@@ -7,7 +7,7 @@ import org.jlab.epsci.ersap.engine.EngineDataType;
 import org.jlab.ersap.actor.coda.proc.Awtbc;
 import org.jlab.ersap.actor.coda.proc.IStreamItem;
 import org.jlab.ersap.actor.coda.proc.fadc.FadcUtil;
-import org.jlab.ersap.actor.coda.proc.fadc.RocTimeSliceBanks;
+import org.jlab.ersap.actor.coda.proc.fadc.RocTimeSliceBank;
 import org.jlab.ersap.actor.datatypes.JavaObjectType;
 import org.json.JSONObject;
 
@@ -54,7 +54,7 @@ public class EventIdentificationEngine implements Engine {
         EngineData out = new EngineData();
         Set<IStreamItem> result = new HashSet<>();
 
-        List<RocTimeSliceBanks> data;
+        List<RocTimeSliceBank> data;
         // Decoding
         try {
             data = FadcUtil.parseEtEvent((ByteBuffer)engineData.getData());

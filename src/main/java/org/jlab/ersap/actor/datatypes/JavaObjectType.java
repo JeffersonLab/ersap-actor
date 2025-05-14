@@ -14,7 +14,7 @@ package org.jlab.ersap.actor.datatypes;
 import org.jlab.epsci.ersap.base.error.ErsapException;
 import org.jlab.epsci.ersap.engine.EngineDataType;
 import org.jlab.epsci.ersap.engine.ErsapSerializer;
-import org.jlab.ersap.actor.util.EUtil;
+import org.jlab.ersap.actor.util.AUtil;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -29,7 +29,7 @@ public class JavaObjectType {
         public ByteBuffer write(Object data) throws ErsapException {
             ByteBuffer bb = null;
             try {
-                bb = ByteBuffer.wrap(EUtil.toByteArray(data));
+                bb = ByteBuffer.wrap(AUtil.toByteArray(data));
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -40,7 +40,7 @@ public class JavaObjectType {
         public Object read(ByteBuffer buffer) throws ErsapException {
             Object b = null;
             try {
-                b = EUtil.toObject(buffer.array());
+                b = AUtil.toObject(buffer.array());
             } catch (IOException | ClassNotFoundException e) {
                 e.printStackTrace();
             }

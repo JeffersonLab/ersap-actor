@@ -1,0 +1,11 @@
+---
+name: CodaSocketSourceEngine
+engine: org.jlab.ersap.actor.coda.engine.CodaSocketSourceEngine
+type: java
+
+author: vardan
+email: gurjyan@jlab.org
+
+version: 0.1
+description:
+  Reads CODA EVIO events from a socket.

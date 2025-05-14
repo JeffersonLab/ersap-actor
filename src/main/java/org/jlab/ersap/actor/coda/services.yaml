@@ -4,11 +4,13 @@ io-services:
     class: org.jlab.ersap.actor.coda.engine.CodaEtSourceEngine
     name: Source
   writer:
-    class: org.jlab.ersap.actor.coda.engine.CodaFileSinkEngine
+    class: org.jlab.ersap.actor.coda.engine.CodaSinkEngine
     name: Sink
 services:
   - class: org.jlab.ersap.actor.coda.engine.EventIdentificationEngine
     name: EventId
+  - class: org.jlab.ersap.actor.coda.engine.CodaHistogramEngine
+    name: Histogram
 configuration:
   io-services:
     reader:
@@ -16,7 +18,11 @@ configuration:
       et_port: 23911
       et_station: "ersap"
       fifo_capacity: 128
-    writer:
+  services:
+    EventId:
+      sliding_window: 40
+      multiplicity: 2
+    Histogram:
       hist_bins: 100
       hist_min: 100
       hist_max: 8000
@@ -25,10 +31,6 @@ configuration:
       #> grid_size defines a layout for histogram visualization
       #> (e.g. 5 will plot 25 histograms in 5x5 matrix)
       grid_size: 4
-  services:
-    EventId:
-      sliding_window: 40
-      multiplicity: 2
 mime-types:
   - binary/data-evio
   - binary/data-jobj

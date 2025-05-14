@@ -68,7 +68,7 @@ This opens a YAML file describing the service composition:
         class: org.jlab.ersap.actor.coda.engine.CodaEtSourceEngine
         name: Source
       writer:
-        class: org.jlab.ersap.actor.coda.engine.CodaFileSinkEngine
+        class: org.jlab.ersap.actor.coda.engine.CodaHistogramSinkEngine
         name: Sink
     
     services:

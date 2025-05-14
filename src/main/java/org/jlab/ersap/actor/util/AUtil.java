@@ -14,7 +14,7 @@ package org.jlab.ersap.actor.util;
 import java.io.*;
 
 
-public class EUtil {
+public class AUtil {
     public static byte[] toByteArray(Object obj) throws IOException {
         byte[] bytes = null;
         ByteArrayOutputStream bos = null;

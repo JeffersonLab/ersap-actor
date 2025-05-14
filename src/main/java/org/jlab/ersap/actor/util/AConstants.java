@@ -1,8 +1,8 @@
 package org.jlab.ersap.actor.util;
 
-public final class EConstants {
+public final class AConstants {
     // Prevents instantiation
-    private EConstants() {
+    private AConstants() {
         throw new UnsupportedOperationException("This is a utility class and cannot be instantiated");
     }
 

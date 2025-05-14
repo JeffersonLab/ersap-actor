@@ -6,7 +6,7 @@ import org.jlab.coda.jevio.EvioException;
 import org.jlab.coda.jevio.EvioReader;
 import org.jlab.ersap.actor.coda.proc.fadc.FADCHit;
 import org.jlab.ersap.actor.coda.proc.fadc.FadcUtil;
-import org.jlab.ersap.actor.util.ISourceReader;
+import org.jlab.ersap.actor.util.IASource;
 
 import java.io.File;
 import java.io.IOException;
@@ -24,7 +24,7 @@ import java.util.List;
  * @author gurjyan on 2/13/23
  * @project ersap-coda
  */
-public class CodaOutputFileReader implements ISourceReader {
+public class CodaOutputFileReader implements IASource {
 
     private String fName;
     private EvioReader reader;

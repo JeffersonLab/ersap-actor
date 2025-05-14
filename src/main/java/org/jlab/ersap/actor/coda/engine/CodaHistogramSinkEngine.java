@@ -5,7 +5,7 @@ import org.jlab.epsci.ersap.std.services.AbstractEventWriterService;
 import org.jlab.epsci.ersap.std.services.EventWriterException;
 import org.jlab.ersap.actor.coda.proc.LiveHistogram;
 import org.jlab.ersap.actor.coda.proc.fadc.FADCHit;
-import org.jlab.ersap.actor.coda.proc.fadc.RocTimeSliceBanks;
+import org.jlab.ersap.actor.coda.proc.fadc.RocTimeSliceBank;
 import org.jlab.ersap.actor.datatypes.JavaObjectType;
 import org.json.JSONObject;
 
@@ -25,7 +25,7 @@ import java.util.*;
  * @author gurjyan on 2/9/23
  * {@code } ersap-actor
  */
-public class CodaFileSinkEngine extends AbstractEventWriterService<FileWriter> {
+public class CodaHistogramSinkEngine extends AbstractEventWriterService<FileWriter> {
     private static String FRAME_TITLE = "frame_title";
     private String frameTitle = "ERSAP";
     private static String FRAME_WIDTH = "frame_width";
@@ -162,10 +162,10 @@ public class CodaFileSinkEngine extends AbstractEventWriterService<FileWriter> {
     protected void writeEvent(Object event) throws EventWriterException {
         List<FADCHit> conis = new ArrayList<>();
         Set<String> conisNames = new HashSet<>();
-        List<RocTimeSliceBanks> banks = (List<RocTimeSliceBanks>)event;
+        List<RocTimeSliceBank> banks = (List<RocTimeSliceBank>)event;
         if (!banks.isEmpty()) {
             if (scatterReset) liveHist.resetScatter();
-            for (RocTimeSliceBanks bank : banks) {
+            for (RocTimeSliceBank bank : banks) {
                 List<FADCHit> hits = bank.getHits();
                 System.out.println();
                 System.out.println("DDD ------------ Frame = "+bank.getFrameNumber());
