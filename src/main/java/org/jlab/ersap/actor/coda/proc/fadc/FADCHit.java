@@ -13,7 +13,21 @@ import org.jlab.ersap.actor.coda.proc.IStreamItem;
  * @author gurjyan on 2/13/23
  * {@code } ersap-coda
  */
-public record FADCHit(int crate, int slot, int channel, int charge, long time) implements IStreamItem {
+public class FADCHit implements IStreamItem {
+
+    private final int crate;
+    private final int slot;
+    private final int channel;
+    private final int charge;
+    private final long time;
+
+    public FADCHit(int crate, int slot, int channel, int charge, long time) {
+        this.crate = crate;
+        this.slot = slot;
+        this.channel = channel;
+        this.charge = charge;
+        this.time = time;
+    }
 
     @Override
     public String getName() {
@@ -22,7 +36,7 @@ public record FADCHit(int crate, int slot, int channel, int charge, long time) i
 
     @Override
     public int getId() {
-        return (crate*1000) + (slot*16) + channel;
+        return (crate * 1000) + (slot * 16) + channel;
     }
 
     @Override
@@ -34,27 +48,22 @@ public record FADCHit(int crate, int slot, int channel, int charge, long time) i
         return new FADCHit(crate, slot, channel, charge, newTime);
     }
 
-    @Override
     public int crate() {
         return crate;
     }
 
-    @Override
     public int slot() {
         return slot;
     }
 
-    @Override
     public int channel() {
         return channel;
     }
 
-    @Override
     public int charge() {
         return charge;
     }
 
-    @Override
     public long time() {
         return time;
     }
