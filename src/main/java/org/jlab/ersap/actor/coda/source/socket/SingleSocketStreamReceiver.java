@@ -37,7 +37,7 @@ public class SingleSocketStreamReceiver implements IASource, Callable<String> {
     public Object nextEvent() {
         // This section is designated for the implementation of
         // a potential supplementary singles-finding algorithm.
-        return  handler.getNextEvent();
+        return  handler.getNextEvent().getData();
     }
 
     @Override
