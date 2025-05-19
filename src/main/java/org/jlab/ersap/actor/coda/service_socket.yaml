@@ -1,0 +1,37 @@
+---
+io-services:
+  reader:
+    class: org.jlab.ersap.actor.coda.engine.CodaSocketSourceEngine
+    name: Source
+  writer:
+    class: org.jlab.ersap.actor.coda.engine.CodaSinkEngine
+    name: Sink
+services:
+  - class: org.jlab.ersap.actor.coda.engine.EventIdentificationEngine
+    name: EventId
+  - class: org.jlab.ersap.actor.coda.engine.CodaHistogramEngine
+    name: Histogram
+configuration:
+  io-services:
+    reader:
+      streamHost: "undefined"
+      streamPort: 7777
+      ringBufferSize: 1024
+      connectionTimeout: 5000
+      readTimeout: 2000
+  services:
+    EventId:
+      sliding_window: 40
+      multiplicity: 2
+    Histogram:
+      hist_bins: 100
+      hist_min: 100
+      hist_max: 8000
+      hist_titles: "1-15-0,1-15-1,1-15-2,1-15-3,1-15-4,1-15-5,1-15-6,1-15-7,1-15-8,1-15-9,1-15-10,1-15-11,1-15-12,1-15-13,1-15-14,1-15-15"
+      coincidence: "1-15-0,1-15-1"
+      #> grid_size defines a layout for histogram visualization
+      #> (e.g. 5 will plot 25 histograms in 5x5 matrix)
+      grid_size: 4
+mime-types:
+  - binary/data-evio
+  - binary/data-jobj
