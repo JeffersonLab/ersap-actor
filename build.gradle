@@ -52,15 +52,17 @@ dependencies {
 //    implementation 'com.lmax:disruptor:3.4.0'
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     implementation group: 'org.apache.commons', name: 'commons-pool2', version: '2.9.0'
-        implementation group: 'com.google.protobuf', name: 'protobuf-java', version: '3.16.3'
-        implementation 'org.jetbrains:annotations:19.0.0'
-        deployerJars 'org.apache.maven.wagon:wagon-ssh-external:2.12'
+    implementation group: 'com.google.protobuf', name: 'protobuf-java', version: '3.16.3'
+    implementation 'org.jetbrains:annotations:19.0.0'
+    deployerJars 'org.apache.maven.wagon:wagon-ssh-external:2.12'
     testImplementation 'junit:junit:4.13.1'
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.4.2'
     testImplementation 'org.hamcrest:hamcrest-library:1.3'
     testImplementation 'org.mockito:mockito-core:2.7.11'
     implementation 'com.google.code.gson:gson:2.10.1'
 //    implementation 'jnetpcap:jnetpcap:1.4.r1425-1d' // getting it from the /libs dir
+    implementation 'org.pcap4j:pcap4j-core:1.8.0'
+    implementation 'org.pcap4j:pcap4j-packetfactory-static:1.8.0'
 }
 
 test {
