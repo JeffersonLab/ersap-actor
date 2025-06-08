@@ -55,22 +55,32 @@ public class EventIdentificationEngine implements Engine {
         Set<IStreamItem> result = new HashSet<>();
 
         List<RocTimeSliceBank> data;
-        // Decoding
-        try {
-            data = FadcUtil.parseEtEvent((ByteBuffer)engineData.getData());
-        } catch (Exception e) {
-            throw new RuntimeException(e);
+        ByteBuffer buffer = (ByteBuffer)engineData.getData();
+        if (buffer != null && buffer.hasRemaining()) {
+            // ByteBuffer is not null and has data
+            System.out.println("Buffer is valid and contains data.");
+        } else {
+            System.out.println("Buffer is null or empty.");
         }
+
+        // Decoding
+//        try {
+//            data = FadcUtil.parseEtEvent((ByteBuffer)engineData.getData());
+//        } catch (Exception e) {
+//            throw new RuntimeException(e);
+//        }
+
         // Clustering
 //        for (RocTimeSliceBanks rsb : data) {
 //            result.addAll(awtbc.findCluster(rsb.getHits()));
 //        }
-        out.setData(JavaObjectType.JOBJ, data);
 //        System.out.println("DDD============DDD");
 //        for (IStreamItem evt : result) {
 //            System.out.println(evt);
 //        }
 //        System.out.println("DDD============DDD");
+
+//        out.setData(JavaObjectType.JOBJ, data);
         return out;
     }
 

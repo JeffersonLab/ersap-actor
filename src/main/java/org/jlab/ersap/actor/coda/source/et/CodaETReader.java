@@ -191,10 +191,9 @@ public class CodaETReader implements IASource, Runnable {
     }
 
     public ByteBuffer dequeue() throws InterruptedException {
-        System.out.println("DDD================DDD");
-        QueueMonitor.checkQueue(queue);
-        System.out.println("DDD================DDD");
-
+//        System.out.println("DDD================DDD");
+//        QueueMonitor.checkQueue(queue);
+//        System.out.println("DDD================DDD");
         return queue.take(); // Blocks if the queue is empty
     }
 
