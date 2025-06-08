@@ -23,6 +23,8 @@ public class FadcUtil {
 //        System.out.println("DDD=============DDD");
         List<RocTimeSliceBank> banks = new ArrayList<>();
         for (int i = 0; i < r.getEventCount(); i++) {
+        System.out.println("DDD=============DDD "+i);
+
             EvioEvent event = r.parseNextEvent();
             if(event==null){
                 System.out.printf("DDDDDDDDD event is null");
