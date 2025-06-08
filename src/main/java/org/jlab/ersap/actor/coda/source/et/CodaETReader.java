@@ -5,6 +5,7 @@ import org.jlab.coda.et.enums.Mode;
 import org.jlab.coda.et.enums.Modify;
 import org.jlab.ersap.actor.coda.proc.fadc.FadcUtil;
 import org.jlab.ersap.actor.util.IASource;
+import org.jlab.ersap.actor.util.QueueMonitor;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -185,10 +186,15 @@ public class CodaETReader implements IASource, Runnable {
         running.set(false);
     }
     public void enqueue(ByteBuffer buffer) throws InterruptedException {
+        System.out.println(buffer);
         queue.put(buffer); // Blocks if the queue is full
     }
 
     public ByteBuffer dequeue() throws InterruptedException {
+        System.out.println("DDD================DDD");
+        QueueMonitor.checkQueue(queue);
+        System.out.println("DDD================DDD");
+
         return queue.take(); // Blocks if the queue is empty
     }
 
