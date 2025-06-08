@@ -57,12 +57,6 @@ public class EventIdentificationEngine implements Engine {
         List<RocTimeSliceBank> data;
 
         ByteBuffer buffer = (ByteBuffer)engineData.getData();
-        if (buffer != null && buffer.hasRemaining()) {
-            // ByteBuffer is not null and has data
-            System.out.println("Buffer is valid and contains data.");
-        } else {
-            System.out.println("Buffer is null or empty.");
-        }
 
         // Decoding
         try {
