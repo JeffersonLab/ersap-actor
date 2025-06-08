@@ -56,8 +56,6 @@ public class EventIdentificationEngine implements Engine {
 
         List<RocTimeSliceBank> data;
 
-        ByteBuffer buffer = (ByteBuffer)engineData.getData();
-
         // Decoding
         try {
             data = FadcUtil.parseEtEvent((ByteBuffer)engineData.getData());

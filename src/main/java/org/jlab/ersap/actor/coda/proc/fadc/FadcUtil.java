@@ -24,17 +24,14 @@ public class FadcUtil {
         List<RocTimeSliceBank> banks = new ArrayList<>();
         for (int i = 0; i < r.getEventCount(); i++) {
             EvioEvent event = r.parseNextEvent();
+            if(event==null){
+                System.out.printf("DDDDDDDDD event is null");
+            }
             evioDataByteOrder = r.getByteOrder();
             RocTimeSliceBank rtsb = parseRocTimeSliceBank(event);
             if (!rtsb.getHits().isEmpty()) {
                 banks.add(rtsb);
             }
-        }
-        if (banks != null) {
-            // ByteBuffer is not null and has data
-            System.out.println("Banks is not null.");
-        } else {
-            System.out.println("Bank is null.");
         }
         return banks;
     }
