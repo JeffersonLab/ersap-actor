@@ -31,10 +31,10 @@ public class FadcUtil {
             System.out.println("DDD============DDD");
 //            EvioEvent event = r.parseNextEvent();
 //            evioDataByteOrder = r.getByteOrder();
-//            RocTimeSliceBank rtsb = parseRocTimeSliceBank(event);
-//            if (!rtsb.getHits().isEmpty()) {
-//                banks.add(rtsb);
-//            }
+            RocTimeSliceBank rtsb = parseRocTimeSliceBank(event);
+            if (!rtsb.getHits().isEmpty()) {
+                banks.add(rtsb);
+            }
         }
         return banks;
     }
