@@ -60,7 +60,7 @@ public class FadcUtil {
 
         // Go one level down ->
         int childCount = ev.getChildCount();
-                System.out.println("Event has " + childCount + " child structures");
+                System.out.println("Event has " + childCount + " childes");
 
         if (childCount < 2) {
             throw new Exception("Problem: too few child for event (" + childCount + ")");
@@ -69,6 +69,9 @@ public class FadcUtil {
 
         // First bank is Time Info Bank (TSS) with frame and timestamp
         EvioSegment b = (EvioSegment) ev.getChildAt(0).getChildAt(0);
+        System.out.println("DDD============DDD");
+        System.out.println(b.toXML());
+        System.out.println("DDD============DDD");
         int[] intData = b.getIntData();
         int frame = intData[0];
         long timestamp = ((((long) intData[1]) & 0x00000000ffffffffL) +
