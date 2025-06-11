@@ -53,8 +53,8 @@ public class EventIdentificationEngine implements Engine {
 
     @Override
     public EngineData execute(EngineData engineData) {
-//        return executeFileEvent(engineData);
-        return executeETEvent(engineData);
+        return executeFileEvent(engineData);
+//        return executeETEvent(engineData);
     }
 
     public EngineData executeFileEvent(EngineData engineData) {
