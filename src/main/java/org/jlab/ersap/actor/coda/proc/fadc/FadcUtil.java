@@ -25,16 +25,15 @@ public class FadcUtil {
 
         List<RocTimeSliceBank> banks = new ArrayList<>();
         for (int i = 0; i < r.getEventCount(); i++) {
-            EvioEvent event = r.getEvent(i+1);
-            System.out.println("DDD============DDD");
-            System.out.println(event.toString());
-            System.out.println("DDD============DDD");
-            r.parseEvent(event);
-//            EvioEvent event = r.parseNextEvent();
-//            evioDataByteOrder = r.getByteOrder();
-            RocTimeSliceBank rtsb = parseRocTimeSliceBank(event);
-            if (!rtsb.getHits().isEmpty()) {
-                banks.add(rtsb);
+            EvioEvent event = r.parseNextEvent();
+            evioDataByteOrder = r.getByteOrder();
+            try {
+                RocTimeSliceBank rtsb = parseRocTimeSliceBank(event);
+                if (!rtsb.getHits().isEmpty()) {
+                    banks.add(rtsb);
+                }
+            } catch (Exception e ){
+                System.out.println(e.getMessage());
             }
         }
         return banks;
@@ -44,7 +43,6 @@ public class FadcUtil {
 
         int evTag = ev.getHeader().getTag();
         System.out.println("DDD======> tag        = "+Integer.toHexString(evTag));
-        System.out.println("DDD======> childCount = "+ev.getChildCount());
         if (evTag == 0xffd1) {
             System.out.println("Skip over PRESTART event");
             return null;
