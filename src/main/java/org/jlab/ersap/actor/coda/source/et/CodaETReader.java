@@ -186,19 +186,15 @@ public class CodaETReader implements IASource, Runnable {
         running.set(false);
     }
     public void enqueue(ByteBuffer buffer) throws InterruptedException {
-        System.out.println(buffer);
         queue.put(buffer); // Blocks if the queue is full
     }
 
     public ByteBuffer dequeue() throws InterruptedException {
-//        System.out.println("DDD================DDD");
-//        QueueMonitor.checkQueue(queue);
-//        System.out.println("DDD================DDD");
         return queue.take(); // Blocks if the queue is empty
     }
 
 
-    private void printStatistics() {
+    public void printStatistics() {
         // calculate the event rate
         long t2 = System.currentTimeMillis();
         long time = t2 - t1;
