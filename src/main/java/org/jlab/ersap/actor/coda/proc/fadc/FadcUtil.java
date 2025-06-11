@@ -91,7 +91,7 @@ public class FadcUtil {
         int frame = intData[0];
         long timestamp = ((((long) intData[1]) & 0x00000000ffffffffL) +
                 (((long) intData[2]) << 32));
-//        System.out.println("  Frame = " + frame + ", TS = " + timestamp);
+        System.out.println("DDD======>  Frame = " + frame + ", TS = " + timestamp);
 
         RocTimeSliceBank rocTimeSliceBank = new RocTimeSliceBank();
         rocTimeSliceBank.setFrameNumber(frame);
@@ -117,6 +117,7 @@ public class FadcUtil {
                 // Just get the data as bytes
                 int payloadId = dataBank.getHeader().getTag();
                 int payloadLength = dataBank.getHeader().getLength();
+                System.out.println("DDD========XXX "+payloadLength);
 
 
                 byte[] byteData = dataBank.getRawBytes();
