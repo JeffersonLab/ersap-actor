@@ -10,6 +10,7 @@ import org.jlab.ersap.actor.util.IASource;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.List;
 
@@ -58,12 +59,12 @@ public class CodaOutputFileReader implements IASource {
     }
 
     @Override
-    public EvioEvent nextEvent() {
+    public Object nextEvent() {
         evtIndex++;
 //        System.out.println("DDD =========== > Reading event = "+evtIndex);
         if (evtIndex <= evCount) {
             try {
-                return reader.parseEvent(evtIndex);
+                return ByteBuffer.wrap(reader.parseEvent(evtIndex).getByteData());
             } catch (IOException | EvioException e) {
                 e.printStackTrace();
                 return null;

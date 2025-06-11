@@ -64,7 +64,6 @@ public class CodaEtSourceEngine extends AbstractEventReaderService<CodaETReader>
 
     @Override
     protected Object readEvent(int i) throws EventReaderException {
-        reader.printStatistics();
         return reader.nextEvent();
     }
 
