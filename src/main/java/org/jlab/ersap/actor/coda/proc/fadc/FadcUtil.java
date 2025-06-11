@@ -84,9 +84,8 @@ public class FadcUtil {
 
         // First bank is Time Info Bank (TSS) with frame and timestamp
         EvioSegment b = (EvioSegment) ev.getChildAt(0).getChildAt(0);
-        System.out.println("DDD======>DDD");
+        System.out.println("DDD======> EvioSegment (XML)");
         System.out.println(b.toXML());
-        System.out.println("DDD=====>DDD");
         int[] intData = b.getIntData();
         int frame = intData[0];
         long timestamp = ((((long) intData[1]) & 0x00000000ffffffffL) +
