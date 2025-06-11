@@ -53,6 +53,11 @@ public class EventIdentificationEngine implements Engine {
 
     @Override
     public EngineData execute(EngineData engineData) {
+//        return executeFileEvent(engineData);
+        return executeETEvent(engineData);
+    }
+
+    public EngineData executeFileEvent(EngineData engineData) {
         EngineData out = new EngineData();
         List<RocTimeSliceBank> data;
 
@@ -64,16 +69,12 @@ public class EventIdentificationEngine implements Engine {
         }
         for (RocTimeSliceBank bank : data) {
             List<FADCHit> hits = bank.getHits();
-            System.out.println();
-            System.out.println("DDD ------------ Frame = " + bank.getFrameNumber());
-
+            System.out.println("========== FADC Data ========== ");
+            System.out.println("DDD=======> Frame = " + bank.getFrameNumber()+" Time = "+ bank.getTimeStamp());
             for (FADCHit hit : hits) {
                 System.out.println(hit);
             }
-            System.out.println("DDD ------------ Time  = "+bank.getTimeStamp());
         }
-
-
             // Clustering
 //        for (RocTimeSliceBanks rsb : data) {
 //            result.addAll(awtbc.findCluster(rsb.getHits()));
@@ -88,22 +89,29 @@ public class EventIdentificationEngine implements Engine {
         return out;
     }
 
-//   public EngineData executeET(EngineData engineData) {
-//        EngineData out = new EngineData();
-//        Set<IStreamItem> result = new HashSet<>();
-//
-//        List<RocTimeSliceBank> data;
-//
-//        // Decoding
-//        try {
-//            data = FadcUtil.parseEtEvent((ByteBuffer)engineData.getData());
-//        } catch (Exception e) {
-//            throw new RuntimeException(e);
-//        }
-//
-//        out.setData(JavaObjectType.JOBJ, data);
-//        return out;
-//    }
+   public EngineData executeETEvent(EngineData engineData) {
+        EngineData out = new EngineData();
+        Set<IStreamItem> result = new HashSet<>();
+
+        List<RocTimeSliceBank> data;
+
+        // Decoding
+        try {
+            data = FadcUtil.parseEtEvent((ByteBuffer)engineData.getData());
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+       for (RocTimeSliceBank bank : data) {
+           List<FADCHit> hits = bank.getHits();
+           System.out.println("========== FADC Data ========== ");
+           System.out.println("DDD=======> Frame = " + bank.getFrameNumber()+" Time = "+ bank.getTimeStamp());
+           for (FADCHit hit : hits) {
+               System.out.println(hit);
+           }
+       }
+        out.setData(JavaObjectType.JOBJ, data);
+        return out;
+    }
 
     @Override
     public EngineData executeGroup(Set<EngineData> set) {
