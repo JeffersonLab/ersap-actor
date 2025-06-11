@@ -71,7 +71,8 @@ public class CodaOutputFileReader implements IASource {
                 System.out.println(e.getMessage());
                 return null;
             }
-        } else return null;
+        }
+        return null;
     }
 
     @Override
