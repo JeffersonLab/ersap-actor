@@ -19,19 +19,19 @@ public class FadcUtil {
     public static List<RocTimeSliceBank> parseEtEvent(ByteBuffer buf) throws Exception {
         EvioReader r = new EvioReader(buf);
         System.out.println("DDD======= "+r.getEvioVersion());
-        System.out.println("DDD======= "+r);
+        System.out.println("DDD======= "+r.getEventCount());
+        System.out.println("DDD======= "+r.getPath());
+        System.out.println("DDD======= "+r.getBlockCount());
 
         List<RocTimeSliceBank> banks = new ArrayList<>();
-        for (int i = 0; i < r.getEventCount(); i++) {
-
+//        for (int i = 0; i < r.getEventCount(); i++) {
 //            EvioEvent event = r.parseNextEvent();
-            evioDataByteOrder = r.getByteOrder();
-            System.out.println("DDD======= "+r.getByteOrder());
+//            evioDataByteOrder = r.getByteOrder();
 //            RocTimeSliceBank rtsb = parseRocTimeSliceBank(event);
 //            if (!rtsb.getHits().isEmpty()) {
 //                banks.add(rtsb);
 //            }
-        }
+//        }
         return banks;
     }
 
