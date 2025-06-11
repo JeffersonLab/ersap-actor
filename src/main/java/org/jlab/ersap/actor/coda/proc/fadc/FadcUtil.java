@@ -5,6 +5,7 @@ import org.jlab.coda.jevio.EvioBank;
 import org.jlab.coda.jevio.EvioEvent;
 import org.jlab.coda.jevio.EvioReader;
 import org.jlab.coda.jevio.EvioSegment;
+import org.jlab.epsci.ersap.util.report.JsonUtils;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -20,18 +21,21 @@ public class FadcUtil {
         EvioReader r = new EvioReader(buf);
         System.out.println("DDD======= "+r.getEvioVersion());
         System.out.println("DDD======= "+r.getEventCount());
-        System.out.println("DDD======= "+r.getPath());
         System.out.println("DDD======= "+r.getBlockCount());
 
         List<RocTimeSliceBank> banks = new ArrayList<>();
-//        for (int i = 0; i < r.getEventCount(); i++) {
+        for (int i = 0; i < r.getEventCount(); i++) {
+            EvioEvent event = r.getEvent(i);
+            System.out.println("DDD============DDD");
+            System.out.println(event.toString());
+            System.out.println("DDD============DDD");
 //            EvioEvent event = r.parseNextEvent();
 //            evioDataByteOrder = r.getByteOrder();
 //            RocTimeSliceBank rtsb = parseRocTimeSliceBank(event);
 //            if (!rtsb.getHits().isEmpty()) {
 //                banks.add(rtsb);
 //            }
-//        }
+        }
         return banks;
     }
 
