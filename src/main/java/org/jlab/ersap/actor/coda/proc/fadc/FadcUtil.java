@@ -25,7 +25,7 @@ public class FadcUtil {
 
         List<RocTimeSliceBank> banks = new ArrayList<>();
         for (int i = 0; i < r.getEventCount(); i++) {
-            EvioEvent event = r.getEvent(i);
+            EvioEvent event = r.getEvent(i+1);
             System.out.println("DDD============DDD");
             System.out.println(event.toString());
             System.out.println("DDD============DDD");
