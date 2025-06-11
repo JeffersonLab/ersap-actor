@@ -59,14 +59,12 @@ public class CodaOutputFileReader implements IASource {
     }
 
     @Override
-    public Object nextEvent() {
+    public EvioEvent nextEvent() {
         evtIndex++;
 //        System.out.println("DDD =========== > Reading event = "+evtIndex);
         if (evtIndex <= evCount) {
             try {
-                byte[] b = reader.parseEvent(evtIndex).getByteData();
-                System.out.println("DDD============ "+ b);
-                if (b !=null) return ByteBuffer.wrap(b);
+                return reader.parseEvent(evtIndex);
             } catch (Exception e) {
                 System.out.println(e.getMessage());
                 return null;

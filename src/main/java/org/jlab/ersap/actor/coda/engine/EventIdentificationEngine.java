@@ -1,5 +1,6 @@
 package org.jlab.ersap.actor.coda.engine;
 
+import org.jlab.coda.jevio.EvioEvent;
 import org.jlab.epsci.ersap.base.ErsapUtil;
 import org.jlab.epsci.ersap.engine.Engine;
 import org.jlab.epsci.ersap.engine.EngineData;
@@ -52,13 +53,11 @@ public class EventIdentificationEngine implements Engine {
     @Override
     public EngineData execute(EngineData engineData) {
         EngineData out = new EngineData();
-        Set<IStreamItem> result = new HashSet<>();
-
         List<RocTimeSliceBank> data;
 
         // Decoding
         try {
-            data = FadcUtil.parseEtEvent((ByteBuffer)engineData.getData());
+            data = FadcUtil.parseFileEvent((EvioEvent)engineData.getData());
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -76,6 +75,23 @@ public class EventIdentificationEngine implements Engine {
         out.setData(JavaObjectType.JOBJ, data);
         return out;
     }
+
+//   public EngineData executeET(EngineData engineData) {
+//        EngineData out = new EngineData();
+//        Set<IStreamItem> result = new HashSet<>();
+//
+//        List<RocTimeSliceBank> data;
+//
+//        // Decoding
+//        try {
+//            data = FadcUtil.parseEtEvent((ByteBuffer)engineData.getData());
+//        } catch (Exception e) {
+//            throw new RuntimeException(e);
+//        }
+//
+//        out.setData(JavaObjectType.JOBJ, data);
+//        return out;
+//    }
 
     @Override
     public EngineData executeGroup(Set<EngineData> set) {

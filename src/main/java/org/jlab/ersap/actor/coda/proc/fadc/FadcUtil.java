@@ -38,6 +38,21 @@ public class FadcUtil {
         }
         return banks;
     }
+  @NotNull
+    public static List<RocTimeSliceBank> parseFileEvent(EvioEvent event) throws Exception {
+
+        List<RocTimeSliceBank> banks = new ArrayList<>();
+            evioDataByteOrder = event.getByteOrder();
+            try {
+                RocTimeSliceBank rtsb = parseRocTimeSliceBank(event);
+                if (!rtsb.getHits().isEmpty()) {
+                    banks.add(rtsb);
+                }
+            } catch (Exception e ){
+                System.out.println(e.getMessage());
+            }
+        return banks;
+    }
 
     public static RocTimeSliceBank parseRocTimeSliceBank(EvioEvent ev) throws Exception{
 
