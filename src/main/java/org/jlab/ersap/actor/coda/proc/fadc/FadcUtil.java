@@ -19,9 +19,9 @@ public class FadcUtil {
     @NotNull
     public static List<RocTimeSliceBank> parseEtEvent(ByteBuffer buf) throws Exception {
         EvioReader r = new EvioReader(buf);
-        System.out.println("DDD======= version    = "+r.getEvioVersion());
-        System.out.println("DDD======= eventCount = "+r.getEventCount());
-        System.out.println("DDD======= blockCount = "+r.getBlockCount());
+        System.out.println("DDD=======> version    = "+r.getEvioVersion());
+        System.out.println("DDD=======> eventCount = "+r.getEventCount());
+        System.out.println("DDD=======> blockCount = "+r.getBlockCount());
 
         List<RocTimeSliceBank> banks = new ArrayList<>();
         for (int i = 0; i < r.getEventCount(); i++) {
@@ -57,7 +57,7 @@ public class FadcUtil {
     public static RocTimeSliceBank parseRocTimeSliceBank(EvioEvent ev) throws Exception{
 
         int evTag = ev.getHeader().getTag();
-        System.out.println("DDD======> tag        = "+Integer.toHexString(evTag));
+        System.out.println("DDD==========================> tag = "+Integer.toHexString(evTag)+" ==================================");
         if (evTag == 0xffd1) {
             System.out.println("Skip over PRESTART event");
             return null;
@@ -84,14 +84,14 @@ public class FadcUtil {
 
         // First bank is Time Info Bank (TSS) with frame and timestamp
         EvioSegment b = (EvioSegment) ev.getChildAt(0).getChildAt(0);
-        System.out.println("DDD============DDD");
+        System.out.println("DDD======>DDD");
         System.out.println(b.toXML());
-        System.out.println("DDD============DDD");
+        System.out.println("DDD=====>DDD");
         int[] intData = b.getIntData();
         int frame = intData[0];
         long timestamp = ((((long) intData[1]) & 0x00000000ffffffffL) +
                 (((long) intData[2]) << 32));
-        System.out.println("DDD======>  Frame = " + frame + ", TS = " + timestamp);
+        System.out.println("DDD======> Frame = " + frame + ", TS = " + timestamp);
 
         RocTimeSliceBank rocTimeSliceBank = new RocTimeSliceBank();
         rocTimeSliceBank.setFrameNumber(frame);
@@ -103,6 +103,7 @@ public class FadcUtil {
             // ROC Time SLice Bank
             EvioBank rocTSB = (EvioBank) ev.getChildAt(j);
             int kids = rocTSB.getChildCount();
+            System.out.println("DDD======> TSB childes = "+ kids);
             if (kids < 2) {
                 throw new Exception("Problem: too few child for TSB (" + childCount + ")");
             }
@@ -117,7 +118,8 @@ public class FadcUtil {
                 // Just get the data as bytes
                 int payloadId = dataBank.getHeader().getTag();
                 int payloadLength = dataBank.getHeader().getLength();
-                System.out.println("DDD========XXX "+payloadLength);
+                System.out.println("DDD======> PayloadID "+payloadId);
+                System.out.println("DDD======> PayloadLength "+payloadLength);
 
 
                 byte[] byteData = dataBank.getRawBytes();
