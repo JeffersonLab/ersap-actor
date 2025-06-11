@@ -29,6 +29,7 @@ public class FadcUtil {
             System.out.println("DDD============DDD");
             System.out.println(event.toString());
             System.out.println("DDD============DDD");
+            r.parseEvent(event);
 //            EvioEvent event = r.parseNextEvent();
 //            evioDataByteOrder = r.getByteOrder();
             RocTimeSliceBank rtsb = parseRocTimeSliceBank(event);
