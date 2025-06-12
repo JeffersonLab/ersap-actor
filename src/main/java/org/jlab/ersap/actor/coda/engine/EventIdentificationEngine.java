@@ -37,6 +37,9 @@ public class EventIdentificationEngine implements Engine {
     private long slidingWindow = 40; // in nanoseconds
     private static final String MULTIPLICITY = "multiplicity";
     private int multiplicity = 2; // number of hits within the sliding window
+    private static final String STREAMSOURCE = "stream_source";
+    private String streamSource;
+    private boolean isSourceEt;
 
 
     @Override
@@ -46,6 +49,12 @@ public class EventIdentificationEngine implements Engine {
             JSONObject data = new JSONObject(source);
             slidingWindow = data.has(SLIDING_WINDOW) ? data.getLong(SLIDING_WINDOW) : 40;
             multiplicity = data.has(MULTIPLICITY) ? data.getInt(MULTIPLICITY) : 2;
+            streamSource = data.has(STREAMSOURCE) ? data.getString(STREAMSOURCE) : "et";
+        }
+        if(streamSource.trim().equalsIgnoreCase("et")){
+            isSourceEt = true;
+        } else if (streamSource.trim().equalsIgnoreCase("file")){
+            isSourceEt = false;
         }
         awtbc = new Awtbc(multiplicity, slidingWindow, false);
         return null;
@@ -53,8 +62,11 @@ public class EventIdentificationEngine implements Engine {
 
     @Override
     public EngineData execute(EngineData engineData) {
-        return executeFileEvent(engineData);
-//        return executeETEvent(engineData);
+        if(isSourceEt) {
+            return executeFileEvent(engineData);
+        } else {
+            return executeETEvent(engineData);
+        }
     }
 
     public EngineData executeFileEvent(EngineData engineData) {
