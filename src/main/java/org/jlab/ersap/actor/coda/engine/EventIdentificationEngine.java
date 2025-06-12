@@ -63,9 +63,9 @@ public class EventIdentificationEngine implements Engine {
     @Override
     public EngineData execute(EngineData engineData) {
         if(isSourceEt) {
-            return executeFileEvent(engineData);
-        } else {
             return executeETEvent(engineData);
+        } else {
+            return executeFileEvent(engineData);
         }
     }
 
