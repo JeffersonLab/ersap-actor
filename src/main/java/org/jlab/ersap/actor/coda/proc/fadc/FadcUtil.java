@@ -6,6 +6,7 @@ import org.jlab.coda.jevio.EvioEvent;
 import org.jlab.coda.jevio.EvioReader;
 import org.jlab.coda.jevio.EvioSegment;
 import org.jlab.epsci.ersap.util.report.JsonUtils;
+import org.jlab.ersap.actor.util.NibblePrinter;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -44,7 +45,8 @@ public class FadcUtil {
         List<RocTimeSliceBank> banks = new ArrayList<>();
             evioDataByteOrder = event.getByteOrder();
             try {
-                System.out.println(event);
+
+                NibblePrinter.printNibbles(event.getByteData());
 
 //                RocTimeSliceBank rtsb = parseRocTimeSliceBank(event);
 //                if (!rtsb.getHits().isEmpty()) {
