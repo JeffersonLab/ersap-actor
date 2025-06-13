@@ -44,10 +44,12 @@ public class FadcUtil {
         List<RocTimeSliceBank> banks = new ArrayList<>();
             evioDataByteOrder = event.getByteOrder();
             try {
-                RocTimeSliceBank rtsb = parseRocTimeSliceBank(event);
-                if (!rtsb.getHits().isEmpty()) {
-                    banks.add(rtsb);
-                }
+                System.out.println(event);
+
+//                RocTimeSliceBank rtsb = parseRocTimeSliceBank(event);
+//                if (!rtsb.getHits().isEmpty()) {
+//                    banks.add(rtsb);
+//                }
             } catch (Exception e ){
                 System.out.println(e.getMessage());
             }
@@ -82,7 +84,7 @@ public class FadcUtil {
         }
 
 
-        // First bank is Time Info Bank (TSS) with frame and timestamp
+        // First bank is Time Slice Segment (TSS) with frame and timestamp
         EvioSegment b = (EvioSegment) ev.getChildAt(0).getChildAt(0);
         System.out.println("DDD======> EvioSegment (XML)");
         System.out.println(b.toXML());
