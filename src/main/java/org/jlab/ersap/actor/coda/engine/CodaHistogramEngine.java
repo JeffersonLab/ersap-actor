@@ -116,12 +116,14 @@ public class CodaHistogramEngine implements Engine {
         Set<String> conisNames = new HashSet<>();
 
         List<RocTimeSliceBank> banks;
-        // Decoding
-        try {
-            banks = FadcUtil.parseEtEvent((ByteBuffer)engineData.getData());
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
+//        // Decoding
+//        try {
+//            banks = FadcUtil.parseEtEvent((ByteBuffer)engineData.getData());
+//        } catch (Exception e) {
+//            throw new RuntimeException(e);
+//        }
+
+        banks = (List<RocTimeSliceBank>)engineData.getData();
         if (!banks.isEmpty()) {
             if (scatterReset) liveHist.resetScatter();
             for (RocTimeSliceBank bank : banks) {
