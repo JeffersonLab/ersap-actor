@@ -12,7 +12,6 @@ import org.jlab.ersap.actor.util.NibblePrinter;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.List;
 
@@ -60,7 +59,7 @@ public class CodaOutputFileReader implements IASource {
 
         try (FileInputStream fis = new FileInputStream(file)) {
             byte[] fileData = fis.readAllBytes();
-            NibblePrinter.printNibbles(fileData, 3);
+            NibblePrinter.printHexBlocks(fileData, 3);
         } catch (IOException e) {
             System.err.println("Error reading file: " + e.getMessage());
         }
