@@ -46,8 +46,6 @@ public class FadcUtil {
             evioDataByteOrder = event.getByteOrder();
             try {
 
-//                NibblePrinter.printNibbles(event.getByteData());
-
                 RocTimeSliceBank rtsb = parseRocTimeSliceBank(event);
                 if (!rtsb.getHits().isEmpty()) {
                     banks.add(rtsb);

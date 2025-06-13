@@ -48,21 +48,21 @@ public class CodaOutputFileReader implements IASource {
     }
 
     public CodaOutputFileReader(File file) {
-//        try {
-//            reader = new EvioReader(file, false, true, false);
-//            order = reader.getByteOrder();
-//            evCount = reader.getEventCount();
-//        } catch (IOException | EvioException e) {
-//            e.printStackTrace();
-//        }
-//        System.out.println("Read in file " + file.getName() + ", got " + evCount + " events");
-
-        try (FileInputStream fis = new FileInputStream(file)) {
-            byte[] fileData = fis.readAllBytes();
-            NibblePrinter.printHexBlocks(fileData, 7);
-        } catch (IOException e) {
-            System.err.println("Error reading file: " + e.getMessage());
+        try {
+            reader = new EvioReader(file, false, true, false);
+            order = reader.getByteOrder();
+            evCount = reader.getEventCount();
+        } catch (IOException | EvioException e) {
+            e.printStackTrace();
         }
+        System.out.println("Read in file " + file.getName() + ", got " + evCount + " events");
+
+//        try (FileInputStream fis = new FileInputStream(file)) {
+//            byte[] fileData = fis.readAllBytes();
+//            NibblePrinter.printHexBlocks(fileData, 4);
+//        } catch (IOException e) {
+//            System.err.println("Error reading file: " + e.getMessage());
+//        }
     }
 
     @Override
