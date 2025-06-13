@@ -7,8 +7,10 @@ import org.jlab.coda.jevio.EvioReader;
 import org.jlab.ersap.actor.coda.proc.fadc.FADCHit;
 import org.jlab.ersap.actor.coda.proc.fadc.FadcUtil;
 import org.jlab.ersap.actor.util.IASource;
+import org.jlab.ersap.actor.util.NibblePrinter;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -47,15 +49,21 @@ public class CodaOutputFileReader implements IASource {
     }
 
     public CodaOutputFileReader(File file) {
-        try {
-            reader = new EvioReader(file, false, true, false);
-            order = reader.getByteOrder();
-            evCount = reader.getEventCount();
-        } catch (IOException | EvioException e) {
-            e.printStackTrace();
-        }
-        System.out.println("Read in file " + file.getName() + ", got " + evCount + " events");
+//        try {
+//            reader = new EvioReader(file, false, true, false);
+//            order = reader.getByteOrder();
+//            evCount = reader.getEventCount();
+//        } catch (IOException | EvioException e) {
+//            e.printStackTrace();
+//        }
+//        System.out.println("Read in file " + file.getName() + ", got " + evCount + " events");
 
+        try (FileInputStream fis = new FileInputStream(file)) {
+            byte[] fileData = fis.readAllBytes();
+            NibblePrinter.printNibbles(fileData);
+        } catch (IOException e) {
+            System.err.println("Error reading file: " + e.getMessage());
+        }
     }
 
     @Override

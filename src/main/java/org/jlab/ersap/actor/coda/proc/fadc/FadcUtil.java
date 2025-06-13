@@ -43,15 +43,15 @@ public class FadcUtil {
     public static List<RocTimeSliceBank> parseFileEvent(EvioEvent event) throws Exception {
 
         List<RocTimeSliceBank> banks = new ArrayList<>();
-//            evioDataByteOrder = event.getByteOrder();
+            evioDataByteOrder = event.getByteOrder();
             try {
 
-                NibblePrinter.printNibbles(event.getByteData());
+//                NibblePrinter.printNibbles(event.getByteData());
 
-//                RocTimeSliceBank rtsb = parseRocTimeSliceBank(event);
-//                if (!rtsb.getHits().isEmpty()) {
-//                    banks.add(rtsb);
-//                }
+                RocTimeSliceBank rtsb = parseRocTimeSliceBank(event);
+                if (!rtsb.getHits().isEmpty()) {
+                    banks.add(rtsb);
+                }
             } catch (Exception e ){
                 System.out.println(e.getMessage());
             }
