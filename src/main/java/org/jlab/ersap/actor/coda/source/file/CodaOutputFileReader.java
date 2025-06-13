@@ -59,7 +59,7 @@ public class CodaOutputFileReader implements IASource {
 
         try (FileInputStream fis = new FileInputStream(file)) {
             byte[] fileData = fis.readAllBytes();
-            NibblePrinter.printHexBlocks(fileData, 3);
+            NibblePrinter.printHexBlocks(fileData, 7);
         } catch (IOException e) {
             System.err.println("Error reading file: " + e.getMessage());
         }
