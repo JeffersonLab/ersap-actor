@@ -43,7 +43,7 @@ public class FadcUtil {
     public static List<RocTimeSliceBank> parseFileEvent(EvioEvent event) throws Exception {
 
         List<RocTimeSliceBank> banks = new ArrayList<>();
-            evioDataByteOrder = event.getByteOrder();
+//            evioDataByteOrder = event.getByteOrder();
             try {
 
                 NibblePrinter.printNibbles(event.getByteData());
