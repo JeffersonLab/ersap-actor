@@ -6,12 +6,10 @@ import org.jlab.epsci.ersap.engine.EngineData;
 import org.jlab.epsci.ersap.engine.EngineDataType;
 import org.jlab.ersap.actor.coda.proc.LiveHistogram;
 import org.jlab.ersap.actor.coda.proc.fadc.FADCHit;
-import org.jlab.ersap.actor.coda.proc.fadc.FadcUtil;
-import org.jlab.ersap.actor.coda.proc.fadc.RocTimeSliceBank;
+import org.jlab.ersap.actor.coda.proc.fadc.RocTimeFrameBank;
 import org.jlab.ersap.actor.datatypes.JavaObjectType;
 import org.json.JSONObject;
 
-import java.nio.ByteBuffer;
 import java.util.*;
 
 public class CodaHistogramEngine implements Engine {
@@ -115,7 +113,7 @@ public class CodaHistogramEngine implements Engine {
         List<FADCHit> conis = new ArrayList<>();
         Set<String> conisNames = new HashSet<>();
 
-        List<RocTimeSliceBank> banks;
+        List<RocTimeFrameBank> banks;
 //        // Decoding
 //        try {
 //            banks = FadcUtil.parseEtEvent((ByteBuffer)engineData.getData());
@@ -123,10 +121,10 @@ public class CodaHistogramEngine implements Engine {
 //            throw new RuntimeException(e);
 //        }
 
-        banks = (List<RocTimeSliceBank>)engineData.getData();
+        banks = (List<RocTimeFrameBank>)engineData.getData();
         if (!banks.isEmpty()) {
             if (scatterReset) liveHist.resetScatter();
-            for (RocTimeSliceBank bank : banks) {
+            for (RocTimeFrameBank bank : banks) {
                 List<FADCHit> hits = bank.getHits();
                 System.out.println();
                 System.out.println("DDD ------------ Frame = "+bank.getFrameNumber());

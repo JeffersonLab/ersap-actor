@@ -3,7 +3,7 @@ package org.jlab.ersap.actor.coda.proc.fadc;
 import java.util.ArrayList;
 import java.util.List;
 
-public class RocTimeSliceBank {
+public class RocTimeFrameBank {
     private int frameNumber;
     private long timeStamp;
     private List<FADCHit> hits = new ArrayList<>();

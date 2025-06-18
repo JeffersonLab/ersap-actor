@@ -9,7 +9,7 @@ import org.jlab.ersap.actor.coda.proc.Awtbc;
 import org.jlab.ersap.actor.coda.proc.IStreamItem;
 import org.jlab.ersap.actor.coda.proc.fadc.FADCHit;
 import org.jlab.ersap.actor.coda.proc.fadc.FadcUtil;
-import org.jlab.ersap.actor.coda.proc.fadc.RocTimeSliceBank;
+import org.jlab.ersap.actor.coda.proc.fadc.RocTimeFrameBank;
 import org.jlab.ersap.actor.datatypes.JavaObjectType;
 import org.json.JSONObject;
 
@@ -71,7 +71,7 @@ public class EventIdentificationEngine implements Engine {
 
     public EngineData executeFileEvent(EngineData engineData) {
         EngineData out = new EngineData();
-        List<RocTimeSliceBank> data;
+        List<RocTimeFrameBank> data;
 
         // Decoding
         try {
@@ -79,7 +79,7 @@ public class EventIdentificationEngine implements Engine {
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
-        for (RocTimeSliceBank bank : data) {
+        for (RocTimeFrameBank bank : data) {
             List<FADCHit> hits = bank.getHits();
             System.out.println("========== FADC Data ========== ");
             System.out.println("DDD=======> Frame = " + bank.getFrameNumber()+" Time = "+ bank.getTimeStamp());
@@ -105,7 +105,7 @@ public class EventIdentificationEngine implements Engine {
         EngineData out = new EngineData();
         Set<IStreamItem> result = new HashSet<>();
 
-        List<RocTimeSliceBank> data;
+        List<RocTimeFrameBank> data;
 
         // Decoding
         try {
@@ -113,7 +113,7 @@ public class EventIdentificationEngine implements Engine {
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
-       for (RocTimeSliceBank bank : data) {
+       for (RocTimeFrameBank bank : data) {
            List<FADCHit> hits = bank.getHits();
            System.out.println("========== FADC Data ========== ");
            System.out.println("DDD=======> Frame = " + bank.getFrameNumber()+" Time = "+ bank.getTimeStamp());
