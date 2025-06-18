@@ -125,12 +125,20 @@ public class FadcUtil {
 
 
                 byte[] byteData = dataBank.getRawBytes();
+
+                System.out.println("DDD======> Frame = " + frame +
+                        ", TS = " + timestamp +
+                        ", payload ID = " + payloadId +
+                        " length = " + payloadLength);
+
                 if (payloadLength > 3) {
-//                    System.out.println("payload ID = " + payloadId + " length = " + payloadLength + " byteData_length = " + byteData.length);
+//                    System.out.println("payload ID = " + payloadId
+//                    + " length = " + payloadLength + " byteData_length = " + byteData.length);
                     hits = FadcUtil.parseFADCPayload(timestamp, payloadId, byteData);
                     System.out.println("DDD======> Frame = " + frame +
                             ", TS = " + timestamp +
-                            ", payload ID = " + payloadId);
+                            ", payload ID = " + payloadId +
+                            " length = " + payloadLength);
                     System.out.println("DDD ------------ FADC Hit = " + k);
                     for (FADCHit h : hits) {
                         System.out.println(h);
