@@ -60,7 +60,7 @@ public class FadcUtil {
     public static RocTimeSliceBank parseRocTimeSliceBank(EvioEvent ev) throws Exception {
 
         int evTag = ev.getHeader().getTag();
-//        System.out.println("DDD==========================> tag = " + Integer.toHexString(evTag) + " ==================================");
+        System.out.println("DDD==========================> tag = " + Integer.toHexString(evTag) + " ==================================");
         if (evTag == 0xffd1) {
             System.out.println("Skip over PRESTART event");
             return null;
@@ -87,8 +87,8 @@ public class FadcUtil {
 
         // First bank is Time Slice Segment (TSS) with frame and timestamp
         EvioSegment b = (EvioSegment) ev.getChildAt(0).getChildAt(0);
-//        System.out.println("DDD======> EvioSegment (XML)");
-//        System.out.println(b.toXML());
+        System.out.println("DDD======> EvioSegment (XML)");
+        System.out.println(b.toXML());
         int[] intData = b.getIntData();
         int frame = intData[0];
         long timestamp = ((((long) intData[1]) & 0x00000000ffffffffL) +
