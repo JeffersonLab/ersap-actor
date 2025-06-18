@@ -20,11 +20,9 @@ public class FadcUtil {
     @NotNull
     public static List<RocTimeSliceBank> parseEtEvent(ByteBuffer buf) throws Exception {
         EvioReader r = new EvioReader(buf);
-        System.out.println("DDD=======> version    = " + r.getEvioVersion());
-        System.out.println("DDD=======> eventCount = " + r.getEventCount());
-        System.out.println("DDD=======> blockCount = " + r.getBlockCount());
-
-        Thread.sleep(10000);
+//        System.out.println("DDD=======> version    = " + r.getEvioVersion());
+//        System.out.println("DDD=======> eventCount = " + r.getEventCount());
+//        System.out.println("DDD=======> blockCount = " + r.getBlockCount());
 
         List<RocTimeSliceBank> banks = new ArrayList<>();
         for (int i = 0; i < r.getEventCount(); i++) {
@@ -62,7 +60,7 @@ public class FadcUtil {
     public static RocTimeSliceBank parseRocTimeSliceBank(EvioEvent ev) throws Exception {
 
         int evTag = ev.getHeader().getTag();
-        System.out.println("DDD==========================> tag = " + Integer.toHexString(evTag) + " ==================================");
+//        System.out.println("DDD==========================> tag = " + Integer.toHexString(evTag) + " ==================================");
         if (evTag == 0xffd1) {
             System.out.println("Skip over PRESTART event");
             return null;
@@ -80,7 +78,7 @@ public class FadcUtil {
 
         // Go one level down ->
         int childCount = ev.getChildCount();
-        System.out.println("Event has " + childCount + " childes");
+//        System.out.println("Event has " + childCount + " childes");
 
         if (childCount < 2) {
             throw new Exception("Problem: too few child for event (" + childCount + ")");
