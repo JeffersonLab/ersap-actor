@@ -67,4 +67,15 @@ public class FADCHit implements IStreamItem {
     public long time() {
         return time;
     }
+
+    @Override
+    public String toString() {
+        return "FADCHit{" +
+                "crate=" + crate +
+                ", slot=" + slot +
+                ", channel=" + channel +
+                ", charge=" + charge +
+                ", time=" + time +
+                '}';
+    }
 }
