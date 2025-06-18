@@ -25,9 +25,10 @@ public class FadcUtil {
      */
     public static List<RocTimeFrameBank> parseEtEvent(ByteBuffer buf) throws Exception {
         EvioReader r = new EvioReader(buf);
-//        if(debug) System.out.println("DDD== EvioReader > version    = " + r.getEvioVersion()
-//        + " eventCount = " + r.getEventCount()
-//        + " blockCount = " + r.getBlockCount());
+
+        if(debug) System.out.println("DDD== EvioReader > version    = " + r.getEvioVersion()
+        + " eventCount = " + r.getEventCount()
+        + " blockCount = " + r.getBlockCount());
 
         List<RocTimeFrameBank> banks = new ArrayList<>();
         for (int i = 0; i < r.getEventCount(); i++) {
@@ -67,8 +68,10 @@ public class FadcUtil {
 
         // Read Aggregated time frame (evio v6.0) bank header and extract event tag
         int evTag = ev.getHeader().getTag();
+
         // Note the event tag = 0xff60 is a built stream event
-//        System.out.println("DDD=====> event tag = " + Integer.toHexString(evTag));
+        if(debug) System.out.println("DDD=====> event tag = " + Integer.toHexString(evTag));
+
         if (evTag == 0xffd1) {
             System.out.println("Skip over PRESTART event");
             return null;
@@ -103,40 +106,40 @@ public class FadcUtil {
         rocTimeFrameBank.setTimeStamp(timestamp);
 
         // Loop through all Aggregation info segments (AIS) which come after TSS.
-        // Note the first child is TSS
         for (int j = 1; j < childCount; j++) {
-            // ROC Time SLice Bank
-            EvioBank rocTSB = (EvioBank) ev.getChildAt(j);
-            int kids = rocTSB.getChildCount();
-//            System.out.println("DDD======> TSB childes = "+ kids);
+            EvioBank rocTFB = (EvioBank) ev.getChildAt(j);
+
+            // Here we get all ROC or streams data (e.g., ROC1, ROC2, etc., aggregated)
+            int kids = rocTFB.getChildCount();
             if (kids < 2) {
-                throw new Exception("Problem: too few child for TSB (" + childCount + ")");
+                throw new Exception("Problem: too few child for TFB (" + childCount + ")");
             }
             List<FADCHit> hits = new ArrayList<>();
-            // Another level down, each TSB has a Stream Info Bank (SIB) which comes first,
-            // followed by data banks
 
-            // Skip over SIB by starting at 1
+            // From here the data is in evio v4.0 format
+            // Another level down, each TFB (now evio v4.0) has a Stream Info Bank (SIB) which comes first,
+            // followed by data banks.
+            //
+            // Skip over SIB by starting at 1.
+            // Here we get payload (slot) banks
             for (int k = 1; k < kids; k++) {
-                EvioBank dataBank = (EvioBank) rocTSB.getChildAt(k);
+                EvioBank payloadBank = (EvioBank) rocTFB.getChildAt(k);
+
+                // Get tag of the header which is the payload ID (associated slot number).
+                // Note that this number is NOT the VXI slot number
+                int payloadId = payloadBank.getHeader().getTag();
+                int payloadLength = payloadBank.getHeader().getLength();
+
                 // Ignore the data type (currently the improper value of 0xf).
                 // Just get the data as bytes
-                int payloadId = dataBank.getHeader().getTag();
-                int payloadLength = dataBank.getHeader().getLength();
-//                System.out.println("DDD======> PayloadID "+payloadId);
-//                System.out.println("DDD======> PayloadLength "+payloadLength);
+                byte[] byteData = payloadBank.getRawBytes();
 
-
-                byte[] byteData = dataBank.getRawBytes();
-
-                System.out.println("DDD======> Frame = " + frameNumber +
+                if(debug) System.out.println("DDD======> Frame = " + frameNumber +
                         ", TS = " + timestamp +
                         ", payload ID = " + payloadId +
                         " length = " + payloadLength);
 
                 if (payloadLength > 3) {
-//                    System.out.println("payload ID = " + payloadId
-//                    + " length = " + payloadLength + " byteData_length = " + byteData.length);
                     hits = FadcUtil.parseFADCPayload(timestamp, payloadId, byteData);
                     System.out.println("DDD======> Frame = " + frameNumber +
                             ", TS = " + timestamp +
