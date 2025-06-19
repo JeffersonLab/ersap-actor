@@ -224,7 +224,7 @@ public class CodaHistogramEngine implements Engine {
             group.add(events.get(i));
             for (int j = i + 1; j < n; j++) {
                 long span = events.get(j).time() - events.get(i).time();
-                System.out.println("DDD====> span = "+span+" delta_t = "+maxInterval);
+//                System.out.println("DDD====> span = "+span+" delta_t = "+maxInterval);
                 if (span <= maxInterval) {
                     group.add(events.get(j));
                 } else {
