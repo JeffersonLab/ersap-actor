@@ -92,14 +92,14 @@ public class LiveHistogram {
 //        }
 
         // Channel vs hit scatter plot
-//        JFrame frame3 = new JFrame("ERSAP: channel vs hitTime");
-//        cc = new TGDataCanvas();
-//        frame3.add(cc);
-//        frame3.setSize(600, 600);
-//        cc.initTimer(600);
-//        scatter = new H2F("cvh", 100, 0, 70000, 100, scatterYMin, scatterYMax);
-//        cc.region().draw(scatter);
-//        frame3.setVisible(true);
+        JFrame frame3 = new JFrame("ERSAP: channel vs hitTime");
+        cc = new TGDataCanvas();
+        frame3.add(cc);
+        frame3.setSize(600, 600);
+        cc.initTimer(600);
+        scatter = new H2F("cvh", 100, 0, 70000, 100, scatterYMin, scatterYMax);
+        cc.region().draw(scatter);
+        frame3.setVisible(true);
 
         // coincidence
         JFrame frame4 = new JFrame("ERSAP: Integral");
