@@ -91,31 +91,33 @@ public class LiveHistogram {
 //            frame2.setVisible(true);
 //        }
 
-        JFrame frame3 = new JFrame("ERSAP: channel vs hitTime");
-        cc = new TGDataCanvas();
-        frame3.add(cc);
-        frame3.setSize(600, 600);
-        cc.initTimer(600);
-        scatter = new H2F("cvh", 100, 0, 70000, 100, scatterYMin, scatterYMax);
-        cc.region().draw(scatter);
-        frame3.setVisible(true);
+        // Channel vs hit scatter plot
+//        JFrame frame3 = new JFrame("ERSAP: channel vs hitTime");
+//        cc = new TGDataCanvas();
+//        frame3.add(cc);
+//        frame3.setSize(600, 600);
+//        cc.initTimer(600);
+//        scatter = new H2F("cvh", 100, 0, 70000, 100, scatterYMin, scatterYMax);
+//        cc.region().draw(scatter);
+//        frame3.setVisible(true);
 
-        JFrame frame4 = new JFrame("ERSAP: Integral");
-        ccc = new TGDataCanvas();
-        frame4.add(ccc);
-        frame4.setSize(600, 600);
-        ccc.initTimer(600);
-        StringBuffer coinTitle = new StringBuffer();
-        for(String t:coincidenceTitle){
-            coinTitle.append(t+"&");
-        }
-        String tt = String.valueOf(coinTitle);
-        String title = tt.substring(0, tt.length() - 1);
-        coincidenceHist = new H1F(title, 100, 0, 12000);
-        coincidenceHist.setTitleX(title);
-        histograms.put(title,coincidenceHist);
-        ccc.region().draw(coincidenceHist);
-        frame4.setVisible(true);
+        // coincidence
+//        JFrame frame4 = new JFrame("ERSAP: Integral");
+//        ccc = new TGDataCanvas();
+//        frame4.add(ccc);
+//        frame4.setSize(600, 600);
+//        ccc.initTimer(600);
+//        StringBuffer coinTitle = new StringBuffer();
+//        for(String t:coincidenceTitle){
+//            coinTitle.append(t+"&");
+//        }
+//        String tt = String.valueOf(coinTitle);
+//        String title = tt.substring(0, tt.length() - 1);
+//        coincidenceHist = new H1F(title, 100, 0, 12000);
+//        coincidenceHist.setTitleX(title);
+//        histograms.put(title,coincidenceHist);
+//        ccc.region().draw(coincidenceHist);
+//        frame4.setVisible(true);
 
         // create directory
         histDir = new TDirectory();
