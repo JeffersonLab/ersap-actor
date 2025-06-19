@@ -22,7 +22,7 @@ public class CodaHistogramEngine implements Engine {
     private static String HIST_TITLES = "hist_titles";
     private ArrayList<String> histTitles = new ArrayList<>(Arrays.asList("1-2-0", "1-2-1", "1-2-2", "1-2-1&2"));;
     private static String COINCIDENCE = "coincidence";
-    private ArrayList<String> concidence;
+    private ArrayList<String> coincidence;
     private static String HIST_BINS = "hist_bins";
     private int histBins = 100;
     private static String HIST_MIN = "hist_min";
@@ -65,11 +65,11 @@ public class CodaHistogramEngine implements Engine {
                 }
             }
             if (opts.has(COINCIDENCE)) {
-                concidence = new ArrayList<>();
+                coincidence = new ArrayList<>();
                 String ht = opts.getString(COINCIDENCE);
                 StringTokenizer st = new StringTokenizer(ht, ",");
                 while (st.hasMoreTokens()) {
-                    concidence.add(st.nextToken().trim());
+                    coincidence.add(st.nextToken().trim());
                 }
             }
             if (opts.has(HIST_BINS)) {
@@ -102,7 +102,7 @@ public class CodaHistogramEngine implements Engine {
             if (opts.has(HIST_MIN)) {
                 histMin = opts.getDouble(HIST_MIN);
             }
-            liveHist = new LiveHistogram(frameTitle, histTitles, concidence, gridSize,
+            liveHist = new LiveHistogram(frameTitle, histTitles, coincidence, gridSize,
                     frameWidth, frameHeight, histBins, histMin, histMax, scatter_y_min, scatter_y_max);
         }
         return null;
@@ -127,19 +127,19 @@ public class CodaHistogramEngine implements Engine {
             for (RocTimeFrameBank bank : banks) {
                 List<FADCHit> hits = bank.getHits();
                 System.out.println();
-                System.out.println("DDD ====> Frame = "+bank.getFrameNumber()+" timeStamp = "+bank.getTimeStamp());
+//                System.out.println("DDD ====> Frame = "+bank.getFrameNumber()+" timeStamp = "+bank.getTimeStamp());
 
                 for (FADCHit hit : hits) {
                     System.out.println(hit);
                     liveHist.update(hit.getName(),hit);
                     liveHist.updateScatter(hit.withTime(hit.time()-bank.getTimeStamp()));
-                    if(concidence.contains(hit.getName())){
+                    if(coincidence.contains(hit.getName())){
                         conis.add(hit);
                         conisNames.add(hit.getName());
                     }
                 }
                 // Coincidence
-                if(conisNames.containsAll(concidence)){
+                if(conisNames.containsAll(coincidence)){
                     int totlaCharge;
                     long time;
                     int size;
