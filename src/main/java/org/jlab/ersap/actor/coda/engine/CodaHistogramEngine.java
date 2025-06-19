@@ -127,7 +127,7 @@ public class CodaHistogramEngine implements Engine {
             for (RocTimeFrameBank bank : banks) {
                 List<FADCHit> hits = bank.getHits();
                 System.out.println();
-                System.out.println("DDD ------------ Frame = "+bank.getFrameNumber());
+                System.out.println("DDD ====> Frame = "+bank.getFrameNumber()+" timeStamp = "+bank.getTimeStamp());
 
                 for (FADCHit hit : hits) {
                     System.out.println(hit);
@@ -163,7 +163,6 @@ public class CodaHistogramEngine implements Engine {
                         }
                     }
                 }
-                System.out.println("DDD ------------ Time  = "+bank.getTimeStamp());
             }
         }
         return engineData;
@@ -225,6 +224,7 @@ public class CodaHistogramEngine implements Engine {
             group.add(events.get(i));
             for (int j = i + 1; j < n; j++) {
                 long span = events.get(j).time() - events.get(i).time();
+                System.out.println("DDD====> span = "+span+" delta_t = "+maxInterval);
                 if (span <= maxInterval) {
                     group.add(events.get(j));
                 } else {
