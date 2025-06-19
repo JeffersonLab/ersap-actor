@@ -102,22 +102,22 @@ public class LiveHistogram {
 //        frame3.setVisible(true);
 
         // coincidence
-//        JFrame frame4 = new JFrame("ERSAP: Integral");
-//        ccc = new TGDataCanvas();
-//        frame4.add(ccc);
-//        frame4.setSize(600, 600);
-//        ccc.initTimer(600);
-//        StringBuffer coinTitle = new StringBuffer();
-//        for(String t:coincidenceTitle){
-//            coinTitle.append(t+"&");
-//        }
-//        String tt = String.valueOf(coinTitle);
-//        String title = tt.substring(0, tt.length() - 1);
-//        coincidenceHist = new H1F(title, 100, 0, 12000);
-//        coincidenceHist.setTitleX(title);
-//        histograms.put(title,coincidenceHist);
-//        ccc.region().draw(coincidenceHist);
-//        frame4.setVisible(true);
+        JFrame frame4 = new JFrame("ERSAP: Integral");
+        ccc = new TGDataCanvas();
+        frame4.add(ccc);
+        frame4.setSize(600, 600);
+        ccc.initTimer(600);
+        StringBuffer coinTitle = new StringBuffer();
+        for(String t:coincidenceTitle){
+            coinTitle.append(t+"&");
+        }
+        String tt = String.valueOf(coinTitle);
+        String title = tt.substring(0, tt.length() - 1);
+        coincidenceHist = new H1F(title, 100, 0, 12000);
+        coincidenceHist.setTitleX(title);
+        histograms.put(title,coincidenceHist);
+        ccc.region().draw(coincidenceHist);
+        frame4.setVisible(true);
 
         // create directory
         histDir = new TDirectory();
