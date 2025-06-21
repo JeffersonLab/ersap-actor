@@ -69,7 +69,7 @@ public class EventIdentificationEngine implements Engine {
         }
     }
 
-    public EngineData executeFileEvent(EngineData engineData) {
+    private EngineData executeFileEvent(EngineData engineData) {
         EngineData out = new EngineData();
         List<RocTimeFrameBank> data;
 
@@ -101,7 +101,7 @@ public class EventIdentificationEngine implements Engine {
         return out;
     }
 
-   public EngineData executeETEvent(EngineData engineData) {
+   private EngineData executeETEvent(EngineData engineData) {
         EngineData out = new EngineData();
         Set<IStreamItem> result = new HashSet<>();
 
@@ -148,7 +148,7 @@ public class EventIdentificationEngine implements Engine {
 
     @Override
     public String getDescription () {
-        return "fADC data decoder and event identification. EVIO data format";
+        return "fADC data decoder and event identification. EVIO data format, supports file and ET sources ";
     }
 
     @Override

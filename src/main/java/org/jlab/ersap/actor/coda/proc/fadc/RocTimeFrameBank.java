@@ -31,6 +31,9 @@ public class RocTimeFrameBank {
     public void setHits(List<FADCHit> hits) {
         this.hits = hits;
     }
+    public void addHits(List<FADCHit> hits) {
+        hits.addAll(hits);
+    }
     public void addHit(FADCHit hit) {
         hits.add(hit);
     }

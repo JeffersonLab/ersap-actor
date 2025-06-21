@@ -151,8 +151,8 @@ public class FadcUtil {
                     }
                     System.out.println("DDD ------------ FADC Hit = " + k);
                 }
+                rocTimeFrameBank.addHits(hits);
             }
-            rocTimeFrameBank.setHits(hits);
         }
         return rocTimeFrameBank;
     }
