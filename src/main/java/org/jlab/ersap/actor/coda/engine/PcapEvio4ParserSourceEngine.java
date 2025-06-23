@@ -13,7 +13,6 @@ import java.nio.file.Path;
 public class PcapEvio4ParserSourceEngine extends AbstractEventReaderService<EVIO4EvtParser> {
     private static final String VERBOSE = "verbose";
     private static final String FIFO_CAPACITY = "fifo_capacity";
-    private static final String FILENAME = "file_name";
     private boolean debug = false;
     public EVIO4EvtParser evio4EvtParser;
 
