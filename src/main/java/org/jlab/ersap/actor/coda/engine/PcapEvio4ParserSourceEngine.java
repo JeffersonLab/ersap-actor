@@ -5,6 +5,7 @@ import org.jlab.epsci.ersap.std.services.AbstractEventReaderService;
 import org.jlab.epsci.ersap.std.services.EventReaderException;
 import org.jlab.ersap.actor.coda.proc.EVIO4EvtParser;
 import org.jlab.ersap.actor.datatypes.JavaObjectType;
+import org.jlab.utils.JsonUtils;
 import org.json.JSONObject;
 
 import java.nio.ByteOrder;
@@ -25,6 +26,7 @@ public class PcapEvio4ParserSourceEngine extends AbstractEventReaderService<EVIO
         if (verbose.trim().equalsIgnoreCase("yes")) {
             debug = true;
         }
+        System.out.println("DDD ===========> "+path.getFileName().toString());
         return evio4EvtParser = new EVIO4EvtParser(path.getFileName().toString(), fifoCapacity, debug);
     }
 
