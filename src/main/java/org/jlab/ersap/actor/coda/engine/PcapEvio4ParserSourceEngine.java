@@ -26,8 +26,8 @@ public class PcapEvio4ParserSourceEngine extends AbstractEventReaderService<EVIO
         if (verbose.trim().equalsIgnoreCase("yes")) {
             debug = true;
         }
-        System.out.println("DDD ===========> "+path.getFileName().toString());
-        return evio4EvtParser = new EVIO4EvtParser(path.getFileName().toString(), fifoCapacity, debug);
+        System.out.println("DDD ===========> "+path.toAbsolutePath().toString());
+        return evio4EvtParser = new EVIO4EvtParser(path.toAbsolutePath().toString(), fifoCapacity, debug);
     }
 
     @Override
