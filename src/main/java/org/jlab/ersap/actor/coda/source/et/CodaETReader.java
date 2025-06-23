@@ -235,8 +235,6 @@ public class CodaETReader implements IASource, Runnable {
             } catch (InterruptedException e) {
                 throw new RuntimeException(e);
             }
-
-
         }
     }
 }

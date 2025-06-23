@@ -1,0 +1,11 @@
+---
+name: CodaEtSourceEngine
+engine: org.jlab.ersap.actor.coda.engine.PcapEvio4ParserSourceEngine
+type: java
+
+author: vardan
+email: gurjyan@jlab.org
+
+version: 0.1
+description:
+  Opens evio v4.0 binary file as a result of pcap file reader program, parses it.
