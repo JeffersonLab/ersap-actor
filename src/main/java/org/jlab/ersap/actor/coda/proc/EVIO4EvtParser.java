@@ -174,7 +174,8 @@ public class EVIO4EvtParser implements IASource, Runnable {
     }
 
     private List<RocTimeFrameBank> dequeue() throws InterruptedException {
-        return queue.take(); // Blocks if the queue is empty
+        List<RocTimeFrameBank> banks = new ArrayList<>(queue.take());
+        return banks; // Blocks if the queue is empty
     }
 
     @Override
