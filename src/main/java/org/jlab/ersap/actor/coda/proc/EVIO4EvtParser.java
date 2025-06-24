@@ -21,7 +21,7 @@ public class EVIO4EvtParser implements IASource, Runnable {
     private static final int WORD_SIZE = 4;
     private static final int MAGIC_WORD = 0xC0DA0100;
     // Queue
-    private final BlockingQueue<RocTimeFrameBank> queue;
+    private final BlockingQueue<List<RocTimeFrameBank>> queue;
     private AtomicBoolean running = new AtomicBoolean(true);
     private ByteBuffer dataBuffer;
 
@@ -39,8 +39,8 @@ public class EVIO4EvtParser implements IASource, Runnable {
     }
 
     private void startParsing(ByteBuffer buffer) throws IOException, InterruptedException {
+       List<RocTimeFrameBank> timeFrameBanks = new ArrayList<>();
 
-        RocTimeFrameBank rocTimeFrameBank = new RocTimeFrameBank();
         while (buffer.remaining() >= WORD_SIZE) {
             buffer.mark();
             int word = buffer.getInt();
@@ -66,8 +66,6 @@ public class EVIO4EvtParser implements IASource, Runnable {
                 if (debug) System.out.println("DDD frameNumber = " + frameNumber + " timeStamp = " + timeStamp);
 
 
-                rocTimeFrameBank.setFrameNumber(frameNumber);
-                rocTimeFrameBank.setTimeStamp(timeStamp);
 
                 if (buffer.remaining() < WORD_SIZE) continue;
                 int nextWord = buffer.getInt();
@@ -97,7 +95,12 @@ public class EVIO4EvtParser implements IASource, Runnable {
                 }
 
                 for (int i = 0; i < payloads; i++) {
+
                     if (buffer.remaining() < WORD_SIZE * 2) continue;
+                    RocTimeFrameBank rocTimeFrameBank = new RocTimeFrameBank();
+                    rocTimeFrameBank.setFrameNumber(frameNumber);
+                    rocTimeFrameBank.setTimeStamp(timeStamp);
+
                     int payloadPortLength = buffer.getInt();
                     int payloadHeader = buffer.getInt();
                     int payloadID = (payloadHeader >>> 16) & 0xFFFF;
@@ -112,8 +115,9 @@ public class EVIO4EvtParser implements IASource, Runnable {
 
                     // Adding hits in this payload board
                     rocTimeFrameBank.addHits(parseFADCPayload(timeStamp, payloadID, payloadBytes));
+                    timeFrameBanks.add(rocTimeFrameBank);
                 }
-                enqueue(rocTimeFrameBank);
+                enqueue(timeFrameBanks);
             } else {
                 buffer.reset();
                 buffer.position(buffer.position() + WORD_SIZE);
@@ -165,11 +169,11 @@ public class EVIO4EvtParser implements IASource, Runnable {
         return hits;
     }
 
-    private void enqueue(RocTimeFrameBank bank) throws InterruptedException {
+    private void enqueue(List<RocTimeFrameBank> bank) throws InterruptedException {
         queue.put(bank); // Blocks if the queue is full
     }
 
-    private RocTimeFrameBank dequeue() throws InterruptedException {
+    private List<RocTimeFrameBank> dequeue() throws InterruptedException {
         return queue.take(); // Blocks if the queue is empty
     }
 
