@@ -121,7 +121,7 @@ public class CodaHistogramEngine implements Engine {
 //            throw new RuntimeException(e);
 //        }
 
-        banks = (List<RocTimeFrameBank>)engineData.getData();
+        banks = new ArrayList<>((List<RocTimeFrameBank>) engineData.getData());
         if (!banks.isEmpty()) {
             if (scatterReset) liveHist.resetScatter();
             for (RocTimeFrameBank bank : banks) {
