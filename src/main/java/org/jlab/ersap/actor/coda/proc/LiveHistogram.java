@@ -90,7 +90,7 @@ public class LiveHistogram {
 //            }
 //            frame2.setVisible(true);
 //        }
-
+/*
         // Channel vs hit scatter plot
         JFrame frame3 = new JFrame("ERSAP: channel vs hitTime");
         cc = new TGDataCanvas();
@@ -118,7 +118,7 @@ public class LiveHistogram {
         histograms.put(title,coincidenceHist);
         ccc.region().draw(coincidenceHist);
         frame4.setVisible(true);
-
+*/
         // create directory
         histDir = new TDirectory();
         ERSAP_USER_DATA = System.getenv("ERSAP_USER_DATA");
