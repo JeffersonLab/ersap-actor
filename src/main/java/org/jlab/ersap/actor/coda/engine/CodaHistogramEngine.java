@@ -126,7 +126,6 @@ public class CodaHistogramEngine implements Engine {
             if (scatterReset) liveHist.resetScatter();
             for (RocTimeFrameBank bank : banks) {
                 List<FADCHit> hits = bank.getHits();
-                System.out.println();
 //                System.out.println("DDD ====> Frame = "+bank.getFrameNumber()+" timeStamp = "+bank.getTimeStamp());
 
                 for (FADCHit hit : hits) {
