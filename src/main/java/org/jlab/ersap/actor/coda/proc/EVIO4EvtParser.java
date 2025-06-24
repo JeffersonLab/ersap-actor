@@ -191,6 +191,7 @@ public class EVIO4EvtParser implements IASource, Runnable {
     @Override
     public Object nextEvent() {
         try {
+            System.out.println("DDD ===== > nextEvent");
             return dequeue();
         } catch (Exception e) {
             throw new RuntimeException(e);
