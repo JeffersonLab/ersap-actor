@@ -115,6 +115,11 @@ public class EVIO4EvtParser implements IASource, Runnable {
 
                     // Adding hits in this payload board
                     rocTimeFrameBank.addHits(parseFADCPayload(timeStamp, payloadID, payloadBytes));
+//                    if(debug) {
+                        for (FADCHit h : rocTimeFrameBank.getHits()) {
+                            System.out.println(h);
+                        }
+//                    }
                     timeFrameBanks.add(rocTimeFrameBank);
                 }
                 enqueue(timeFrameBanks);
