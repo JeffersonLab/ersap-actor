@@ -108,10 +108,10 @@ public class FadcHistogramEngine implements Engine{
             for (RocTimeFrameBank bank : banks) {
                 List<FADCHit> hits = bank.getHits();
 //                System.out.println("DDD =======> "+bank.getFrameNumber()+" "+bank.getTimeStamp()+" "+hits.isEmpty());
-                for (FADCHit hit : hits) {
-                    System.out.println(hit);
-                    liveHist.update(hit.getName(), hit);
-                }
+//                for (FADCHit hit : hits) {
+//                    System.out.println(hit);
+//                    liveHist.update(hit.getName(), hit);
+//                }
             }
         }
 
