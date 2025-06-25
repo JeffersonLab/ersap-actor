@@ -114,14 +114,13 @@ public class EVIO4EvtParser implements IASource, Runnable {
                     buffer.get(payloadBytes);
 
                     List<FADCHit> hList = parseFADCPayload(timeStamp, payloadID, payloadBytes);
-//                    System.out.println("DDD =====> "+ hList.isEmpty());
                     // Adding hits in this payload board
-                    rocTimeFrameBank.addHits(hList);
-//                    if(debug) {
+                    rocTimeFrameBank.setHits(hList);
+                    if(debug) {
                         for (FADCHit h :  hList) {
                             System.out.println(h);
                         }
-//                    }
+                    }
                     timeFrameBanks.add(rocTimeFrameBank);
                 }
                 enqueue(timeFrameBanks);
