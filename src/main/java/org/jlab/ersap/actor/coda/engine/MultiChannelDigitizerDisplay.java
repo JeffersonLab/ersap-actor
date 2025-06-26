@@ -86,7 +86,7 @@ public class MultiChannelDigitizerDisplay implements Engine {
                 System.out.println("DDD =====> rocID = "+tb.getRocID()+" "+rocId + tb.getHits().isEmpty());
 //                if(tb.getRocID() == rocId) {
                     for (FADCHit hit : tb.getHits()) {
-                        System.out.printf("DDD => " + hit);
+                        System.out.println("DDD => " + hit);
                         liveHist.update(hit.getName(), hit);
                     }
 //                }
