@@ -135,11 +135,6 @@ public class EvioEventParser {
 
                 if (payloadLength > 3) {
                     hits = parseFADCPayload(timestamp, rocID, payloadId, byteData);
-                    if (debug) {
-                        for (FADCHit h : hits) {
-                            System.out.println(h);
-                        }
-                    }
                     rocTimeFrameBank.addHits(hits);
                 }
             }
@@ -148,66 +143,23 @@ public class EvioEventParser {
         return banks;
     }
 
-    private List<FADCHit> parseFADCPayload(Long frame_time_ns, int rocId, int payloadId, byte[] ba) {
-        List<FADCHit> hits = new ArrayList<>();
-        IntBuffer intBuf = ByteBuffer.wrap(ba).order(ByteOrder.BIG_ENDIAN).asIntBuffer();
-        int[] pData = new int[intBuf.remaining()];
-        intBuf.get(pData);
-
-        for (int word : pData) {
-            int wordType = (word >>> 30) & 0x3;
-
-            if (wordType == 0b00) {
-                int q = word & 0x1FFF;                   // bits 12:0
-                int channel = (word >>> 13) & 0xF;       // bits 16:13
-                long t_offset = ((word >>> 17) & 0x1FFF) * 4L; // bits 29:17, 4ns units
-                long hit_time = frame_time_ns + t_offset;
-
-                // Filter out invalid or junk values:
-                boolean isPowerOf2 = (q != 0) && ((q & (q - 1)) == 0);
-                boolean looksValid =
-                        q > 0 &&
-                                !isPowerOf2 && // reject pure powers of 2
-                                channel >= 0 && channel < 16 &&
-                                (hit_time > frame_time_ns) &&
-                                (hit_time - frame_time_ns) < 100_000_000; // max 100ms drift
-
-                if (!looksValid) continue;
-
-                FADCHit hit = new FADCHit(rocId, payloadId, channel, q, hit_time);
-                hits.add(hit);
-
-                if (debug)
-                    System.out.printf("HIT: 0x%08X → ch=%d q=%d t=%d\n", word, channel, q, hit_time);
-            } else {
-                if (debug)
-                    System.out.printf("SKIP: Non-hit word: 0x%08X (type=%d)\n", word, wordType);
+        @NotNull
+        public List<FADCHit> parseFADCPayload (Long frame_time_ns, int rocId, int payloadId, byte[] ba){
+            List<FADCHit> hits = new ArrayList<>();
+            IntBuffer intBuf =
+                    ByteBuffer.wrap(ba)
+                            .order(ByteOrder.BIG_ENDIAN)
+                            .asIntBuffer();
+            int[] pData = new int[intBuf.remaining()];
+            intBuf.get(pData);
+            for (int i : pData) {
+                int q = (i) & 0x1FFF;
+                int channel = (i >>> 13) & 0x000F;
+                long v = ((i >>> 17) & 0x3FFF) * 4;
+                long ht = frame_time_ns + v;
+                hits.add(new FADCHit(rocId, payloadId, channel, q, ht));
             }
+            return hits;
         }
 
-        if (debug)
-            for (FADCHit hit : hits)
-                System.out.println(hit);
-        return hits;
     }
-
-    @NotNull
-    public List<FADCHit> parseFADCPayload(Long frame_time_ns, int payloadId, byte[] ba) {
-        List<FADCHit> hits = new ArrayList<>();
-        IntBuffer intBuf =
-                ByteBuffer.wrap(ba)
-                        .order(ByteOrder.BIG_ENDIAN)
-                        .asIntBuffer();
-        int[] pData = new int[intBuf.remaining()];
-        intBuf.get(pData);
-        for (int i : pData) {
-            int q = (i) & 0x1FFF;
-            int channel = (i >>> 13) & 0x000F;
-            long v = ((i >>> 17) & 0x3FFF) * 4;
-            long ht = frame_time_ns + v;
-            hits.add(new FADCHit(1, payloadId, channel, q, ht));
-        }
-        return hits;
-    }
-
-}
