@@ -1,7 +1,5 @@
 package org.jlab.ersap.actor.coda.proc;
 
-import org.jlab.ersap.actor.coda.proc.fadc.FADCHit;
-import org.jlab.ersap.actor.coda.proc.fadc.RocTimeFrameBank;
 import org.jlab.ersap.actor.util.IASource;
 
 import java.io.IOException;
@@ -16,7 +14,7 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-public class EVIO4EvtParser implements IASource, Runnable {
+public class CustomEvioEventParser implements IASource, Runnable {
     private boolean debug;
     private static final int WORD_SIZE = 4;
     private static final int MAGIC_WORD = 0xC0DA0100;
@@ -25,7 +23,7 @@ public class EVIO4EvtParser implements IASource, Runnable {
     private AtomicBoolean running = new AtomicBoolean(true);
     private ByteBuffer dataBuffer;
 
-    public EVIO4EvtParser(String fileName, int queueCapacity, boolean debug) {
+    public CustomEvioEventParser(String fileName, int queueCapacity, boolean debug) {
         this.queue = new LinkedBlockingQueue<>(queueCapacity);
         this.debug = debug;
         try {

@@ -4,38 +4,36 @@ import org.jlab.epsci.ersap.base.ErsapUtil;
 import org.jlab.epsci.ersap.engine.Engine;
 import org.jlab.epsci.ersap.engine.EngineData;
 import org.jlab.epsci.ersap.engine.EngineDataType;
-import org.jlab.ersap.actor.coda.proc.LiveHistogram;
+import org.jlab.ersap.actor.coda.proc.EtEvent;
 import org.jlab.ersap.actor.coda.proc.FADCHit;
+import org.jlab.ersap.actor.coda.proc.LiveHistogram;
 import org.jlab.ersap.actor.coda.proc.RocTimeFrameBank;
 import org.jlab.ersap.actor.datatypes.JavaObjectType;
+import org.jlab.utils.JsonUtils;
 import org.json.JSONObject;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
+import java.util.StringTokenizer;
 
-public class FadcHistogramEngine implements Engine{
+public class MultiChannelDigitizerDisplay implements Engine {
     private static String FRAME_TITLE = "frame_title";
     private String frameTitle = "ERSAP";
     private static String FRAME_WIDTH = "frame_width";
     private int frameWidth = 1200;
     private static String FRAME_HEIGHT = "frame_height";
     private int frameHeight = 1200;
-    private static String HIST_TITLES = "hist_titles";
-    private ArrayList<String> histTitles = new ArrayList<>(Arrays.asList("1-2-0", "1-2-1", "1-2-2", "1-2-1&2"));;
-    private static String COINCIDENCE = "coincidence";
-    private ArrayList<String> coincidence;
     private static String HIST_BINS = "hist_bins";
     private int histBins = 100;
     private static String HIST_MIN = "hist_min";
     private double histMin = 0;
     private static String HIST_MAX = "hist_max";
     private double histMax = 8000;
-    private static String GRID_SIZE = "grid_size";
-    private int gridSize = 2;
-    private static String SCATTER_RESET = "scatter_reset";
-    private static String SCATTER_YMIN = "scatter_y_min";
-    private static String SCATTER_YMAX = "scatter_y_max";
-    private boolean scatterReset = true;
-    private double scatter_y_min = 0 , scatter_y_max = 2000;
+    private static String ROC_ID = "roc_id";
+    private int rocId = 1;
+    private static String SLOT = "slot";
+    private int slot = 1;
 
     private LiveHistogram liveHist;
 
@@ -53,22 +51,6 @@ public class FadcHistogramEngine implements Engine{
             if (opts.has(FRAME_HEIGHT)) {
                 frameHeight = opts.getInt(FRAME_HEIGHT);
             }
-            if (opts.has(HIST_TITLES)) {
-                histTitles = new ArrayList<>();
-                String ht = opts.getString(HIST_TITLES);
-                StringTokenizer st = new StringTokenizer(ht, ",");
-                while (st.hasMoreTokens()) {
-                    histTitles.add(st.nextToken().trim());
-                }
-            }
-            if (opts.has(COINCIDENCE)) {
-                coincidence = new ArrayList<>();
-                String ht = opts.getString(COINCIDENCE);
-                StringTokenizer st = new StringTokenizer(ht, ",");
-                while (st.hasMoreTokens()) {
-                    coincidence.add(st.nextToken().trim());
-                }
-            }
             if (opts.has(HIST_BINS)) {
                 histBins = opts.getInt(HIST_BINS);
             }
@@ -78,44 +60,39 @@ public class FadcHistogramEngine implements Engine{
             if (opts.has(HIST_MAX)) {
                 histMax = opts.getDouble(HIST_MAX);
             }
-            if (opts.has(GRID_SIZE)) {
-                gridSize = opts.getInt(GRID_SIZE);
+            if (opts.has(SLOT)) {
+                slot = opts.getInt(SLOT);
+            }
+            if (opts.has(ROC_ID)) {
+                rocId = opts.getInt(ROC_ID);
             }
 
-            if (opts.has(SCATTER_RESET)) {
-                scatterReset = true;
-            }
-            if (opts.has(SCATTER_YMIN)) {
-                scatter_y_min = opts.getDouble(SCATTER_YMIN);
-            }
-            if (opts.has(SCATTER_YMAX)) {
-                scatter_y_max = opts.getDouble(SCATTER_YMAX);
+            List<String> histTitles = new ArrayList<>();
+            for(int i=0;i<16;i++){
+                histTitles.add(rocId+"-"+slot+"-"+i);
             }
 
-            if (opts.has(HIST_MIN)) {
-                histMin = opts.getDouble(HIST_MIN);
-            }
-            liveHist = new LiveHistogram(frameTitle, histTitles, coincidence, gridSize,
-                    frameWidth, frameHeight, histBins, histMin, histMax, scatter_y_min, scatter_y_max);
+            liveHist = new LiveHistogram(frameTitle, histTitles, 4,
+                    frameWidth, frameHeight, histBins, histMin, histMax);
         }
         return null;
     }
 
     @Override
     public EngineData execute(EngineData engineData) {
-        List<RocTimeFrameBank> banks = new ArrayList<>((List<RocTimeFrameBank>) engineData.getData());
-        if (!banks.isEmpty()) {
-            for (RocTimeFrameBank bank : banks) {
-                List<FADCHit> hits = bank.getHits();
-//                System.out.println("DDD =======> "+bank.getFrameNumber()+" "+bank.getTimeStamp()+" "+hits.isEmpty());
-//                for (FADCHit hit : hits) {
-//                    System.out.println(hit);
-//                    liveHist.update(hit.getName(), hit);
+        EtEvent data = (EtEvent) engineData.getData();
+        for(List<RocTimeFrameBank> rtf: data.getTimeFrames()){
+            for(RocTimeFrameBank tb: rtf){
+                System.out.println("DDD =====> rocID = "+tb.getRocID()+" "+rocId);
+//                if(tb.getRocID() == rocId) {
+                    for (FADCHit hit : tb.getHits()) {
+                        System.out.printf("DDD => " + hit);
+                        liveHist.update(hit.getName(), hit);
+                    }
 //                }
             }
         }
-
-                return engineData;
+        return engineData;
     }
 
     @Override
@@ -141,7 +118,7 @@ public class FadcHistogramEngine implements Engine{
 
     @Override
     public String getDescription() {
-        return "FADC25 digitiser data histogram actor";
+        return "CODA EVIO data histogram actor";
     }
 
     @Override
@@ -161,4 +138,5 @@ public class FadcHistogramEngine implements Engine{
     @Override
     public void destroy() {
     }
+
 }

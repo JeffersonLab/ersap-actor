@@ -1,6 +1,5 @@
 package org.jlab.ersap.actor.coda.proc;
 
-import org.jlab.ersap.actor.coda.proc.fadc.FADCHit;
 import twig.data.H2F;
 import twig.graphics.TGDataCanvas;
 

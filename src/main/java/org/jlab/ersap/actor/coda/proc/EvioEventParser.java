@@ -1,4 +1,4 @@
-package org.jlab.ersap.actor.coda.proc.fadc;
+package org.jlab.ersap.actor.coda.proc;
 
 import org.jetbrains.annotations.NotNull;
 import org.jlab.coda.jevio.EvioBank;
@@ -13,64 +13,55 @@ import java.util.ArrayList;
 import java.util.List;
 
 
-public class FadcUtil {
-    private static boolean debug = false;
+public class EvioEventParser {
+    private boolean debug;
 
     public static ByteOrder evioDataByteOrder = ByteOrder.BIG_ENDIAN;
+
+    public EvioEventParser(boolean debug) {
+        this.debug = debug;
+    }
 
     @NotNull
     /**
      * Parses ET event created and sent by the CODA aggregator.
      * This is going to be an evio-6 format
      */
-    public static List<RocTimeFrameBank> parseEtEvent(ByteBuffer buf) throws Exception {
+    public EtEvent parseEtEvent(ByteBuffer buf) throws Exception {
         EvioReader r = new EvioReader(buf);
+        EtEvent evt = new EtEvent();
+        if (debug) System.out.println("DDD== EvioReader > version    = " + r.getEvioVersion()
+                + " eventCount = " + r.getEventCount()
+                + " blockCount = " + r.getBlockCount());
 
-        if(debug) System.out.println("DDD== EvioReader > version    = " + r.getEvioVersion()
-        + " eventCount = " + r.getEventCount()
-        + " blockCount = " + r.getBlockCount());
-
-        List<RocTimeFrameBank> banks = new ArrayList<>();
         for (int i = 0; i < r.getEventCount(); i++) {
             EvioEvent event = r.parseNextEvent();
             evioDataByteOrder = r.getByteOrder();
-            try {
-                RocTimeFrameBank rocTFB = parseRocTimeFrameBank(event);
-                assert rocTFB != null;
-                if (!rocTFB.getHits().isEmpty()) {
-                    banks.add(rocTFB);
-                }
-            } catch (Exception e) {
-                System.out.println(e.getMessage());
-            }
+            List<RocTimeFrameBank> rocBanks = parseTimeFrame(event);
+            evt.addTimeFrame(rocBanks);
         }
-        return banks;
+        return evt;
     }
 
     @NotNull
-    public static List<RocTimeFrameBank> parseFileEvent(EvioEvent event) throws Exception {
+    public EtEvent parseFileEvent(EvioEvent event) throws Exception {
 
-        List<RocTimeFrameBank> banks = new ArrayList<>();
+        EtEvent evt = new EtEvent();
         evioDataByteOrder = event.getByteOrder();
-        try {
 
-            RocTimeFrameBank rtsb = parseRocTimeFrameBank(event);
-            if (!rtsb.getHits().isEmpty()) {
-                banks.add(rtsb);
-            }
-        } catch (Exception e) {
-            System.out.println(e.getMessage());
-        }
-        return banks;
+        List<RocTimeFrameBank> rocBanks = parseTimeFrame(event);
+        evt.addTimeFrame(rocBanks);
+        return evt;
     }
 
-    public static RocTimeFrameBank parseRocTimeFrameBank(EvioEvent ev) throws Exception {
+    private List<RocTimeFrameBank> parseTimeFrame(EvioEvent ev) throws Exception {
 
+        List<RocTimeFrameBank> banks = new ArrayList<>();
         // Read Aggregated time frame (evio v6.0) bank header and extract event tag
         int evTag = ev.getHeader().getTag();
 
         // Note the event tag = 0xff60 is a built stream event
-        if(debug) System.out.println("DDD=====> event tag = " + Integer.toHexString(evTag));
+        if (debug) System.out.println("DDD=====> event tag = " + Integer.toHexString(evTag));
 
         if (evTag == 0xffd1) {
             System.out.println("Skip over PRESTART event");
@@ -99,15 +90,19 @@ public class FadcUtil {
         long timestamp = ((((long) intData[1]) & 0x00000000ffffffffL) +
                 (((long) intData[2]) << 32));
 
-
-        // Create a rcoTimeFrame instance and assign frame number and timestamp
-        RocTimeFrameBank rocTimeFrameBank = new RocTimeFrameBank();
-        rocTimeFrameBank.setFrameNumber(frameNumber);
-        rocTimeFrameBank.setTimeStamp(timestamp);
-
         // Loop through all Aggregation info segments (AIS) which come after TSS.
+        // This is ROCs loop
         for (int j = 1; j < childCount; j++) {
+            // Create a rcoTimeFrame instance and assign frame number and timestamp
+            RocTimeFrameBank rocTimeFrameBank = new RocTimeFrameBank();
+            rocTimeFrameBank.setFrameNumber(frameNumber);
+            rocTimeFrameBank.setTimeStamp(timestamp);
+
             EvioBank rocTFB = (EvioBank) ev.getChildAt(j);
+            // This must be the ROC ID
+            int rocID = rocTFB.getHeader().getTag();
+            System.out.println("DDD =====> " + rocID);
+            rocTimeFrameBank.setRocID(rocID);
 
             // Here we get all ROC or streams data (e.g., ROC1, ROC2, etc., aggregated)
             int kids = rocTFB.getChildCount();
@@ -134,31 +129,28 @@ public class FadcUtil {
                 // Just get the data as bytes
                 byte[] byteData = payloadBank.getRawBytes();
 
-                if(debug) System.out.println("DDD======> Frame = " + frameNumber +
+                if (debug) System.out.println("DDD======> Frame = " + frameNumber +
                         ", TS = " + timestamp +
                         ", payload ID = " + payloadId +
                         " length = " + payloadLength);
 
                 if (payloadLength > 3) {
-                    hits = FadcUtil.parseFADCPayload(timestamp, payloadId, byteData);
-                    System.out.println("DDD======> Frame = " + frameNumber +
-                            ", TS = " + timestamp +
-                            ", payload ID = " + payloadId +
-                            " length = " + payloadLength);
-                    System.out.println("DDD ------------ FADC Hit = " + k);
-                    for (FADCHit h : hits) {
-                        System.out.println(h);
+                    hits = parseFADCPayload(timestamp, payloadId, byteData);
+                    if (debug) {
+                        for (FADCHit h : hits) {
+                            System.out.println(h);
+                        }
                     }
-                    System.out.println("DDD ------------ FADC Hit = " + k);
+                    rocTimeFrameBank.addHits(hits);
                 }
-                rocTimeFrameBank.addHits(hits);
             }
+            banks.add(rocTimeFrameBank);
         }
-        return rocTimeFrameBank;
+        return banks;
     }
 
     @NotNull
-    public static List<FADCHit> parseFADCPayload(Long frame_time_ns, int payloadId, byte[] ba) {
+    public List<FADCHit> parseFADCPayload(Long frame_time_ns, int payloadId, byte[] ba) {
         List<FADCHit> hits = new ArrayList<>();
         IntBuffer intBuf =
                 ByteBuffer.wrap(ba)
@@ -167,9 +159,9 @@ public class FadcUtil {
         int[] pData = new int[intBuf.remaining()];
         intBuf.get(pData);
         for (int i : pData) {
-            int q = (i >> 0) & 0x1FFF;
-            int channel = (i >> 13) & 0x000F;
-            long v = ((i >> 17) & 0x3FFF) * 4;
+            int q = (i) & 0x1FFF;
+            int channel = (i >>> 13) & 0x000F;
+            long v = ((i >>> 17) & 0x3FFF) * 4;
             long ht = frame_time_ns + v;
             hits.add(new FADCHit(1, payloadId, channel, q, ht));
         }

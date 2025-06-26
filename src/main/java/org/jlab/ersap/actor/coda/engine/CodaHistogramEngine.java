@@ -5,8 +5,8 @@ import org.jlab.epsci.ersap.engine.Engine;
 import org.jlab.epsci.ersap.engine.EngineData;
 import org.jlab.epsci.ersap.engine.EngineDataType;
 import org.jlab.ersap.actor.coda.proc.LiveHistogram;
-import org.jlab.ersap.actor.coda.proc.fadc.FADCHit;
-import org.jlab.ersap.actor.coda.proc.fadc.RocTimeFrameBank;
+import org.jlab.ersap.actor.coda.proc.FADCHit;
+import org.jlab.ersap.actor.coda.proc.RocTimeFrameBank;
 import org.jlab.ersap.actor.datatypes.JavaObjectType;
 import org.json.JSONObject;
 

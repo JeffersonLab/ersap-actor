@@ -1,6 +1,5 @@
 package org.jlab.ersap.actor.coda.proc;
 
-import org.jlab.ersap.actor.coda.proc.fadc.FADCHit;
 import twig.data.H1F;
 import twig.data.H2F;
 import twig.data.TDirectory;
@@ -13,6 +12,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -37,11 +37,40 @@ public class LiveHistogram {
     private TDirectory histDir;
     private static String ERSAP_USER_DATA;
 
-    public LiveHistogram(String frameTitle, ArrayList<String> histTitles,
+
+    public LiveHistogram(String frameTitle, List<String> histTitles,
+                         int gridSize, int frameWidth, int frameHeight,
+                         int histBins, double histMin, double histMax) {
+
+        JFrame frame = new JFrame(frameTitle);
+        frame.setSize(frameWidth, frameHeight);
+        JPanel panel = new JPanel();
+        GridLayout gl = new GridLayout(gridSize, gridSize);
+        gl.setHgap(10);
+        gl.setVgap(10);
+        panel.setLayout(gl);
+        frame.getContentPane().add(panel);
+
+        // create canvases with associated histograms,
+        // and add them to the panel
+        for (String s : histTitles) {
+            TGDataCanvas c = new TGDataCanvas();
+            c.setAxisFont(new Font("Avenir", Font.PLAIN, 6));
+            panel.add(c);
+            c.initTimer(600);
+            H1F hist = new H1F(s, histBins, histMin, histMax);
+            hist.setTitleX(s);
+            histograms.put(s, hist);
+            c.region().draw(hist);
+        }
+        frame.setVisible(true);
+    }
+
+    public LiveHistogram(String frameTitle, List<String> histTitles,
                          ArrayList<String> coincidenceTitle,
                          int gridSize, int frameWidth, int frameHeight,
                          int histBins, double histMin, double histMax,
-                         double scatterYMin, double scatterYMax) {
+                         Object scatterYMin, Object scatterYMax) {
 
         JFrame frame = new JFrame(frameTitle);
         frame.setSize(frameWidth, frameHeight);

@@ -1,7 +1,5 @@
 package org.jlab.ersap.actor.coda.proc;
 
-import org.jlab.ersap.actor.coda.proc.fadc.FADCHit;
-
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;

@@ -1,6 +1,4 @@
-package org.jlab.ersap.actor.coda.proc.fadc;
-
-import org.jlab.ersap.actor.coda.proc.IStreamItem;
+package org.jlab.ersap.actor.coda.proc;
 
 /**
  * Copyright (c) 2021, Jefferson Science Associates, all rights reserved.

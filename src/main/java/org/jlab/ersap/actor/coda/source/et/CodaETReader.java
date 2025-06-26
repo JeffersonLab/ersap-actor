@@ -3,9 +3,8 @@ package org.jlab.ersap.actor.coda.source.et;
 import org.jlab.coda.et.*;
 import org.jlab.coda.et.enums.Mode;
 import org.jlab.coda.et.enums.Modify;
-import org.jlab.ersap.actor.coda.proc.fadc.FadcUtil;
+import org.jlab.ersap.actor.coda.proc.EvioEventParser;
 import org.jlab.ersap.actor.util.IASource;
-import org.jlab.ersap.actor.util.QueueMonitor;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -177,7 +176,7 @@ public class CodaETReader implements IASource, Runnable {
 
     @Override
     public ByteOrder getByteOrder() {
-        return FadcUtil.evioDataByteOrder;
+        return EvioEventParser.evioDataByteOrder;
     }
 
     @Override
