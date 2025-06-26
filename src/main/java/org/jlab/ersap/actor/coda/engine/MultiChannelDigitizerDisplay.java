@@ -83,7 +83,7 @@ public class MultiChannelDigitizerDisplay implements Engine {
         EtEvent data = (EtEvent) engineData.getData();
         for(List<RocTimeFrameBank> rtf: data.getTimeFrames()){
             for(RocTimeFrameBank tb: rtf){
-                System.out.println("DDD =====> rocID = "+tb.getRocID()+" "+rocId);
+                System.out.println("DDD =====> rocID = "+tb.getRocID()+" "+rocId + tb.getHits().isEmpty());
 //                if(tb.getRocID() == rocId) {
                     for (FADCHit hit : tb.getHits()) {
                         System.out.printf("DDD => " + hit);

@@ -101,7 +101,6 @@ public class EvioEventParser {
             EvioBank rocTFB = (EvioBank) ev.getChildAt(j);
             // This must be the ROC ID
             int rocID = rocTFB.getHeader().getTag();
-            System.out.println("DDD =====> " + rocID);
             rocTimeFrameBank.setRocID(rocID);
 
             // Here we get all ROC or streams data (e.g., ROC1, ROC2, etc., aggregated)
