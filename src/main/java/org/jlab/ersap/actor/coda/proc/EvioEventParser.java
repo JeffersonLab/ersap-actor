@@ -122,7 +122,7 @@ public class EvioEventParser {
                 // Get tag of the header which is the payload ID (associated slot number).
                 // Note that this number is NOT the VXI slot number
                 int payloadId = payloadBank.getHeader().getTag();
-                int payloadLength = payloadBank.getHeader().getLength();
+//                int payloadLength = payloadBank.getHeader().getLength();
 
                 // Ignore the data type (currently the improper value of 0xf).
                 // Just get the data as bytes
@@ -131,12 +131,12 @@ public class EvioEventParser {
                 if (debug) System.out.println("DDD======> Frame = " + frameNumber +
                         ", TS = " + timestamp +
                         ", payload ID = " + payloadId +
-                        " length = " + payloadLength);
+                        " length = ");
 
-                if (payloadLength > 3) {
+//                if (payloadLength > 3) {
                     hits = parseFADCPayload(timestamp, rocID, payloadId, byteData);
                     rocTimeFrameBank.addHits(hits);
-                }
+//                }
             }
             banks.add(rocTimeFrameBank);
         }
