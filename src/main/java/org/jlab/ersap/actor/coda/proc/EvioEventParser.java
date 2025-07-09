@@ -128,13 +128,18 @@ public class EvioEventParser {
                 // Just get the data as bytes
                 byte[] byteData = payloadBank.getRawBytes();
 
-                if (debug) System.out.println("DDD======> Frame = " + frameNumber +
-                        ", TS = " + timestamp +
-                        ", payload ID = " + payloadId +
-                        " length = ");
+                if (debug)
 
 //                if (payloadLength > 3) {
                     hits = parseFADCPayload(timestamp, rocID, payloadId, byteData);
+                    if(debug) {
+                        System.out.println("DDD======> Frame = " + frameNumber +
+                                ", TS = " + timestamp +
+                                ", payload ID = " + payloadId);
+                        for(FADCHit hit:hits){
+                            System.out.println(hit);
+                        }
+                    }
                     rocTimeFrameBank.addHits(hits);
 //                }
             }
