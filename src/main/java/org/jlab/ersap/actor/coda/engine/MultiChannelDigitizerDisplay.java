@@ -81,15 +81,18 @@ public class MultiChannelDigitizerDisplay implements Engine {
     @Override
     public EngineData execute(EngineData engineData) {
         EtEvent data = (EtEvent) engineData.getData();
-        for(List<RocTimeFrameBank> rtf: data.getTimeFrames()){
-            for(RocTimeFrameBank tb: rtf){
-                System.out.println("DDD =====> rocID = "+tb.getRocID()+" "+rocId + tb.getHits().isEmpty());
+        List<List<RocTimeFrameBank>> ltf = data.getTimeFrames();
+        if(ltf !=null && !ltf.isEmpty()) {
+            for (List<RocTimeFrameBank> rtf : data.getTimeFrames()) {
+                for (RocTimeFrameBank tb : rtf) {
+                    System.out.println("DDD =====> rocID = " + tb.getRocID() + " " + rocId + tb.getHits().isEmpty());
 //                if(tb.getRocID() == rocId) {
                     for (FADCHit hit : tb.getHits()) {
                         System.out.println("DDD => " + hit);
                         liveHist.update(hit.getName(), hit);
                     }
 //                }
+                }
             }
         }
         return engineData;
