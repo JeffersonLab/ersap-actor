@@ -135,7 +135,7 @@ public class EvioEventParser {
                     if(debug) {
                         System.out.println("DDD======> Frame = " + frameNumber +
                                 ", TS = " + timestamp +
-                                ", payload ID = " + payloadId);
+                                ", payload ID = " + payloadId +" "+hits.isEmpty());
                         for(FADCHit hit:hits){
                             System.out.println(hit);
                         }
