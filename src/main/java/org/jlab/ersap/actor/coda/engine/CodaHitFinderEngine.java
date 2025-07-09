@@ -44,10 +44,15 @@ public class CodaHitFinderEngine implements Engine {
 
     @Override
     public EngineData execute(EngineData engineData) {
-        if (isSourceEt) {
-            return executeETEvent(engineData);
-        } else {
-            return executeFileEvent(engineData);
+        try {
+            if (isSourceEt) {
+                return executeETEvent(engineData);
+            } else {
+                return executeFileEvent(engineData);
+            }
+        } catch (Exception e){
+            System.out.println(e.getMessage());
+            return engineData;
         }
     }
 
