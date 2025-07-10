@@ -87,7 +87,8 @@ public class MultiChannelDigitizerDisplayNative implements Engine {
                 if(rtf !=null && !rtf.isEmpty()) {
                     for (RocTimeFrameBank tb : rtf) {
                         for (FADCHit hit : tb.getHits()) {
-                            liveHist.update(hit.getName(), hit);
+                            System.out.println("DDD => "+hit);
+//                            liveHist.update(hit.getName(), hit);
                         }
                     }
                 }
