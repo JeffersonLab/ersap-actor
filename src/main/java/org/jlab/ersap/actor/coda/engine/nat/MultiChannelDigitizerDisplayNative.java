@@ -10,6 +10,7 @@ import org.jlab.ersap.actor.coda.proc.LiveHistogram;
 import org.jlab.ersap.actor.coda.proc.RocTimeFrameBank;
 import org.jlab.ersap.actor.datatypes.CodaTimeFrameDataType;
 import org.jlab.ersap.actor.datatypes.JavaObjectType;
+import org.jlab.utils.JsonUtils;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
@@ -79,19 +80,20 @@ public class MultiChannelDigitizerDisplayNative implements Engine {
 
     @Override
     public EngineData execute(EngineData engineData) {
-        EtEvent data = (EtEvent) engineData.getData();
-        List<List<RocTimeFrameBank>> ltf = data.getTimeFrames();
-        if(ltf !=null && !ltf.isEmpty()) {
-            for (List<RocTimeFrameBank> rtf : data.getTimeFrames()) {
-                if(rtf !=null && !rtf.isEmpty()) {
-                    for (RocTimeFrameBank tb : rtf) {
-                        for (FADCHit hit : tb.getHits()) {
-                            liveHist.update(hit.getName(), hit);
-                        }
-                    }
-                }
-            }
-        }
+        System.out.println("DDD++++++++++>>> "+engineData.getData().getClass().getName());
+//        EtEvent data = (EtEvent) engineData.getData();
+//        List<List<RocTimeFrameBank>> ltf = data.getTimeFrames();
+//        if(ltf !=null && !ltf.isEmpty()) {
+//            for (List<RocTimeFrameBank> rtf : data.getTimeFrames()) {
+//                if(rtf !=null && !rtf.isEmpty()) {
+//                    for (RocTimeFrameBank tb : rtf) {
+//                        for (FADCHit hit : tb.getHits()) {
+//                            liveHist.update(hit.getName(), hit);
+//                        }
+//                    }
+//                }
+//            }
+//        }
         return engineData;
     }
 
