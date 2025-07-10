@@ -108,7 +108,7 @@ public class EvioEventParser {
             if (kids < 2) {
                 throw new Exception("Problem: too few child for TFB (" + childCount + ")");
             }
-            List<FADCHit> hits = new ArrayList<>();
+            List<FADCHit> hits;
 
             // From here the data is in evio v4.0 format
             // Another level down, each TFB (now evio v4.0) has a Stream Info Bank (SIB) which comes first,
@@ -122,25 +122,25 @@ public class EvioEventParser {
                 // Get tag of the header which is the payload ID (associated slot number).
                 // Note that this number is NOT the VXI slot number
                 int payloadId = payloadBank.getHeader().getTag();
-//                int payloadLength = payloadBank.getHeader().getLength();
+
+                // @todo check to see why payloadLength always returns 1
+                // int payloadLength = payloadBank.getHeader().getLength();
 
                 // Ignore the data type (currently the improper value of 0xf).
                 // Just get the data as bytes
                 byte[] byteData = payloadBank.getRawBytes();
-
-
-//                if (payloadLength > 3) {
                     hits = parseFADCPayload(timestamp, rocID, payloadId, byteData);
-                    if(debug) {
+                    if(!hits.isEmpty()) {
+                        if (debug) {
 //                        System.out.println("DDD======> Frame = " + frameNumber +
 //                                ", TS = " + timestamp +
 //                                ", payload ID = " + payloadId +" "+hits.isEmpty());
-                        for(FADCHit hit:hits){
-                            System.out.println(hit);
+                            for (FADCHit hit : hits) {
+                                System.out.println(hit);
+                            }
                         }
+                        rocTimeFrameBank.addHits(hits);
                     }
-                    rocTimeFrameBank.addHits(hits);
-//                }
             }
             banks.add(rocTimeFrameBank);
         }
