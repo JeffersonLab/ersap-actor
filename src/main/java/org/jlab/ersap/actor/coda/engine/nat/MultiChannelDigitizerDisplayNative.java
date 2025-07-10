@@ -39,6 +39,7 @@ public class MultiChannelDigitizerDisplayNative implements Engine {
 
     @Override
     public EngineData configure(EngineData engineData) {
+        System.out.println("DDD => "+engineData.getMimeType());
         if (engineData.getMimeType().equalsIgnoreCase(EngineDataType.JSON.mimeType())) {
             String source = (String) engineData.getData();
             JSONObject opts = new JSONObject(source);
@@ -87,7 +88,7 @@ public class MultiChannelDigitizerDisplayNative implements Engine {
                 if(rtf !=null && !rtf.isEmpty()) {
                     for (RocTimeFrameBank tb : rtf) {
                         for (FADCHit hit : tb.getHits()) {
-                            System.out.println("DDD => "+hit);
+//                            System.out.println("DDD => "+hit);
 //                            liveHist.update(hit.getName(), hit);
                         }
                     }
