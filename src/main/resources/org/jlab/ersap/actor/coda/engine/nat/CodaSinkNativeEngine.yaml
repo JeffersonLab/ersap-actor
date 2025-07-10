@@ -1,0 +1,11 @@
+---
+name: CodaSinkNativeEngine
+engine: org.jlab.ersap.actor.coda.engine.nat.CodaSinkNativeEngine
+type: java
+
+author: vardan
+email: gurjyan@jlab.org
+
+version: 0.1
+description:
+  Writes xmsg native data format events to a file.

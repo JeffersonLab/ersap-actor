@@ -80,20 +80,19 @@ public class MultiChannelDigitizerDisplayNative implements Engine {
 
     @Override
     public EngineData execute(EngineData engineData) {
-        System.out.println("DDD++++++++++>>> "+engineData.getData().getClass().getName());
-//        EtEvent data = (EtEvent) engineData.getData();
-//        List<List<RocTimeFrameBank>> ltf = data.getTimeFrames();
-//        if(ltf !=null && !ltf.isEmpty()) {
-//            for (List<RocTimeFrameBank> rtf : data.getTimeFrames()) {
-//                if(rtf !=null && !rtf.isEmpty()) {
-//                    for (RocTimeFrameBank tb : rtf) {
-//                        for (FADCHit hit : tb.getHits()) {
-//                            liveHist.update(hit.getName(), hit);
-//                        }
-//                    }
-//                }
-//            }
-//        }
+        EtEvent data = (EtEvent) engineData.getData();
+        List<List<RocTimeFrameBank>> ltf = data.getTimeFrames();
+        if(ltf !=null && !ltf.isEmpty()) {
+            for (List<RocTimeFrameBank> rtf : data.getTimeFrames()) {
+                if(rtf !=null && !rtf.isEmpty()) {
+                    for (RocTimeFrameBank tb : rtf) {
+                        for (FADCHit hit : tb.getHits()) {
+                            liveHist.update(hit.getName(), hit);
+                        }
+                    }
+                }
+            }
+        }
         return engineData;
     }
 
