@@ -105,13 +105,13 @@ public class MultiChannelDigitizerDisplayNative implements Engine {
 
     @Override
     public Set<EngineDataType> getInputDataTypes() {
-        return ErsapUtil.buildDataTypes(JavaObjectType.JOBJ,
+        return ErsapUtil.buildDataTypes(EngineDataType.JSON,
                 CodaTimeFrameDataType.CODA_TIME_FRAME);
     }
 
     @Override
     public Set<EngineDataType> getOutputDataTypes() {
-        return ErsapUtil.buildDataTypes(JavaObjectType.JOBJ);
+        return ErsapUtil.buildDataTypes(CodaTimeFrameDataType.CODA_TIME_FRAME);
     }
 
     @Override
