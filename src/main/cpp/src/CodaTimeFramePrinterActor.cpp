@@ -88,13 +88,13 @@ ersap::EngineData CodaTimeFramePrinterActor::execute(ersap::EngineData& input) {
 //            printTimingInfo(event);
 //        }
         
-        if (verbose_) {
-            printTimeFrameDetails(event);
-        }
+//        if (verbose_) {
+//            printTimeFrameDetails(event);
+//        }
         
-        if (showHitDetails_) {
-            printHitSample(event);
-        }
+//        if (showHitDetails_) {
+//            printHitSample(event);
+//        }
         
 //        printStatistics(event);
 //        printSeparator();

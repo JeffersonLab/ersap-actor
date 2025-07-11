@@ -1,0 +1,55 @@
+/*
+ * Copyright (c) 2024, Jefferson Science Associates, all rights reserved.
+ * See LICENSE.txt file.
+ * Thomas Jefferson National Accelerator Facility
+ * Experimental Physics Software and Computing Infrastructure Group
+ * 12000, Jefferson Ave, Newport News, VA 23606
+ * Phone : (757)-269-7100
+ *
+ * Protocol Buffers schema for ERSAP CodaTimeFrame data structure
+ * Compatible with CODA DAQ system and nuclear physics event processing
+ */
+
+syntax = "proto3";
+option optimize_for = SPEED;
+option java_outer_classname = "CodaTimeFrameProto";
+option java_package = "org.jlab.ersap.actor.coda.proto";
+
+package org.jlab.ersap.actor.coda.proto;
+
+// Represents a single FADC hit from detector hardware
+message FADCHit {
+    // Hardware addressing components
+    int32 crate = 1;        // Crate number in DAQ system
+    int32 slot = 2;         // Slot number within crate
+    int32 channel = 3;      // Channel number within slot
+    
+    // Physics data
+    int32 charge = 4;       // Integrated ADC charge value
+    int64 time = 5;         // Hit timestamp in nanoseconds
+}
+
+// Represents a collection of hits from a single ROC (ReadOut Controller) within a time frame
+message RocTimeFrameBank {
+    int32 roc_id = 1;           // ReadOut Controller identifier
+    int32 frame_number = 2;     // Time frame sequence number
+    int64 time_stamp = 3;       // Frame timestamp in nanoseconds
+    repeated FADCHit hits = 4;  // Collection of hits within this time frame
+}
+
+// Represents a complete physics event containing multiple time frames from multiple ROCs
+message CodaTimeFrame {
+    // Nested array structure: each time frame contains multiple ROC banks
+    // This preserves the original Java structure: List<List<RocTimeFrameBank>>
+    repeated TimeFrame time_frames = 1;
+    
+    // Metadata for event processing
+    int64 event_id = 2;         // Unique event identifier (optional)
+    int64 creation_time = 3;    // Event creation timestamp (optional)
+    string source_info = 4;     // Source information (ET system, file, etc.) (optional)
+}
+
+// Container for a single time frame containing multiple ROC banks
+message TimeFrame {
+    repeated RocTimeFrameBank roc_banks = 1;
+}
