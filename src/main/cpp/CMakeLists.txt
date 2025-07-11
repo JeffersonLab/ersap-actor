@@ -35,34 +35,56 @@ include_directories(
     ${ERSAP_INCLUDE_DIR}
 )
 
-# Source files
-set(SOURCES
+# Source files for individual libraries
+set(DATATYPE_SOURCES
     src/CodaTimeFrameDataType.cpp
+)
+
+set(DATATYPE_HEADERS
+    include/CodaTimeFrameDataType.hpp
+)
+
+set(ACTOR_SOURCES
     src/CodaTimeFramePrinterActor.cpp
 )
 
-set(HEADERS
-    include/CodaTimeFrameDataType.hpp
+set(ACTOR_HEADERS
     include/CodaTimeFramePrinterActor.hpp
 )
 
-# Create shared library for the ERSAP actor
-add_library(ersap-actor-cpp SHARED ${SOURCES} ${HEADERS})
+# Create shared library for the data type
+add_library(CodaTimeFrameDataType SHARED ${DATATYPE_SOURCES} ${DATATYPE_HEADERS})
 
-# Link libraries
-target_link_libraries(ersap-actor-cpp
+# Link libraries for data type
+target_link_libraries(CodaTimeFrameDataType
     ${ERSAP_LIBRARY}
 )
 
-# Set library properties
-set_target_properties(ersap-actor-cpp PROPERTIES
+# Set library properties for data type
+set_target_properties(CodaTimeFrameDataType PROPERTIES
     VERSION ${PROJECT_VERSION}
     SOVERSION 1
-    PUBLIC_HEADER "${HEADERS}"
+    PUBLIC_HEADER "${DATATYPE_HEADERS}"
 )
 
-# Installation rules
-install(TARGETS ersap-actor-cpp
+# Create shared library for the ERSAP actor
+add_library(CodaTimeFramePrinterActor SHARED ${ACTOR_SOURCES} ${ACTOR_HEADERS})
+
+# Link libraries for actor (depends on data type library)
+target_link_libraries(CodaTimeFramePrinterActor
+    ${ERSAP_LIBRARY}
+    CodaTimeFrameDataType
+)
+
+# Set library properties for actor
+set_target_properties(CodaTimeFramePrinterActor PROPERTIES
+    VERSION ${PROJECT_VERSION}
+    SOVERSION 1
+    PUBLIC_HEADER "${ACTOR_HEADERS}"
+)
+
+# Installation rules for both libraries
+install(TARGETS CodaTimeFrameDataType CodaTimeFramePrinterActor
     LIBRARY DESTINATION lib
     PUBLIC_HEADER DESTINATION include/ersap-actor-cpp
 )
@@ -70,8 +92,8 @@ install(TARGETS ersap-actor-cpp
 # Optional: Create a simple test executable
 option(BUILD_TESTS "Build test executables" OFF)
 if(BUILD_TESTS)
-    add_executable(test-ev-event-serializer tests/test_coda_timeframe_serializer.cpp src/CodaTimeFrameDataType.cpp)
-    target_link_libraries(test-ev-event-serializer ${ERSAP_LIBRARY})
+    add_executable(test-ev-event-serializer tests/test_coda_timeframe_serializer.cpp)
+    target_link_libraries(test-ev-event-serializer ${ERSAP_LIBRARY} CodaTimeFrameDataType)
 endif()
 
 # Print configuration summary
@@ -97,4 +119,5 @@ message(STATUS "  make install")
 message(STATUS "")
 message(STATUS "Usage in ERSAP:")
 message(STATUS "  Set LD_LIBRARY_PATH to include the installation directory")
-message(STATUS "  Configure ERSAP to use 'ersap-actor-cpp' as the engine library")
+message(STATUS "  Configure ERSAP to use 'CodaTimeFramePrinterActor' as the engine library")
+message(STATUS "  Data type library 'CodaTimeFrameDataType' will be loaded automatically")
