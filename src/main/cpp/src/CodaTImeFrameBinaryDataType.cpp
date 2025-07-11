@@ -100,5 +100,16 @@ CodaTimeFrame deserializeFromBinary(const std::vector<std::uint8_t>& buffer) {
     return event;
 }
 
+// CodaTimeFrameSerializer implementation
+std::vector<std::uint8_t> CodaTimeFrameSerializer::write(const ersap::any& data) const {
+    const auto& event = ersap::any_cast<const CodaTimeFrame&>(data);
+    return serializeToBinary(event);
+}
+
+ersap::any CodaTimeFrameSerializer::read(const std::vector<std::uint8_t>& buffer) const {
+    CodaTimeFrame event = deserializeFromBinary(buffer);
+    return ersap::any{std::move(event)};
+}
+
 } // namespace coda
 } // namespace ersap

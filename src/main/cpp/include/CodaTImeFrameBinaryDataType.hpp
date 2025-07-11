@@ -144,15 +144,8 @@ CodaTimeFrame deserializeFromBinary(const std::vector<std::uint8_t>& buffer);
 
 class CodaTimeFrameSerializer : public ersap::Serializer {
 public:
-    std::vector<std::uint8_t> write(const ersap::any& data) const override {
-        const auto& event = ersap::any_cast<const CodaTimeFrame&>(data);
-        return serializeToBinary(event);
-    }
-
-    ersap::any read(const std::vector<std::uint8_t>& buffer) const override {
-        CodaTimeFrame event = deserializeFromBinary(buffer);
-        return ersap::any{std::move(event)};
-    }
+    std::vector<std::uint8_t> write(const ersap::any& data) const override;
+    ersap::any read(const std::vector<std::uint8_t>& buffer) const override;
 };
 
 const std::string CODA_TIME_FRAME_MIME_TYPE = "binary/coda-time-frame";
