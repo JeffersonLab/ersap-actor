@@ -280,7 +280,7 @@ std::string CodaTimeFrameBinaryPrinterActor::formatHexByte(std::uint8_t byte) co
 }
 
 std::vector<std::uint8_t> CodaTimeFrameBinaryPrinterActor::serializeEvent(const CodaTimeFrame& event) const {
-    return serializeToBinary(event);
+    return CodaTimeFrameSerializer::serializeToBinary(event);
 }
 
 std::size_t CodaTimeFrameBinaryPrinterActor::calculateExpectedSize(const CodaTimeFrame& event) const {

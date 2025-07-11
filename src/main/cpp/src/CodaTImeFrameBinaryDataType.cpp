@@ -9,7 +9,7 @@ namespace ersap {
 namespace coda {
 
 
-std::vector<std::uint8_t> serializeToBinary(const CodaTimeFrame& event) {
+std::vector<std::uint8_t> CodaTimeFrameSerializer::serializeToBinary(const CodaTimeFrame& event) {
     std::vector<std::uint8_t> buffer;
 
     auto writeInt32 = [&](std::int32_t val) {
@@ -47,7 +47,7 @@ std::vector<std::uint8_t> serializeToBinary(const CodaTimeFrame& event) {
     return buffer;
 }
 
-CodaTimeFrame deserializeFromBinary(const std::vector<std::uint8_t>& buffer) {
+CodaTimeFrame CodaTimeFrameSerializer::deserializeFromBinary(const std::vector<std::uint8_t>& buffer) {
     size_t offset = 0;
 
     auto readInt32 = [&]() -> std::int32_t {
@@ -103,11 +103,11 @@ CodaTimeFrame deserializeFromBinary(const std::vector<std::uint8_t>& buffer) {
 // CodaTimeFrameSerializer implementation
 std::vector<std::uint8_t> CodaTimeFrameSerializer::write(const ersap::any& data) const {
     const auto& event = ersap::any_cast<const CodaTimeFrame&>(data);
-    return serializeToBinary(event);
+    return CodaTimeFrameSerializer::serializeToBinary(event);
 }
 
 ersap::any CodaTimeFrameSerializer::read(const std::vector<std::uint8_t>& buffer) const {
-    CodaTimeFrame event = deserializeFromBinary(buffer);
+    CodaTimeFrame event = CodaTimeFrameSerializer::deserializeFromBinary(buffer);
     return ersap::any{std::move(event)};
 }
 
