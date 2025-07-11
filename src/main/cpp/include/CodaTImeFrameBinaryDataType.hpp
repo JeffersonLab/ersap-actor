@@ -1,5 +1,5 @@
-#ifndef CODA_TIME_FRAME_DATA_TYPE_HPP
-#define CODA_TIME_FRAME_DATA_TYPE_HPP
+#ifndef CODA_TIME_FRAME_BINARY_DATA_TYPE_HPP
+#define CODA_TIME_FRAME_BINARY_DATA_TYPE_HPP
 
 #include <string>
 #include <vector>
@@ -165,4 +165,4 @@ const ersap::EngineDataType CODA_TIME_FRAME_TYPE{
 } // namespace coda
 } // namespace ersap
 
-#endif // CODA_TIME_FRAME_DATA_TYPE_HPP
+#endif // CODA_TIME_FRAME_BINARY_DATA_TYPE_HPP
