@@ -62,10 +62,12 @@ include_directories(
 # Source files for individual libraries
 set(DATATYPE_SOURCES
     src/CodaTimeFrameDataType.cpp
+    src/CodaTimeFrameBinaryDataType.cpp
 )
 
 set(DATATYPE_HEADERS
     include/CodaTimeFrameDataType.hpp
+    include/CodaTimeFrameBinaryDataType.hpp
 )
 
 set(ACTOR_SOURCES
@@ -74,6 +76,14 @@ set(ACTOR_SOURCES
 
 set(ACTOR_HEADERS
     include/CodaTimeFramePrinterActor.hpp
+)
+
+set(BINARY_ACTOR_SOURCES
+    src/CodaTimeFrameBinaryPrinterActor.cpp
+)
+
+set(BINARY_ACTOR_HEADERS
+    include/CodaTimeFrameBinaryPrinterActor.hpp
 )
 
 # Create shared library for the data type
@@ -109,8 +119,24 @@ set_target_properties(CodaTimeFramePrinterActor PROPERTIES
     PUBLIC_HEADER "${ACTOR_HEADERS}"
 )
 
-# Installation rules for both libraries
-install(TARGETS CodaTimeFrameDataType CodaTimeFramePrinterActor
+# Create shared library for the binary printer ERSAP actor
+add_library(CodaTimeFrameBinaryPrinterActor SHARED ${BINARY_ACTOR_SOURCES} ${BINARY_ACTOR_HEADERS})
+
+# Link libraries for binary printer actor (depends on data type library)
+target_link_libraries(CodaTimeFrameBinaryPrinterActor
+    ${ERSAP_LIBRARY}
+    CodaTimeFrameDataType
+)
+
+# Set library properties for binary printer actor
+set_target_properties(CodaTimeFrameBinaryPrinterActor PROPERTIES
+    VERSION ${PROJECT_VERSION}
+    SOVERSION 1
+    PUBLIC_HEADER "${BINARY_ACTOR_HEADERS}"
+)
+
+# Installation rules for all libraries
+install(TARGETS CodaTimeFrameDataType CodaTimeFramePrinterActor CodaTimeFrameBinaryPrinterActor
     LIBRARY DESTINATION lib
     PUBLIC_HEADER DESTINATION include/ersap-actor-cpp
 )
