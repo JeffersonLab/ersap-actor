@@ -8,6 +8,7 @@
 namespace ersap {
 namespace coda {
 
+
 std::vector<std::uint8_t> serializeToBinary(const CodaTimeFrame& event) {
     std::vector<std::uint8_t> buffer;
 
