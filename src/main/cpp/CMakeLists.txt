@@ -20,6 +20,17 @@ mark_as_advanced(CMAKE_INSTALL_PLUGINDIR)
 # Find required packages
 find_package(PkgConfig REQUIRED)
 
+# Find protobuf compatible with xMsg library
+# Use pkg-config to find protobuf version that matches system
+pkg_check_modules(PROTOBUF REQUIRED protobuf>=3.0)
+message(STATUS "Found protobuf version: ${PROTOBUF_VERSION}")
+message(STATUS "Protobuf include dirs: ${PROTOBUF_INCLUDE_DIRS}")
+message(STATUS "Protobuf libraries: ${PROTOBUF_LIBRARIES}")
+
+# Use the same protobuf version for compilation
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${PROTOBUF_CFLAGS_OTHER}")
+link_directories(${PROTOBUF_LIBRARY_DIRS})
+
 # Find ERSAP C++ library
 set(ERSAP_ROOT $ENV{ERSAP_HOME})
 find_path(ERSAP_INCLUDE_DIR ersap/engine.hpp HINTS ${ERSAP_ROOT}/include)
@@ -45,6 +56,7 @@ include_directories(
     ${CMAKE_CURRENT_SOURCE_DIR}/include
     ${ERSAP_INCLUDE_DIR}
     ${XMSG_INCLUDE_DIR}
+    ${PROTOBUF_INCLUDE_DIRS}
 )
 
 # Source files for individual libraries
@@ -71,6 +83,7 @@ add_library(CodaTimeFrameDataType SHARED ${DATATYPE_SOURCES} ${DATATYPE_HEADERS}
 target_link_libraries(CodaTimeFrameDataType
     ${ERSAP_LIBRARY}
     ${XMSG_LIBRARY}
+    ${PROTOBUF_LIBRARIES}
 )
 
 # Set library properties for data type
