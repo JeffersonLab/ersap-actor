@@ -68,6 +68,7 @@ ersap::EngineData CodaTimeFramePrinterActor::configure(ersap::EngineData& input)
 ersap::EngineData CodaTimeFramePrinterActor::execute(ersap::EngineData& input) {
     auto output = ersap::EngineData{};
      std::cout << "DDD ===> " << eventCount_<< std::endl;
+
     // Verify input data type
     if (input.mime_type() != CODA_TIME_FRAME_MIME_TYPE) {
         output.set_status(ersap::EngineStatus::ERROR);
