@@ -194,6 +194,11 @@ private:
     void serializeCodaTimeFrame(const CodaTimeFrame& event, std::vector<std::uint8_t>& buffer) const;
     CodaTimeFrame deserializeCodaTimeFrame(const std::vector<std::uint8_t>& buffer) const;
     
+    // Format-specific deserialization methods
+    CodaTimeFrame deserializeCustomFormat(const std::vector<std::uint8_t>& buffer, std::size_t& offset) const;
+    CodaTimeFrame deserializeXMsgFormat(const std::vector<std::uint8_t>& buffer) const;
+    bool isXMsgProtobufFormat(const std::vector<std::uint8_t>& buffer) const;
+    
     // Helper methods for primitive data serialization
     void writeInt32(std::int32_t value, std::vector<std::uint8_t>& buffer) const;
     void writeInt64(std::int64_t value, std::vector<std::uint8_t>& buffer) const;
