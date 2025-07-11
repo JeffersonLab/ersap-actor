@@ -29,6 +29,13 @@ if(NOT ERSAP_INCLUDE_DIR OR NOT ERSAP_LIBRARY)
     message(FATAL_ERROR "ERSAP C++ library not found. Please install ersap-cpp or set ERSAP_HOME.")
 endif()
 
+# Find xMsg C++ library for protobuf serialization
+find_package(xMsg REQUIRED HINTS /Users/gurjyan/Documents/Devel/ersap/xmsg-cpp/build)
+
+if(NOT TARGET xMsg::xmsg)
+    message(FATAL_ERROR "xMsg C++ library not found. Please install xmsg-cpp.")
+endif()
+
 # Include directories
 include_directories(
     ${CMAKE_CURRENT_SOURCE_DIR}/include
@@ -58,6 +65,7 @@ add_library(CodaTimeFrameDataType SHARED ${DATATYPE_SOURCES} ${DATATYPE_HEADERS}
 # Link libraries for data type
 target_link_libraries(CodaTimeFrameDataType
     ${ERSAP_LIBRARY}
+    xMsg::xmsg
 )
 
 # Set library properties for data type

@@ -43,40 +43,54 @@ ersap::any CodaTimeFrameSerializer::read(const std::vector<std::uint8_t>& buffer
 
 // Serialization helper methods
 void CodaTimeFrameSerializer::serializeCodaTimeFrame(const CodaTimeFrame& event, std::vector<std::uint8_t>& buffer) const {
-    // Serialize in simplified binary format for cross-language compatibility
-    // This is a simplified protocol - in production, you'd want to use protobuf or xMsg payload
+    // Create xMsg protobuf payload matching Java implementation
+    xmsg::proto::Payload payload;
     
-    // Write magic header for identification
-    const std::string magic = "COTF";
-    buffer.insert(buffer.end(), magic.begin(), magic.end());
+    // Add event type metadata
+    auto* eventTypeItem = payload.add_item();
+    eventTypeItem->set_name("event_type");
+    eventTypeItem->mutable_data()->set_string("CodaTimeFrame");
     
-    // Write version
-    writeInt32(1, buffer); // Version 1
+    // Add time frame count
+    auto* timeFrameCountItem = payload.add_item();
+    timeFrameCountItem->set_name("time_frame_count");
+    timeFrameCountItem->mutable_data()->set_vlsint32(static_cast<std::int32_t>(event.timeFrames.size()));
     
-    // Write metadata
-    writeInt64(event.eventId, buffer);
-    writeInt64(event.creationTime, buffer);
-    writeString(event.sourceInfo, buffer);
-    
-    // Write time frame count
-    writeInt32(static_cast<std::int32_t>(event.timeFrames.size()), buffer);
-    
-    // Write each time frame
-    for (const auto& timeFrame : event.timeFrames) {
-        // Write ROC count for this time frame
-        writeInt32(static_cast<std::int32_t>(timeFrame.size()), buffer);
+    // Serialize each time frame
+    for (std::size_t tfIndex = 0; tfIndex < event.timeFrames.size(); ++tfIndex) {
+        const auto& timeFrame = event.timeFrames[tfIndex];
         
-        // Write each ROC bank
-        for (const auto& rocBank : timeFrame) {
-            writeInt32(rocBank.rocId, buffer);
-            writeInt32(rocBank.frameNumber, buffer);
-            writeInt64(rocBank.timeStamp, buffer);
+        // Add ROC count for this time frame
+        auto* rocCountItem = payload.add_item();
+        rocCountItem->set_name("time_frame_" + std::to_string(tfIndex) + "_roc_count");
+        rocCountItem->mutable_data()->set_vlsint32(static_cast<std::int32_t>(timeFrame.size()));
+        
+        // Serialize each ROC bank in this time frame
+        for (std::size_t rocIndex = 0; rocIndex < timeFrame.size(); ++rocIndex) {
+            const auto& rocBank = timeFrame[rocIndex];
+            std::string rocPrefix = "time_frame_" + std::to_string(tfIndex) + "_roc_" + std::to_string(rocIndex);
             
-            // Write hit count
-            writeInt32(static_cast<std::int32_t>(rocBank.hits.size()), buffer);
+            // ROC metadata
+            auto* rocIdItem = payload.add_item();
+            rocIdItem->set_name(rocPrefix + "_id");
+            rocIdItem->mutable_data()->set_vlsint32(rocBank.rocId);
             
-            // Write hits in array format for efficiency
+            auto* frameNumberItem = payload.add_item();
+            frameNumberItem->set_name(rocPrefix + "_frame_number");
+            frameNumberItem->mutable_data()->set_vlsint32(rocBank.frameNumber);
+            
+            auto* timestampItem = payload.add_item();
+            timestampItem->set_name(rocPrefix + "_timestamp");
+            timestampItem->mutable_data()->set_vlsint64(rocBank.timeStamp);
+            
+            // Hit count
+            auto* hitCountItem = payload.add_item();
+            hitCountItem->set_name(rocPrefix + "_hit_count");
+            hitCountItem->mutable_data()->set_vlsint32(static_cast<std::int32_t>(rocBank.hits.size()));
+            
+            // Serialize hits if present
             if (!rocBank.hits.empty()) {
+                // Pack all hit data into arrays for efficiency
                 std::vector<std::int32_t> crates, slots, channels, charges;
                 std::vector<std::int64_t> times;
                 
@@ -88,36 +102,55 @@ void CodaTimeFrameSerializer::serializeCodaTimeFrame(const CodaTimeFrame& event,
                     times.push_back(hit.time);
                 }
                 
-                writeIntArray(crates, buffer);
-                writeIntArray(slots, buffer);
-                writeIntArray(channels, buffer);
-                writeIntArray(charges, buffer);
-                writeLongArray(times, buffer);
+                // Add hit arrays
+                auto* cratesItem = payload.add_item();
+                cratesItem->set_name(rocPrefix + "_crates");
+                for (std::int32_t crate : crates) {
+                    cratesItem->mutable_data()->add_vlsint32a(crate);
+                }
+                
+                auto* slotsItem = payload.add_item();
+                slotsItem->set_name(rocPrefix + "_slots");
+                for (std::int32_t slot : slots) {
+                    slotsItem->mutable_data()->add_vlsint32a(slot);
+                }
+                
+                auto* channelsItem = payload.add_item();
+                channelsItem->set_name(rocPrefix + "_channels");
+                for (std::int32_t channel : channels) {
+                    channelsItem->mutable_data()->add_vlsint32a(channel);
+                }
+                
+                auto* chargesItem = payload.add_item();
+                chargesItem->set_name(rocPrefix + "_charges");
+                for (std::int32_t charge : charges) {
+                    chargesItem->mutable_data()->add_vlsint32a(charge);
+                }
+                
+                auto* timesItem = payload.add_item();
+                timesItem->set_name(rocPrefix + "_times");
+                for (std::int64_t time : times) {
+                    timesItem->mutable_data()->add_vlsint64a(time);
+                }
             }
         }
     }
+    
+    // Serialize the payload to buffer
+    buffer.resize(payload.ByteSizeLong());
+    payload.SerializeToArray(buffer.data(), buffer.size());
 }
 
 CodaTimeFrame CodaTimeFrameSerializer::deserializeCodaTimeFrame(const std::vector<std::uint8_t>& buffer) const {
-    std::size_t offset = 0;
-    
     // Check if this is a custom binary format (with COTF magic header)
     if (buffer.size() >= 4 && std::string(buffer.begin(), buffer.begin() + 4) == "COTF") {
-        // Handle custom binary format
-        offset += 4;
+        // Handle custom binary format (backward compatibility)
+        std::size_t offset = 4;
         return deserializeCustomFormat(buffer, offset);
     }
     
-    // Check if this is xMsg protobuf format
-    if (buffer.size() >= 2) {
-        // xMsg protobuf typically starts with length prefixes or protobuf tags
-        // Try to detect protobuf format by looking for protobuf wire format patterns
-        if (isXMsgProtobufFormat(buffer)) {
-            return deserializeXMsgFormat(buffer);
-        }
-    }
-    
-    throw std::runtime_error("Invalid CodaTimeFrame buffer: unknown format (expected COTF custom binary or xMsg protobuf)");
+    // Default to xMsg protobuf format
+    return deserializeXMsgFormat(buffer);
 }
 
 CodaTimeFrame CodaTimeFrameSerializer::deserializeCustomFormat(const std::vector<std::uint8_t>& buffer, std::size_t& offset) const {
@@ -194,32 +227,116 @@ bool CodaTimeFrameSerializer::isXMsgProtobufFormat(const std::vector<std::uint8_
 }
 
 CodaTimeFrame CodaTimeFrameSerializer::deserializeXMsgFormat(const std::vector<std::uint8_t>& buffer) const {
-    // For now, create a minimal implementation that handles the basic structure
-    // This is a simplified parser that extracts the basic data structure
-    // A full implementation would require protobuf library integration
+    // Parse xMsg protobuf payload
+    xmsg::proto::Payload payload;
+    if (!payload.ParseFromArray(buffer.data(), buffer.size())) {
+        throw std::runtime_error("Failed to parse xMsg protobuf payload");
+    }
     
     CodaTimeFrame event;
     
-    // Try to extract basic information from the xMsg protobuf format
-    // This is a simplified approach - in production, use proper protobuf parsing
+    // Find metadata items
+    int timeFrameCount = 0;
+    for (const auto& item : payload.item()) {
+        if (item.name() == "time_frame_count") {
+            timeFrameCount = item.data().vlsint32();
+            break;
+        }
+    }
     
-    // For now, return a minimal valid event to avoid crashes
-    // TODO: Implement proper xMsg protobuf parsing
-    event.eventId = 0;
-    event.creationTime = 0;
-    event.sourceInfo = "xMsg protobuf format (simplified parsing)";
-    
-    // Create a minimal time frame structure
-    TimeFrame timeFrame;
-    RocTimeFrameBank rocBank;
-    rocBank.rocId = 0;
-    rocBank.frameNumber = 0;
-    rocBank.timeStamp = 0;
-    
-    timeFrame.push_back(std::move(rocBank));
-    event.addTimeFrame(std::move(timeFrame));
+    // Reconstruct time frames
+    for (int tfIndex = 0; tfIndex < timeFrameCount; ++tfIndex) {
+        TimeFrame timeFrame;
+        
+        // Find ROC count for this time frame
+        int rocCount = 0;
+        std::string rocCountKey = "time_frame_" + std::to_string(tfIndex) + "_roc_count";
+        for (const auto& item : payload.item()) {
+            if (item.name() == rocCountKey) {
+                rocCount = item.data().vlsint32();
+                break;
+            }
+        }
+        
+        // Reconstruct each ROC bank
+        for (int rocIndex = 0; rocIndex < rocCount; ++rocIndex) {
+            std::string rocPrefix = "time_frame_" + std::to_string(tfIndex) + "_roc_" + std::to_string(rocIndex);
+            RocTimeFrameBank rocBank = reconstructRocBankFromXMsg(payload, rocPrefix);
+            timeFrame.push_back(std::move(rocBank));
+        }
+        
+        event.addTimeFrame(std::move(timeFrame));
+    }
     
     return event;
+}
+
+RocTimeFrameBank CodaTimeFrameSerializer::reconstructRocBankFromXMsg(const xmsg::proto::Payload& payload, const std::string& rocPrefix) const {
+    RocTimeFrameBank rocBank;
+    
+    // Extract ROC metadata
+    for (const auto& item : payload.item()) {
+        std::string name = item.name();
+        if (name == rocPrefix + "_id") {
+            rocBank.rocId = item.data().vlsint32();
+        } else if (name == rocPrefix + "_frame_number") {
+            rocBank.frameNumber = item.data().vlsint32();
+        } else if (name == rocPrefix + "_timestamp") {
+            rocBank.timeStamp = item.data().vlsint64();
+        }
+    }
+    
+    // Extract hit count
+    int hitCount = 0;
+    for (const auto& item : payload.item()) {
+        if (item.name() == rocPrefix + "_hit_count") {
+            hitCount = item.data().vlsint32();
+            break;
+        }
+    }
+    
+    // Reconstruct hits if present
+    if (hitCount > 0) {
+        std::vector<std::int32_t> crates, slots, channels, charges;
+        std::vector<std::int64_t> times;
+        
+        for (const auto& item : payload.item()) {
+            std::string name = item.name();
+            if (name == rocPrefix + "_crates") {
+                for (int i = 0; i < item.data().vlsint32a_size(); ++i) {
+                    crates.push_back(item.data().vlsint32a(i));
+                }
+            } else if (name == rocPrefix + "_slots") {
+                for (int i = 0; i < item.data().vlsint32a_size(); ++i) {
+                    slots.push_back(item.data().vlsint32a(i));
+                }
+            } else if (name == rocPrefix + "_channels") {
+                for (int i = 0; i < item.data().vlsint32a_size(); ++i) {
+                    channels.push_back(item.data().vlsint32a(i));
+                }
+            } else if (name == rocPrefix + "_charges") {
+                for (int i = 0; i < item.data().vlsint32a_size(); ++i) {
+                    charges.push_back(item.data().vlsint32a(i));
+                }
+            } else if (name == rocPrefix + "_times") {
+                for (int i = 0; i < item.data().vlsint64a_size(); ++i) {
+                    times.push_back(item.data().vlsint64a(i));
+                }
+            }
+        }
+        
+        // Create FADCHit objects
+        if (crates.size() == hitCount && slots.size() == hitCount && 
+            channels.size() == hitCount && charges.size() == hitCount && 
+            times.size() == hitCount) {
+            for (int i = 0; i < hitCount; ++i) {
+                FADCHit hit(crates[i], slots[i], channels[i], charges[i], times[i]);
+                rocBank.addHit(hit);
+            }
+        }
+    }
+    
+    return rocBank;
 }
 
 // Primitive serialization methods

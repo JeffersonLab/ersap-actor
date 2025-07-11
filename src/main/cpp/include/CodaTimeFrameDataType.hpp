@@ -17,11 +17,18 @@
 
 #include <ersap/engine_data_type.hpp>
 #include <ersap/serializer.hpp>
+#include <xmsg/proto/data.h>
 #include <vector>
 #include <memory>
 #include <string>
 #include <cstdint>
 #include <algorithm>
+
+namespace xmsg {
+namespace proto {
+    class Payload;
+}
+}
 
 namespace ersap {
 namespace coda {
@@ -198,6 +205,7 @@ private:
     CodaTimeFrame deserializeCustomFormat(const std::vector<std::uint8_t>& buffer, std::size_t& offset) const;
     CodaTimeFrame deserializeXMsgFormat(const std::vector<std::uint8_t>& buffer) const;
     bool isXMsgProtobufFormat(const std::vector<std::uint8_t>& buffer) const;
+    RocTimeFrameBank reconstructRocBankFromXMsg(const xmsg::proto::Payload& payload, const std::string& rocPrefix) const;
     
     // Helper methods for primitive data serialization
     void writeInt32(std::int32_t value, std::vector<std::uint8_t>& buffer) const;
