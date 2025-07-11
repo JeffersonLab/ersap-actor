@@ -34,3 +34,4 @@ configuration:
 mime-types:
   - binary/data-evio
   - binary/data-jobj
+  - xmsg/coda-time-frame

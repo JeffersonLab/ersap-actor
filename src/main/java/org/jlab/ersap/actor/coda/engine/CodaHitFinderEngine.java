@@ -8,6 +8,7 @@ import org.jlab.epsci.ersap.engine.EngineDataType;
 import org.jlab.ersap.actor.coda.proc.EtEvent;
 import org.jlab.ersap.actor.coda.proc.EvioEventParser;
 import org.jlab.ersap.actor.datatypes.JavaObjectType;
+import org.jlab.ersap.actor.datatypes.CodaTimeFrameDataType;
 import org.json.JSONObject;
 
 import java.nio.ByteBuffer;
@@ -65,7 +66,7 @@ public class CodaHitFinderEngine implements Engine {
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
-        out.setData(JavaObjectType.JOBJ, data);
+        out.setData(CodaTimeFrameDataType.CODA_TIME_FRAME, data);
         return out;
     }
 
@@ -78,7 +79,7 @@ public class CodaHitFinderEngine implements Engine {
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
-        out.setData(JavaObjectType.JOBJ, data);
+        out.setData(CodaTimeFrameDataType.CODA_TIME_FRAME, data);
         return out;
     }
 
@@ -95,7 +96,7 @@ public class CodaHitFinderEngine implements Engine {
 
     @Override
     public Set<EngineDataType> getOutputDataTypes() {
-        return ErsapUtil.buildDataTypes(JavaObjectType.JOBJ);
+        return ErsapUtil.buildDataTypes(CodaTimeFrameDataType.CODA_TIME_FRAME);
     }
 
     @Override
