@@ -40,6 +40,20 @@ if(NOT ERSAP_INCLUDE_DIR OR NOT ERSAP_LIBRARY)
     message(FATAL_ERROR "ERSAP C++ library not found. Please install ersap-cpp or set ERSAP_HOME.")
 endif()
 
+# Find ET library (optional, for HaidisActor)
+find_library(ET_LIBRARY et HINTS $ENV{CODA} $ENV{CODA}/lib)
+find_path(ET_INCLUDE_DIR et.h HINTS $ENV{CODA}/include $ENV{CODA})
+
+if(ET_LIBRARY AND ET_INCLUDE_DIR)
+    message(STATUS "Found ET library: ${ET_LIBRARY}")
+    message(STATUS "Found ET include dir: ${ET_INCLUDE_DIR}")
+    set(BUILD_HAIDIS_ACTOR ON)
+else()
+    message(STATUS "ET library not found. HaidisActor will not be built.")
+    message(STATUS "To build HaidisActor, set CODA environment variable to ET installation path.")
+    set(BUILD_HAIDIS_ACTOR OFF)
+endif()
+
 # Find xMsg C++ library for protobuf serialization from ERSAP installation
 find_library(XMSG_LIBRARY xmsg HINTS ${ERSAP_ROOT}/lib)
 find_path(XMSG_INCLUDE_DIR xmsg/proto/data.h HINTS ${ERSAP_ROOT}/include)
@@ -58,6 +72,11 @@ include_directories(
     ${XMSG_INCLUDE_DIR}
     ${PROTOBUF_INCLUDE_DIRS}
 )
+
+# Add ET include directory if available
+if(BUILD_HAIDIS_ACTOR)
+    include_directories(${ET_INCLUDE_DIR})
+endif()
 
 # Source files for individual libraries
 set(DATATYPE_SOURCES
@@ -84,6 +103,14 @@ set(BINARY_ACTOR_SOURCES
 
 set(BINARY_ACTOR_HEADERS
     include/CodaTimeFrameBinaryPrinterActor.hpp
+)
+
+set(HAIDIS_ACTOR_SOURCES
+    src/haidis_actor.cpp
+)
+
+set(HAIDIS_ACTOR_HEADERS
+    include/HaidisActor.hpp
 )
 
 # Create shared library for the data type
@@ -135,11 +162,36 @@ set_target_properties(CodaTimeFrameBinaryPrinterActor PROPERTIES
     PUBLIC_HEADER "${BINARY_ACTOR_HEADERS}"
 )
 
+# Create shared library for the HaidisActor (if ET library is available)
+if(BUILD_HAIDIS_ACTOR)
+    add_library(HaidisActor SHARED ${HAIDIS_ACTOR_SOURCES} ${HAIDIS_ACTOR_HEADERS})
+
+    # Link libraries for HaidisActor
+    target_link_libraries(HaidisActor
+        ${ERSAP_LIBRARY}
+        ${ET_LIBRARY}
+    )
+
+    # Set library properties for HaidisActor
+    set_target_properties(HaidisActor PROPERTIES
+        VERSION ${PROJECT_VERSION}
+        SOVERSION 1
+        PUBLIC_HEADER "${HAIDIS_ACTOR_HEADERS}"
+    )
+endif()
+
 # Installation rules for all libraries
-install(TARGETS CodaTimeFrameDataType CodaTimeFramePrinterActor CodaTimeFrameBinaryPrinterActor
-    LIBRARY DESTINATION lib
-    PUBLIC_HEADER DESTINATION include/ersap-actor-cpp
-)
+if(BUILD_HAIDIS_ACTOR)
+    install(TARGETS CodaTimeFrameDataType CodaTimeFramePrinterActor CodaTimeFrameBinaryPrinterActor HaidisActor
+        LIBRARY DESTINATION lib
+        PUBLIC_HEADER DESTINATION include/ersap-actor-cpp
+    )
+else()
+    install(TARGETS CodaTimeFrameDataType CodaTimeFramePrinterActor CodaTimeFrameBinaryPrinterActor
+        LIBRARY DESTINATION lib
+        PUBLIC_HEADER DESTINATION include/ersap-actor-cpp
+    )
+endif()
 
 # Optional: Create a simple test executable
 option(BUILD_TESTS "Build test executables" OFF)
