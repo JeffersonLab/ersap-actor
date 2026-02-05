@@ -81,12 +81,12 @@ endif()
 # Source files for individual libraries
 set(DATATYPE_SOURCES
     src/CodaTimeFrameDataType.cpp
-    src/CodaTimeFrameBinaryDataType.cpp
+    src/CodaTImeFrameBinaryDataType.cpp
 )
 
 set(DATATYPE_HEADERS
     include/CodaTimeFrameDataType.hpp
-    include/CodaTimeFrameBinaryDataType.hpp
+    include/CodaTImeFrameBinaryDataType.hpp
 )
 
 set(ACTOR_SOURCES
