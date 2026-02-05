@@ -1,4 +1,4 @@
-name: CodaEtSourceEngine
+name: UniAdapterSourceEngine
 engine:  org.jlab.ersap.actor.coda.engine.UniAdapterSourceEngine
 type: java
 
