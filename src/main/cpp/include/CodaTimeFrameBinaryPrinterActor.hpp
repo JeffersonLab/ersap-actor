@@ -18,7 +18,7 @@
 #include <ersap/engine.hpp>
 #include <ersap/engine_data.hpp>
 #include <ersap/engine_data_type.hpp>
-#include "CodaTimeFrameBinaryDataType.hpp"
+#include "CodaTImeFrameBinaryDataType.hpp"
 #include <memory>
 #include <set>
 #include <string>
