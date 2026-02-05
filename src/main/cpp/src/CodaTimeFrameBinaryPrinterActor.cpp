@@ -12,7 +12,7 @@
 */
 
 #include "CodaTimeFrameBinaryPrinterActor.hpp"
-#include "CodaTimeFrameBinaryDataType.hpp"
+#include "CodaTImeFrameBinaryDataType.hpp"
 #include <ersap/stdlib/json_utils.hpp>
 #include <iostream>
 #include <iomanip>
