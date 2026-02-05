@@ -1,0 +1,10 @@
+name: CodaEtSourceEngine
+engine:  org.jlab.ersap.actor.coda.engine.UniAdapterSourceEngine
+type: java
+
+author: vardan
+email: gurjyan@jlab.org
+
+version: 0.1
+description:
+  ERSAP internal orchestrator agent

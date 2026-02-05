@@ -4,6 +4,10 @@ import org.jlab.ersap.actor.util.IASource;
 import java.nio.ByteOrder;
 
 public class UniAdapter implements IASource {
+
+    public UniAdapter() {
+    }
+
     @Override
     public Integer nextEvent() {
         return 369;
