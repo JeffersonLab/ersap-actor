@@ -71,8 +71,8 @@ private:
 
     // ET system handles
     et_sys_id etSys_ = nullptr;
-    et_att_id etAtt_ = nullptr;
-    et_stat_id etStat_ = nullptr;
+    et_att_id etAtt_ = 0;
+    et_stat_id etStat_ = 0;
     bool etConnected_ = false;
 
     // Statistics

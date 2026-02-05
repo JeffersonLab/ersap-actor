@@ -381,13 +381,13 @@ void HaidisActor::cleanupET() {
 
     int status;
 
-    if (etAtt_ != nullptr) {
+    if (etAtt_ != 0) {
         status = et_station_detach(etSys_, etAtt_);
         if (status != ET_OK) {
             std::cerr << "Warning: Failed to detach from station (status "
                       << status << ")" << std::endl;
         }
-        etAtt_ = nullptr;
+        etAtt_ = 0;
     }
 
     if (etSys_ != nullptr) {
@@ -399,7 +399,7 @@ void HaidisActor::cleanupET() {
         etSys_ = nullptr;
     }
 
-    etStat_ = nullptr;
+    etStat_ = 0;
     etConnected_ = false;
 
     if (verbose_) {
