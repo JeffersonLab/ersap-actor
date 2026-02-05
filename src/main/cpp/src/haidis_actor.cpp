@@ -182,6 +182,9 @@ ersap::EngineData HaidisActor::execute(ersap::EngineData& input) {
             printSeparator();
         }
 
+        // Copy the 16 doubles into a vector for output
+        std::vector<double> output_data(doubles, doubles + 16);
+
         // Return event to ET system
         status = et_event_put(etSys_, etAtt_, pe);
         if (status == ET_ERROR_DEAD) {
@@ -205,8 +208,8 @@ ersap::EngineData HaidisActor::execute(ersap::EngineData& input) {
             printEventSummary();
         }
 
-        // Set success status and pass through trigger value
-        output.set_data(ersap::type::SINT32, 1);
+        // Set success status and output array of doubles
+        output.set_data(ersap::type::ARRAY_DOUBLE, output_data);
 
     } catch (const std::exception& e) {
         output.set_status(ersap::EngineStatus::ERROR);
@@ -228,7 +231,7 @@ std::vector<ersap::EngineDataType> HaidisActor::input_data_types() const {
 }
 
 std::vector<ersap::EngineDataType> HaidisActor::output_data_types() const {
-    return { ersap::type::SINT32, ersap::type::JSON };
+    return { ersap::type::ARRAY_DOUBLE, ersap::type::JSON };
 }
 
 std::set<std::string> HaidisActor::states() const {
