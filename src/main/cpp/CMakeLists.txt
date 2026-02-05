@@ -42,8 +42,8 @@ if(NOT ERSAP_INCLUDE_DIR OR NOT ERSAP_LIBRARY)
 endif()
 
 # Find ET library (optional, for HaidisActor)
-find_library(ET_LIBRARY et HINTS $ENV{CODA} $ENV{CODA}/lib)
-find_path(ET_INCLUDE_DIR et.h HINTS $ENV{CODA}/include $ENV{CODA})
+find_library(ET_LIBRARY et HINTS $ENV{CODA}/Linux-x86_64/lib $ENV{CODA}/lib $ENV{CODA})
+find_path(ET_INCLUDE_DIR et.h HINTS $ENV{CODA}/common/include $ENV{CODA}/include $ENV{CODA})
 
 if(ET_LIBRARY AND ET_INCLUDE_DIR)
     message(STATUS "Found ET library: ${ET_LIBRARY}")
