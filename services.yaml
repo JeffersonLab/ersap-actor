@@ -1,0 +1,25 @@
+---
+io-services:
+  reader:
+    class: org.jlab.ersap.actor.coda.engine.UniAdapterSourceEngine
+    name: UniAdapter
+  writer:
+    class: org.jlab.ersap.actor.coda.engine.CodaSinkEngine
+    name: Sink
+services:
+  - class: HaidisActor
+    name: haidis
+configuration:
+  io-services:
+    reader:
+    writer:
+  services:
+    haidis:
+      et_filename: "/tmp/et_SRO_ERSAP"
+      et_host: "localhost"
+      et_port: 23911
+      station_name: "haidis"
+      verbose: false
+mime-types:
+  - binary/sint32
+  - binary/array-double
