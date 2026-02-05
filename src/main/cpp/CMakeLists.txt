@@ -86,6 +86,13 @@ set(DATATYPE_SOURCES
 
 set(DATATYPE_HEADERS
     include/CodaTimeFrameDataType.hpp
+)
+
+set(BINARY_DATATYPE_SOURCES
+    src/CodaTImeFrameBinaryDataType.cpp
+)
+
+set(BINARY_DATATYPE_HEADERS
     include/CodaTImeFrameBinaryDataType.hpp
 )
 
@@ -133,6 +140,24 @@ set_target_properties(CodaTimeFrameDataType PROPERTIES
     PUBLIC_HEADER "${DATATYPE_HEADERS}"
 )
 
+# Create shared library for the binary data type
+add_library(CodaTimeFrameBinaryDataType SHARED ${BINARY_DATATYPE_SOURCES} ${BINARY_DATATYPE_HEADERS})
+
+# Require C++17 for this target
+target_compile_features(CodaTimeFrameBinaryDataType PUBLIC cxx_std_17)
+
+# Link libraries for binary data type
+target_link_libraries(CodaTimeFrameBinaryDataType
+    ${ERSAP_LIBRARY}
+)
+
+# Set library properties for binary data type
+set_target_properties(CodaTimeFrameBinaryDataType PROPERTIES
+    VERSION ${PROJECT_VERSION}
+    SOVERSION 1
+    PUBLIC_HEADER "${BINARY_DATATYPE_HEADERS}"
+)
+
 # Create shared library for the ERSAP actor
 add_library(CodaTimeFramePrinterActor SHARED ${ACTOR_SOURCES} ${ACTOR_HEADERS})
 
@@ -158,10 +183,10 @@ add_library(CodaTimeFrameBinaryPrinterActor SHARED ${BINARY_ACTOR_SOURCES} ${BIN
 # Require C++17 for this target
 target_compile_features(CodaTimeFrameBinaryPrinterActor PUBLIC cxx_std_17)
 
-# Link libraries for binary printer actor (depends on data type library)
+# Link libraries for binary printer actor (depends on binary data type library)
 target_link_libraries(CodaTimeFrameBinaryPrinterActor
     ${ERSAP_LIBRARY}
-    CodaTimeFrameDataType
+    CodaTimeFrameBinaryDataType
 )
 
 # Set library properties for binary printer actor
@@ -194,12 +219,12 @@ endif()
 
 # Installation rules for all libraries
 if(BUILD_HAIDIS_ACTOR)
-    install(TARGETS CodaTimeFrameDataType CodaTimeFramePrinterActor CodaTimeFrameBinaryPrinterActor HaidisActor
+    install(TARGETS CodaTimeFrameDataType CodaTimeFrameBinaryDataType CodaTimeFramePrinterActor CodaTimeFrameBinaryPrinterActor HaidisActor
         LIBRARY DESTINATION lib
         PUBLIC_HEADER DESTINATION include/ersap-actor-cpp
     )
 else()
-    install(TARGETS CodaTimeFrameDataType CodaTimeFramePrinterActor CodaTimeFrameBinaryPrinterActor
+    install(TARGETS CodaTimeFrameDataType CodaTimeFrameBinaryDataType CodaTimeFramePrinterActor CodaTimeFrameBinaryPrinterActor
         LIBRARY DESTINATION lib
         PUBLIC_HEADER DESTINATION include/ersap-actor-cpp
     )
