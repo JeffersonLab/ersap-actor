@@ -1,8 +1,8 @@
 cmake_minimum_required(VERSION 3.10)
 project(ersap-actor-cpp VERSION 1.0.0)
 
-# Set C++ standard
-set(CMAKE_CXX_STANDARD 14)
+# Set C++ standard (fallback for older CMake or external dependencies)
+set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 # If ERSAP_HOME is defined, set default install path and prefix path
@@ -117,6 +117,9 @@ set(HAIDIS_ACTOR_HEADERS
 # Create shared library for the data type
 add_library(CodaTimeFrameDataType SHARED ${DATATYPE_SOURCES} ${DATATYPE_HEADERS})
 
+# Require C++17 for this target
+target_compile_features(CodaTimeFrameDataType PUBLIC cxx_std_17)
+
 # Link libraries for data type
 target_link_libraries(CodaTimeFrameDataType
     ${ERSAP_LIBRARY}
@@ -134,6 +137,9 @@ set_target_properties(CodaTimeFrameDataType PROPERTIES
 # Create shared library for the ERSAP actor
 add_library(CodaTimeFramePrinterActor SHARED ${ACTOR_SOURCES} ${ACTOR_HEADERS})
 
+# Require C++17 for this target
+target_compile_features(CodaTimeFramePrinterActor PUBLIC cxx_std_17)
+
 # Link libraries for actor (depends on data type library)
 target_link_libraries(CodaTimeFramePrinterActor
     ${ERSAP_LIBRARY}
@@ -149,6 +155,9 @@ set_target_properties(CodaTimeFramePrinterActor PROPERTIES
 
 # Create shared library for the binary printer ERSAP actor
 add_library(CodaTimeFrameBinaryPrinterActor SHARED ${BINARY_ACTOR_SOURCES} ${BINARY_ACTOR_HEADERS})
+
+# Require C++17 for this target
+target_compile_features(CodaTimeFrameBinaryPrinterActor PUBLIC cxx_std_17)
 
 # Link libraries for binary printer actor (depends on data type library)
 target_link_libraries(CodaTimeFrameBinaryPrinterActor
@@ -166,6 +175,9 @@ set_target_properties(CodaTimeFrameBinaryPrinterActor PROPERTIES
 # Create shared library for the HaidisActor (if ET library is available)
 if(BUILD_HAIDIS_ACTOR)
     add_library(HaidisActor SHARED ${HAIDIS_ACTOR_SOURCES} ${HAIDIS_ACTOR_HEADERS})
+
+    # Require C++17 for this target
+    target_compile_features(HaidisActor PUBLIC cxx_std_17)
 
     # Link libraries for HaidisActor
     target_link_libraries(HaidisActor
@@ -198,6 +210,7 @@ endif()
 option(BUILD_TESTS "Build test executables" OFF)
 if(BUILD_TESTS)
     add_executable(test-ev-event-serializer tests/test_coda_timeframe_serializer.cpp)
+    target_compile_features(test-ev-event-serializer PRIVATE cxx_std_17)
     target_link_libraries(test-ev-event-serializer ${ERSAP_LIBRARY} CodaTimeFrameDataType)
 endif()
 
