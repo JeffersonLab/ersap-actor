@@ -1,5 +1,5 @@
 // CodaTimeFrameBinaryDataType.cpp
-#include "CodaTimeFrameBinaryDataType.hpp"
+#include "CodaTImeFrameBinaryDataType.hpp"
 #include <stdexcept>
 #include <cstring>
 #include <cstdint>
