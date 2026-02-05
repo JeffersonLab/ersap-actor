@@ -27,9 +27,10 @@ message(STATUS "Found protobuf version: ${PROTOBUF_VERSION}")
 message(STATUS "Protobuf include dirs: ${PROTOBUF_INCLUDE_DIRS}")
 message(STATUS "Protobuf libraries: ${PROTOBUF_LIBRARIES}")
 
-# Use the same protobuf version for compilation
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${PROTOBUF_CFLAGS_OTHER}")
-link_directories(${PROTOBUF_LIBRARY_DIRS})
+# Add protobuf library directories
+if(PROTOBUF_LIBRARY_DIRS)
+    link_directories(${PROTOBUF_LIBRARY_DIRS})
+endif()
 
 # Find ERSAP C++ library
 set(ERSAP_ROOT $ENV{ERSAP_HOME})
