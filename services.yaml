@@ -9,6 +9,7 @@ io-services:
 services:
   - class: HaidisActor
     name: haidis
+    lang: cpp
 configuration:
   io-services:
     reader:
