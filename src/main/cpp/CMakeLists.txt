@@ -82,7 +82,6 @@ endif()
 # Source files for individual libraries
 set(DATATYPE_SOURCES
     src/CodaTimeFrameDataType.cpp
-    src/CodaTImeFrameBinaryDataType.cpp
 )
 
 set(DATATYPE_HEADERS
