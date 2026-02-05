@@ -1,6 +1,32 @@
 # Build Instructions for HaidisActor
 
-This guide explains how to build the HaidisActor C++ ERSAP service.
+This guide explains how to build and install the HaidisActor C++ ERSAP service.
+
+## Quick Start (Complete Build and Install)
+
+```bash
+# 1. Set environment variables
+export ERSAP_HOME=/path/to/your/ersap/installation
+export CODA=/path/to/coda/et/installation
+
+# 2. Navigate to C++ source directory
+cd /Users/gurjyan/Documents/Devel/ersap-actor/src/main/cpp
+
+# 3. Create build directory
+mkdir -p build && cd build
+
+# 4. Configure, build, and install to $ERSAP_HOME
+cmake ..
+make -j$(nproc)
+make install
+
+# 5. Verify installation
+ls -lh $ERSAP_HOME/lib/libHaidisActor.so*
+```
+
+After installation, the service will be available at `$ERSAP_HOME/lib/libHaidisActor.so` and can be used in ERSAP orchestrations.
+
+---
 
 ## Prerequisites
 
@@ -66,14 +92,42 @@ make
 - `libCodaTimeFrameBinaryPrinterActor.so` - Binary printer
 - **`libHaidisActor.so`** - Your HaidisActor service (main target)
 
-### 5. Install (Optional)
+### 5. Install to $ERSAP_HOME
+
+**IMPORTANT:** The installation step is required for ERSAP to find and load the HaidisActor service.
+
 ```bash
 make install
 ```
 
-This installs libraries to:
-- `$ERSAP_HOME/lib/` - Shared libraries
-- `$ERSAP_HOME/include/ersap-actor-cpp/` - Header files
+**What gets installed:**
+
+Libraries are installed to `$ERSAP_HOME/lib/`:
+- `libHaidisActor.so` (or `.dylib` on macOS) - Main HaidisActor service
+- `libCodaTimeFrameDataType.so` - Data type library
+- `libCodaTimeFramePrinterActor.so` - Printer actor
+- `libCodaTimeFrameBinaryPrinterActor.so` - Binary printer
+
+Headers are installed to `$ERSAP_HOME/include/ersap-actor-cpp/`:
+- `HaidisActor.hpp`
+- `CodaTimeFrameDataType.hpp`
+- Other header files
+
+**Verify Installation:**
+```bash
+ls -lh $ERSAP_HOME/lib/libHaidisActor.so*
+ls -lh $ERSAP_HOME/include/ersap-actor-cpp/
+```
+
+**Custom Install Location (Optional):**
+
+If you want to install to a different location:
+```bash
+cmake -DCMAKE_INSTALL_PREFIX=/custom/path ..
+make install
+```
+
+But for ERSAP to automatically find the service, installing to `$ERSAP_HOME` is recommended.
 
 ## Quick Build Script
 
@@ -133,17 +187,21 @@ ls $ERSAP_HOME/lib/libxmsg*
 ls $ERSAP_HOME/include/xmsg/
 ```
 
-## Using the Built Service
+## Post-Installation: Using HaidisActor in ERSAP
 
-After building and installing, you can use HaidisActor in ERSAP:
+After successfully building and installing to `$ERSAP_HOME`, you can use HaidisActor in ERSAP:
 
-1. **Make sure the library is in the library path:**
+1. **Ensure ERSAP environment is configured:**
    ```bash
+   # Add ERSAP libraries to library path
    export LD_LIBRARY_PATH=$ERSAP_HOME/lib:$LD_LIBRARY_PATH  # Linux
    export DYLD_LIBRARY_PATH=$ERSAP_HOME/lib:$DYLD_LIBRARY_PATH  # macOS
+
+   # Verify HaidisActor is installed
+   ls $ERSAP_HOME/lib/libHaidisActor.so*
    ```
 
-2. **Use in services.yaml:**
+2. **Configure services.yaml:**
    ```yaml
    services:
      - class: HaidisActor
