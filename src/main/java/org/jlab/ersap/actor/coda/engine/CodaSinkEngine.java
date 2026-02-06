@@ -35,6 +35,6 @@ public class CodaSinkEngine extends AbstractEventWriterService<FileWriter> {
 
     @Override
     protected EngineDataType getDataType() {
-        return JavaObjectType.JOBJ;
+        return EngineDataType.ARRAY_DOUBLE;
     }
 }
