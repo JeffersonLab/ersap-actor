@@ -215,12 +215,12 @@ ersap::EngineData HaidisActor::execute(ersap::EngineData& input) {
                 analysis_results.push_back(result.s_pippi0);
                 analysis_results.push_back(result.s_pimpi0);
 
-                //if (verbose_) {
+                if (verbose_) {
                     std::cout << "Group " << (group_idx + 1) << " PASSED kinematic cuts:" << std::endl;
                     std::cout << "  s_pippim  = " << result.s_pippim << std::endl;
                     std::cout << "  s_pippi0  = " << result.s_pippi0 << std::endl;
                     std::cout << "  s_pimpi0  = " << result.s_pimpi0 << std::endl;
-                //}
+                }
             } else if (verbose_) {
                 std::cout << "Group " << (group_idx + 1) << " FAILED kinematic cuts (not included in output)" << std::endl;
             }
