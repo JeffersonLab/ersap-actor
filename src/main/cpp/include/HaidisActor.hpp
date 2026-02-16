@@ -25,6 +25,7 @@
 #include <memory>
 #include <set>
 #include <vector>
+#include <cmath>
 
 namespace ersap {
 namespace coda {
