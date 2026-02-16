@@ -1,0 +1,8 @@
+# Build directories
+src/main/cpp/build/
+
+# IDE
+.idea/workspace.xml
+
+# Gradle
+.gradle/
