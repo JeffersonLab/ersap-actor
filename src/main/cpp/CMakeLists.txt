@@ -120,6 +120,14 @@ set(HAIDIS_ACTOR_HEADERS
     include/HaidisActor.hpp
 )
 
+set(HAIDIS_LINK_ACTOR_SOURCES
+    src/haidis_link_actor.cpp
+)
+
+set(HAIDIS_LINK_ACTOR_HEADERS
+    include/HaidisLinkActor.hpp
+)
+
 # Create shared library for the data type
 add_library(CodaTimeFrameDataType SHARED ${DATATYPE_SOURCES} ${DATATYPE_HEADERS})
 
@@ -215,11 +223,29 @@ if(BUILD_HAIDIS_ACTOR)
         SOVERSION 1
         PUBLIC_HEADER "${HAIDIS_ACTOR_HEADERS}"
     )
+
+    # Create shared library for the HaidisLinkActor
+    add_library(HaidisLinkActor SHARED ${HAIDIS_LINK_ACTOR_SOURCES} ${HAIDIS_LINK_ACTOR_HEADERS})
+
+    # Require C++17 for this target
+    target_compile_features(HaidisLinkActor PUBLIC cxx_std_17)
+
+    # Link libraries for HaidisLinkActor
+    target_link_libraries(HaidisLinkActor
+        ${ERSAP_LIBRARY}
+    )
+
+    # Set library properties for HaidisLinkActor
+    set_target_properties(HaidisLinkActor PROPERTIES
+        VERSION ${PROJECT_VERSION}
+        SOVERSION 1
+        PUBLIC_HEADER "${HAIDIS_LINK_ACTOR_HEADERS}"
+    )
 endif()
 
 # Installation rules for all libraries
 if(BUILD_HAIDIS_ACTOR)
-    install(TARGETS CodaTimeFrameDataType CodaTimeFrameBinaryDataType CodaTimeFramePrinterActor CodaTimeFrameBinaryPrinterActor HaidisActor
+    install(TARGETS CodaTimeFrameDataType CodaTimeFrameBinaryDataType CodaTimeFramePrinterActor CodaTimeFrameBinaryPrinterActor HaidisActor HaidisLinkActor
         LIBRARY DESTINATION lib
         PUBLIC_HEADER DESTINATION include/ersap-actor-cpp
     )
