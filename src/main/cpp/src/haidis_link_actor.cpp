@@ -94,50 +94,56 @@ ersap::EngineData HaidisLinkActor::execute(ersap::EngineData& input) {
             printReceivedData(in);
         }
 
-        // Step 3: Create 16-bit header from size_bytes
-        // Header represents input size in bytes modulo 65536
-        uint16_t header_u16 = static_cast<uint16_t>(size_bytes & 0xFFFF);
+        // Step 3: Create 64-bit header with 32+16+16 bit structure
+        // Header layout (64 bits total):
+        //   Bits  0-15 (uint16_t): num_doubles & 0xFFFF
+        //   Bits 16-31 (uint16_t): triplet_count & 0xFFFF
+        //   Bits 32-63 (uint32_t): size_bytes (full 32-bit size)
 
-        // Warn if size exceeds 16-bit capacity
-        if (size_bytes > 65535 && verbose_) {
-            std::cout << "Warning: Input size (" << size_bytes
-                      << " bytes) exceeds 65535. Header will contain only low 16 bits: "
-                      << header_u16 << std::endl;
-        }
+        uint64_t header_u64 = 0;
+        header_u64 |= (static_cast<uint64_t>(size_bytes) << 32);                    // bits 32-63
+        header_u64 |= (static_cast<uint64_t>(triplet_count & 0xFFFF) << 16);        // bits 16-31
+        header_u64 |= (num_doubles & 0xFFFF);                                       // bits  0-15
 
         if (verbose_) {
-            std::cout << "\nHeader generation:" << std::endl;
-            std::cout << "  - Input size: " << size_bytes << " bytes" << std::endl;
-            std::cout << "  - Header value (16-bit): 0x" << std::hex << header_u16 << std::dec
-                      << " (" << header_u16 << ")" << std::endl;
+            std::cout << "\nHeader generation (64-bit structure):" << std::endl;
+            std::cout << "  - num_doubles: " << num_doubles
+                      << " (0x" << std::hex << (num_doubles & 0xFFFF) << std::dec << ")" << std::endl;
+            std::cout << "  - triplet_count: " << triplet_count
+                      << " (0x" << std::hex << (triplet_count & 0xFFFF) << std::dec << ")" << std::endl;
+            std::cout << "  - size_bytes: " << size_bytes
+                      << " (0x" << std::hex << size_bytes << std::dec << ")" << std::endl;
+            std::cout << "  - Full 64-bit header: 0x" << std::hex << header_u64 << std::dec << std::endl;
         }
 
-        // Step 4: Bit-pack header into double using memcpy (NOT numeric casting)
+        // Step 4: Binary-copy 64-bit header to double using memcpy
         // This is a binary container operation, not numeric conversion
         static_assert(sizeof(double) == sizeof(uint64_t), "double must be 8 bytes");
 
-        // Pack header into uint64_t (low 16 bits = header, upper 48 bits = zero)
-        uint64_t header_u64 = static_cast<uint64_t>(header_u16);
-
-        // Binary-copy uint64_t to double (strict aliasing safe via memcpy)
         double header_double;
         std::memcpy(&header_double, &header_u64, sizeof(header_u64));
 
         // To decode this header (for downstream consumers):
         // uint64_t u64;
         // std::memcpy(&u64, &header_double, sizeof(double));
-        // uint16_t decoded = static_cast<uint16_t>(u64 & 0xFFFF);
+        // uint16_t num_doubles_decoded = static_cast<uint16_t>(u64 & 0xFFFF);
+        // uint16_t triplet_count_decoded = static_cast<uint16_t>((u64 >> 16) & 0xFFFF);
+        // uint32_t size_bytes_decoded = static_cast<uint32_t>(u64 >> 32);
 
         if (verbose_) {
-            std::cout << "  - Packed into uint64_t: 0x" << std::hex << header_u64 << std::dec << std::endl;
-            std::cout << "  - Binary-copied to double via memcpy (NOT numeric cast)" << std::endl;
+            std::cout << "  - Binary-copied to double via memcpy" << std::endl;
 
             // Verification: decode to confirm correct packing
             uint64_t verify_u64;
             std::memcpy(&verify_u64, &header_double, sizeof(double));
-            uint16_t verify_u16 = static_cast<uint16_t>(verify_u64 & 0xFFFF);
-            std::cout << "  - Verification: decoded header = 0x" << std::hex << verify_u16
-                      << std::dec << " (" << verify_u16 << ")" << std::endl;
+            uint16_t verify_num_doubles = static_cast<uint16_t>(verify_u64 & 0xFFFF);
+            uint16_t verify_triplet_count = static_cast<uint16_t>((verify_u64 >> 16) & 0xFFFF);
+            uint32_t verify_size_bytes = static_cast<uint32_t>(verify_u64 >> 32);
+
+            std::cout << "  - Verification (decoded):" << std::endl;
+            std::cout << "    * num_doubles: " << verify_num_doubles << std::endl;
+            std::cout << "    * triplet_count: " << verify_triplet_count << std::endl;
+            std::cout << "    * size_bytes: " << verify_size_bytes << std::endl;
         }
 
         // Step 5: Construct output array with header prepended
@@ -200,8 +206,9 @@ std::string HaidisLinkActor::author() const {
 
 std::string HaidisLinkActor::description() const {
     return "ERSAP actor that receives ARRAY_DOUBLE from HaidisActor (triplets: s_pippim, "
-           "s_pippi0, s_pimpi0), creates a 16-bit header from input size, bit-packs it into "
-           "a double using memcpy, and prepends it to the output array.";
+           "s_pippi0, s_pimpi0), creates a 64-bit header (32+16+16 bit structure) encoding "
+           "size_bytes, triplet_count, and num_doubles, copies it into a double using memcpy, "
+           "and prepends it to the output array.";
 }
 
 std::string HaidisLinkActor::version() const {

@@ -39,23 +39,26 @@ namespace coda {
  * Processing:
  *   1. Read input array and compute size metrics
  *   2. Print received data (triplets formatted nicely)
- *   3. Create 16-bit header from input size in bytes (modulo 65536)
- *   4. Bit-pack header into double slot using memcpy (NOT numeric cast)
+ *   3. Create 64-bit header with 32+16+16 bit structure
+ *   4. Binary-copy header to double slot using memcpy
  *   5. Prepend header-double to output array
  *
  * Output:
  *   - ARRAY_DOUBLE: [header_double, original_data...]
- *     where header_double encodes size_bytes in low 16 bits
+ *     where header_double encodes metadata in 64 bits
  *
- * Header Encoding:
- *   - uint16_t header_u16 = size_bytes & 0xFFFF
- *   - Packed into uint64_t with upper 48 bits zero
+ * Header Encoding (64-bit structure):
+ *   - Bits  0-15 (uint16_t): num_doubles & 0xFFFF
+ *   - Bits 16-31 (uint16_t): triplet_count & 0xFFFF
+ *   - Bits 32-63 (uint32_t): size_bytes (full 32-bit size)
  *   - Binary-copied to double via memcpy (strict aliasing safe)
  *
  * Header Decoding (for downstream consumers):
  *   uint64_t u64;
  *   std::memcpy(&u64, &header_double, sizeof(double));
- *   uint16_t size_mod = static_cast<uint16_t>(u64 & 0xFFFF);
+ *   uint16_t num_doubles = static_cast<uint16_t>(u64 & 0xFFFF);
+ *   uint16_t triplet_count = static_cast<uint16_t>((u64 >> 16) & 0xFFFF);
+ *   uint32_t size_bytes = static_cast<uint32_t>(u64 >> 32);
  */
 class HaidisLinkActor : public ersap::Engine {
 public:
