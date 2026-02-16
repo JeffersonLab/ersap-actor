@@ -17,6 +17,7 @@
 #include <iomanip>
 #include <sstream>
 #include <cstring>
+#include <cmath>
 
 // C interface for engine creation
 extern "C"
@@ -152,10 +153,13 @@ ersap::EngineData HaidisActor::execute(ersap::EngineData& input) {
         et_event_getdata(pe, &data_ptr);
         et_event_getlength(pe, &data_len);
 
-        // Validate payload size - expecting 16 doubles
-        if (data_len < EXPECTED_SIZE) {
+        // Validate payload size - expecting at least one complete group (16 doubles)
+        constexpr size_t DOUBLES_PER_GROUP = 16;
+        constexpr size_t BYTES_PER_GROUP = DOUBLES_PER_GROUP * sizeof(double);
+
+        if (data_len < BYTES_PER_GROUP) {
             std::cerr << "Warning: Received " << data_len
-                      << " bytes, expected minimum " << EXPECTED_SIZE << " bytes" << std::endl;
+                      << " bytes, expected minimum " << BYTES_PER_GROUP << " bytes" << std::endl;
 
             // Return event to ET system
             status = et_event_put(etSys_, etAtt_, pe);
@@ -165,25 +169,69 @@ ersap::EngineData HaidisActor::execute(ersap::EngineData& input) {
 
             output.set_status(ersap::EngineStatus::ERROR);
             output.set_description("Invalid ET event size: " + std::to_string(data_len) +
-                                   " bytes, expected " + std::to_string(EXPECTED_SIZE));
+                                   " bytes, expected minimum " + std::to_string(BYTES_PER_GROUP));
             errorCount_++;
             return output;
+        }
+
+        // Calculate number of complete groups in the payload
+        size_t num_groups = data_len / BYTES_PER_GROUP;
+        size_t leftover_bytes = data_len % BYTES_PER_GROUP;
+
+        if (leftover_bytes > 0 && verbose_) {
+            std::cout << "Warning: Payload has " << leftover_bytes
+                      << " leftover bytes (not a complete group). Processing "
+                      << num_groups << " complete groups only." << std::endl;
         }
 
         // Interpret data as array of doubles
         double* doubles = static_cast<double*>(data_ptr);
 
-        // Process and print the four-vectors
-        if (verbose_) {
-            printSeparator("Physics Event Data");
-        }
-        printFourVectors(doubles);
-        if (verbose_) {
-            printSeparator();
+        // Vector to collect analysis results (3 doubles per passing event)
+        std::vector<double> analysis_results;
+
+        // Process each group of 16 doubles
+        for (size_t group_idx = 0; group_idx < num_groups; ++group_idx) {
+            const double* group_data = doubles + (group_idx * DOUBLES_PER_GROUP);
+
+            // Print four-vectors for this group
+            if (verbose_) {
+                if (num_groups > 1) {
+                    printSeparator("Physics Event Data - Group " + std::to_string(group_idx + 1) +
+                                   "/" + std::to_string(num_groups));
+                } else {
+                    printSeparator("Physics Event Data");
+                }
+            }
+            printFourVectors(group_data);
+            if (verbose_) {
+                printSeparator();
+            }
+
+            // Run Dalitz analysis on this group
+            KinematicResult result = compute_kinematics(group_data);
+
+            // Only collect results that pass kinematic cuts
+            if (result.pass_kinematic_check) {
+                analysis_results.push_back(result.s_pippim);
+                analysis_results.push_back(result.s_pippi0);
+                analysis_results.push_back(result.s_pimpi0);
+
+                if (verbose_) {
+                    std::cout << "Group " << (group_idx + 1) << " PASSED kinematic cuts:" << std::endl;
+                    std::cout << "  s_pippim  = " << result.s_pippim << std::endl;
+                    std::cout << "  s_pippi0  = " << result.s_pippi0 << std::endl;
+                    std::cout << "  s_pimpi0  = " << result.s_pimpi0 << std::endl;
+                }
+            } else if (verbose_) {
+                std::cout << "Group " << (group_idx + 1) << " FAILED kinematic cuts (not included in output)" << std::endl;
+            }
         }
 
-        // Copy the 16 doubles into a vector for output
-        std::vector<double> output_data(doubles, doubles + 16);
+        if (verbose_ && num_groups > 1) {
+            std::cout << "Processed " << num_groups << " groups, "
+                      << (analysis_results.size() / 3) << " passed kinematic cuts" << std::endl;
+        }
 
         // Return event to ET system
         status = et_event_put(etSys_, etAtt_, pe);
@@ -208,8 +256,9 @@ ersap::EngineData HaidisActor::execute(ersap::EngineData& input) {
             printEventSummary();
         }
 
-        // Set success status and output array of doubles
-        output.set_data(ersap::type::ARRAY_DOUBLE, output_data);
+        // Set success status and output analysis results
+        // Output contains 3 doubles per passing event: (s_pippim, s_pippi0, s_pimpi0)
+        output.set_data(ersap::type::ARRAY_DOUBLE, analysis_results);
 
     } catch (const std::exception& e) {
         output.set_status(ersap::EngineStatus::ERROR);
@@ -405,6 +454,37 @@ void HaidisActor::cleanupET() {
     if (verbose_) {
         std::cout << "ET cleanup complete" << std::endl;
     }
+}
+
+KinematicResult HaidisActor::compute_kinematics(const double* data) const {
+    // Particle masses (in GeV)
+    constexpr double PION_MASS = 0.139;  // π± mass
+    constexpr double PHOTON_MASS = 0.0;  // γ mass
+
+    // Construct Lorentz vectors from payload data
+    // Layout: π+ (E,Px,Py,Pz), π- (E,Px,Py,Pz), γ1 (E,Px,Py,Pz), γ2 (E,Px,Py,Pz)
+    LorentzVector pip(data[0], data[1], data[2], data[3], PION_MASS);
+    LorentzVector pim(data[4], data[5], data[6], data[7], PION_MASS);
+    LorentzVector g1(data[8], data[9], data[10], data[11], PHOTON_MASS);
+    LorentzVector g2(data[12], data[13], data[14], data[15], PHOTON_MASS);
+
+    // Compute invariant masses squared (Dalitz variables)
+    double s_pippim = (pip + pim).M2();
+
+    // Reconstruct π0 from two photons
+    LorentzVector pi0 = g1 + g2;
+    double m_pi0 = pi0.M();
+
+    double s_pippi0 = (pip + pi0).M2();
+    double s_pimpi0 = (pim + pi0).M2();
+
+    // Apply kinematic cuts (matching Python logic)
+    bool pass_kinematic_check = false;
+    if (std::sqrt(s_pippim) >= 0.278 && m_pi0 >= 0.08 && m_pi0 <= 0.15) {
+        pass_kinematic_check = true;
+    }
+
+    return KinematicResult{s_pippim, s_pippi0, s_pimpi0, pass_kinematic_check};
 }
 
 void HaidisActor::printFourVectors(const double* data) const {

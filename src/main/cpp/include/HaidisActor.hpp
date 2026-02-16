@@ -30,6 +30,44 @@ namespace ersap {
 namespace coda {
 
 /**
+ * Simple Lorentz four-vector for physics calculations.
+ * Stores (E, Px, Py, Pz) with particle mass.
+ */
+struct LorentzVector {
+    double E, Px, Py, Pz;
+    double mass;
+
+    LorentzVector(double e, double px, double py, double pz, double m = 0.0)
+        : E(e), Px(px), Py(py), Pz(pz), mass(m) {}
+
+    // Vector addition
+    LorentzVector operator+(const LorentzVector& other) const {
+        return LorentzVector(E + other.E, Px + other.Px, Py + other.Py, Pz + other.Pz, 0.0);
+    }
+
+    // Invariant mass squared: M^2 = E^2 - P^2
+    double M2() const {
+        return E*E - (Px*Px + Py*Py + Pz*Pz);
+    }
+
+    // Invariant mass: M = sqrt(max(M^2, 0))
+    double M() const {
+        double m2 = M2();
+        return m2 >= 0.0 ? std::sqrt(m2) : 0.0;
+    }
+};
+
+/**
+ * Results from Dalitz kinematic analysis.
+ */
+struct KinematicResult {
+    double s_pippim;
+    double s_pippi0;
+    double s_pimpi0;
+    bool pass_kinematic_check;
+};
+
+/**
  * ERSAP engine that bridges Java trigger signals to ET system event processing.
  *
  * Architecture:
@@ -90,6 +128,9 @@ private:
     void printFourVectors(const double* data) const;
     void printEventSummary() const;
     void printSeparator(const std::string& title = "") const;
+
+    // Physics analysis method
+    KinematicResult compute_kinematics(const double* data) const;
 };
 
 } // namespace coda
