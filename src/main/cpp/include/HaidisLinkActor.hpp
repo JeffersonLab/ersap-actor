@@ -7,8 +7,8 @@
  * Phone : (757)-269-7100
  *
  * ERSAP actor that receives ARRAY_DOUBLE output from HaidisActor,
- * creates a 16-bit header from input size, bit-packs it into a double,
- * and prepends it to the output array.
+ * constructs a structured binary header, and writes [header][payload]
+ * to a POSIX shared memory region via ShmemWriter.
  *
  * @author gurjyan
  * @project ersap-actor
@@ -17,6 +17,7 @@
 #ifndef HAIDIS_LINK_ACTOR_HPP
 #define HAIDIS_LINK_ACTOR_HPP
 
+#include "haidis_shem_writer.hpp"
 #include <ersap/engine.hpp>
 #include <ersap/engine_data.hpp>
 #include <ersap/engine_data_type.hpp>
@@ -30,35 +31,38 @@ namespace ersap {
 namespace coda {
 
 /**
- * ERSAP actor for processing HaidisActor output with header prepending.
+ * ERSAP actor for processing HaidisActor output and forwarding to shared memory.
  *
  * Input:
  *   - ARRAY_DOUBLE: triplets of doubles (s_pippim, s_pippi0, s_pimpi0, ...)
  *     from HaidisActor kinematic analysis
  *
  * Processing:
- *   1. Read input array and compute size metrics
- *   2. Print received data (triplets formatted nicely)
- *   3. Create 64-bit header with 32+16+16 bit structure
- *   4. Binary-copy header to double slot using memcpy
- *   5. Prepend header-double to output array
+ *   1. Read input array and compute size metrics.
+ *   2. Optionally print received triplets (verbose mode).
+ *   3. Build a contiguous byte buffer:
+ *        [custom header (20 bytes)][raw double payload]
+ *   4. Write the buffer to POSIX shared memory via ShmemWriter.
+ *      The writer does NOT inject any additional header word.
  *
- * Output:
- *   - ARRAY_DOUBLE: [header_double, original_data...]
- *     where header_double encodes metadata in 64 bits
+ * Shared-memory layout per message:
+ *   Offset  Size  Field
+ *   0        8    size_t  : payload size in bytes (num_doubles * sizeof(double))
+ *   8        4    uint32_t: constant 2
+ *   12       4    uint32_t: triplet_count (num_doubles / 3)
+ *   16       4    uint32_t: constant 3
+ *   20       N*8  double[] : raw payload
  *
- * Header Encoding (64-bit structure):
- *   - Bits  0-15 (uint16_t): num_doubles & 0xFFFF
- *   - Bits 16-31 (uint16_t): triplet_count & 0xFFFF
- *   - Bits 32-63 (uint32_t): size_bytes (full 32-bit size)
- *   - Binary-copied to double via memcpy (strict aliasing safe)
+ * Decoding (reader side):
+ *   size_t  size_bytes    = *reinterpret_cast<size_t*>(ptr + 0);
+ *   uint32_t triplet_count = *reinterpret_cast<uint32_t*>(ptr + 12);
+ *   double*  payload       = reinterpret_cast<double*>(ptr + 20);
  *
- * Header Decoding (for downstream consumers):
- *   uint64_t u64;
- *   std::memcpy(&u64, &header_double, sizeof(double));
- *   uint16_t num_doubles = static_cast<uint16_t>(u64 & 0xFFFF);
- *   uint16_t triplet_count = static_cast<uint16_t>((u64 >> 16) & 0xFFFF);
- *   uint32_t size_bytes = static_cast<uint32_t>(u64 >> 32);
+ * Configuration (JSON):
+ *   "verbose"    : bool   - enable per-event logging (default false)
+ *   "shmem_name" : string - POSIX shmem object name (default "/haidis_shmem")
+ *   "sem_name"   : string - POSIX semaphore name    (default "/haidis_sem")
+ *   "shmem_size" : int    - shared memory size bytes (default 10485760 = 10 MB)
  */
 class HaidisLinkActor : public ersap::Engine {
 public:
@@ -84,6 +88,12 @@ public:
 private:
     // Configuration parameters
     bool verbose_ = false;
+    std::string shmem_name_ = "/haidis_shmem";
+    std::string sem_name_   = "/haidis_sem";
+    std::size_t shmem_size_ = 10485760; // 10 MB default
+
+    // Shared memory writer — constructed in configure()
+    std::unique_ptr<ShmemWriter> writer_;
 
     // Statistics
     std::size_t eventCount_ = 0;

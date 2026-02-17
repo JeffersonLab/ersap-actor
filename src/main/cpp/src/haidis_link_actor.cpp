@@ -36,14 +36,25 @@ ersap::EngineData HaidisLinkActor::configure(ersap::EngineData& input) {
         try {
             auto config = ersap::stdlib::parse_json(input);
 
-            // Parse verbose flag
             if (!config["verbose"].is_null()) {
                 verbose_ = config["verbose"].bool_value();
+            }
+            if (!config["shmem_name"].is_null()) {
+                shmem_name_ = config["shmem_name"].string_value();
+            }
+            if (!config["sem_name"].is_null()) {
+                sem_name_ = config["sem_name"].string_value();
+            }
+            if (!config["shmem_size"].is_null()) {
+                shmem_size_ = static_cast<std::size_t>(config["shmem_size"].int_value());
             }
 
             if (verbose_) {
                 std::cout << "HaidisLinkActor configuration:" << std::endl;
-                std::cout << "  - Verbose: " << verbose_ << std::endl;
+                std::cout << "  - verbose:    " << verbose_    << std::endl;
+                std::cout << "  - shmem_name: " << shmem_name_ << std::endl;
+                std::cout << "  - sem_name:   " << sem_name_   << std::endl;
+                std::cout << "  - shmem_size: " << shmem_size_ << std::endl;
             }
 
         } catch (const std::exception& e) {
@@ -52,6 +63,16 @@ ersap::EngineData HaidisLinkActor::configure(ersap::EngineData& input) {
             std::cerr << "Error parsing HaidisLinkActor configuration: " << e.what() << std::endl;
             return output;
         }
+    }
+
+    // (Re-)initialize shared memory writer with current config
+    writer_ = std::make_unique<ShmemWriter>(shmem_name_, shmem_size_, sem_name_);
+    if (!writer_->initialize()) {
+        output.set_status(ersap::EngineStatus::ERROR);
+        output.set_description("Failed to initialize ShmemWriter for " + shmem_name_);
+        std::cerr << "HaidisLinkActor: failed to initialize ShmemWriter" << std::endl;
+        writer_.reset();
+        return output;
     }
 
     if (verbose_) {
@@ -77,11 +98,10 @@ ersap::EngineData HaidisLinkActor::execute(ersap::EngineData& input) {
         auto& in = ersap::data_cast<std::vector<double>>(input);
 
         // Step 1: Compute size metrics
-        size_t num_doubles = in.size();
-        size_t size_bytes = num_doubles * sizeof(double);
-        size_t triplet_count = num_doubles / 3;
+        const std::size_t num_doubles   = in.size();
+        const std::size_t size_bytes    = num_doubles * sizeof(double);
+        const std::uint32_t triplet_count = static_cast<std::uint32_t>(num_doubles / 3);
 
-        // Warn if incomplete triplets
         if (num_doubles % 3 != 0 && verbose_) {
             std::cout << "Warning: Input has " << num_doubles
                       << " doubles (not divisible by 3). "
@@ -89,74 +109,52 @@ ersap::EngineData HaidisLinkActor::execute(ersap::EngineData& input) {
                       << ", leftover: " << (num_doubles % 3) << std::endl;
         }
 
-        // Step 2: Print received data
+        // Step 2: Build contiguous [header][payload] buffer.
+        //
+        // Header layout (20 bytes):
+        //   Offset  Size  Field
+        //   0        8    size_t  : size_bytes
+        //   8        4    uint32_t: constant 2
+        //   12       4    uint32_t: triplet_count
+        //   16       4    uint32_t: constant 3
+        // Payload (size_bytes):
+        //   20       N*8  double[]: raw doubles
+        //
+        const std::size_t HEADER_BYTES = sizeof(std::size_t) + 3 * sizeof(std::uint32_t);
+        const std::size_t total_bytes  = HEADER_BYTES + size_bytes;
+
+        if (writer_ && total_bytes > shmem_size_) {
+            std::cerr << "HaidisLinkActor: message size " << total_bytes
+                      << " bytes exceeds shmem capacity " << shmem_size_ << " bytes — skipping write" << std::endl;
+        } else {
+            std::vector<std::uint8_t> buf(total_bytes);
+            std::size_t off = 0;
+
+            // Header field 1: payload size in bytes
+            std::memcpy(buf.data() + off, &size_bytes,    sizeof(std::size_t));   off += sizeof(std::size_t);
+            // Header field 2: constant 2
+            std::uint32_t a = 2;
+            std::memcpy(buf.data() + off, &a,             sizeof(std::uint32_t)); off += sizeof(std::uint32_t);
+            // Header field 3: triplet count
+            std::memcpy(buf.data() + off, &triplet_count, sizeof(std::uint32_t)); off += sizeof(std::uint32_t);
+            // Header field 4: constant 3
+            std::uint32_t b = 3;
+            std::memcpy(buf.data() + off, &b,             sizeof(std::uint32_t)); off += sizeof(std::uint32_t);
+            // Payload: raw double bytes
+            std::memcpy(buf.data() + off, in.data(),      size_bytes);
+
+            if (writer_) {
+                if (!writer_->write_data(buf.data(), buf.size())) {
+                    std::cerr << "HaidisLinkActor: write_data failed for event " << eventCount_ << std::endl;
+                }
+            } else {
+                std::cerr << "HaidisLinkActor: ShmemWriter not initialized — dropping event " << eventCount_ << std::endl;
+            }
+        }
+
+        // Step 3: Print received data (verbose only)
         if (verbose_) {
             printReceivedData(in);
-        }
-
-        // Step 3: Create 64-bit header with 32+16+16 bit structure
-        // Header layout (64 bits total):
-        //   Bits  0-15 (uint16_t): num_doubles & 0xFFFF
-        //   Bits 16-31 (uint16_t): triplet_count & 0xFFFF
-        //   Bits 32-63 (uint32_t): size_bytes (full 32-bit size)
-
-        uint64_t header_u64 = 0;
-        header_u64 |= (static_cast<uint64_t>(size_bytes) << 32);                    // bits 32-63
-        header_u64 |= (static_cast<uint64_t>(triplet_count & 0xFFFF) << 16);        // bits 16-31
-        header_u64 |= (num_doubles & 0xFFFF);                                       // bits  0-15
-
-        if (verbose_) {
-            std::cout << "\nHeader generation (64-bit structure):" << std::endl;
-            std::cout << "  - num_doubles: " << num_doubles
-                      << " (0x" << std::hex << (num_doubles & 0xFFFF) << std::dec << ")" << std::endl;
-            std::cout << "  - triplet_count: " << triplet_count
-                      << " (0x" << std::hex << (triplet_count & 0xFFFF) << std::dec << ")" << std::endl;
-            std::cout << "  - size_bytes: " << size_bytes
-                      << " (0x" << std::hex << size_bytes << std::dec << ")" << std::endl;
-            std::cout << "  - Full 64-bit header: 0x" << std::hex << header_u64 << std::dec << std::endl;
-        }
-
-        // Step 4: Binary-copy 64-bit header to double using memcpy
-        // This is a binary container operation, not numeric conversion
-        static_assert(sizeof(double) == sizeof(uint64_t), "double must be 8 bytes");
-
-        double header_double;
-        std::memcpy(&header_double, &header_u64, sizeof(header_u64));
-
-        // To decode this header (for downstream consumers):
-        // uint64_t u64;
-        // std::memcpy(&u64, &header_double, sizeof(double));
-        // uint16_t num_doubles_decoded = static_cast<uint16_t>(u64 & 0xFFFF);
-        // uint16_t triplet_count_decoded = static_cast<uint16_t>((u64 >> 16) & 0xFFFF);
-        // uint32_t size_bytes_decoded = static_cast<uint32_t>(u64 >> 32);
-
-        if (verbose_) {
-            std::cout << "  - Binary-copied to double via memcpy" << std::endl;
-
-            // Verification: decode to confirm correct packing
-            uint64_t verify_u64;
-            std::memcpy(&verify_u64, &header_double, sizeof(double));
-            uint16_t verify_num_doubles = static_cast<uint16_t>(verify_u64 & 0xFFFF);
-            uint16_t verify_triplet_count = static_cast<uint16_t>((verify_u64 >> 16) & 0xFFFF);
-            uint32_t verify_size_bytes = static_cast<uint32_t>(verify_u64 >> 32);
-
-            std::cout << "  - Verification (decoded):" << std::endl;
-            std::cout << "    * num_doubles: " << verify_num_doubles << std::endl;
-            std::cout << "    * triplet_count: " << verify_triplet_count << std::endl;
-            std::cout << "    * size_bytes: " << verify_size_bytes << std::endl;
-        }
-
-        // Step 5: Construct output array with header prepended
-        std::vector<double> out;
-        out.reserve(num_doubles + 1);
-        out.push_back(header_double);  // Prepend header as first element
-        out.insert(out.end(), in.begin(), in.end());  // Append all input doubles
-
-        if (verbose_) {
-            std::cout << "\nOutput array:" << std::endl;
-            std::cout << "  - Total elements: " << out.size()
-                      << " (1 header + " << num_doubles << " data)" << std::endl;
-            std::cout << "  - Output size: " << (out.size() * sizeof(double)) << " bytes" << std::endl;
         }
 
         // Update statistics
@@ -167,8 +165,8 @@ ersap::EngineData HaidisLinkActor::execute(ersap::EngineData& input) {
             std::cout << "  Events processed: " << eventCount_ << std::endl;
         }
 
-        // Set output data
-        output.set_data(ersap::type::ARRAY_DOUBLE, out);
+        // Pass input through to downstream ERSAP actors unchanged
+        output.set_data(ersap::type::ARRAY_DOUBLE, in);
 
     } catch (const std::exception& e) {
         output.set_status(ersap::EngineStatus::ERROR);
@@ -215,8 +213,6 @@ std::string HaidisLinkActor::version() const {
     return "1.0.0";
 }
 
-// Private helper methods
-
 void HaidisLinkActor::printReceivedData(const std::vector<double>& data) const {
     size_t num_doubles = data.size();
     size_t size_bytes = num_doubles * sizeof(double);
@@ -257,6 +253,5 @@ void HaidisLinkActor::printReceivedData(const std::vector<double>& data) const {
 
     std::cout << "========================================" << std::endl;
 }
-
 } // namespace coda
 } // namespace ersap
