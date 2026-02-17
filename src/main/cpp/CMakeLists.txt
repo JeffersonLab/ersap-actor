@@ -122,10 +122,12 @@ set(HAIDIS_ACTOR_HEADERS
 
 set(HAIDIS_LINK_ACTOR_SOURCES
     src/haidis_link_actor.cpp
+    src/haidis_shem_writer.cpp
 )
 
 set(HAIDIS_LINK_ACTOR_HEADERS
     include/HaidisLinkActor.hpp
+    include/haidis_shem_writer.hpp
 )
 
 # Create shared library for the data type
@@ -231,8 +233,10 @@ if(BUILD_HAIDIS_ACTOR)
     target_compile_features(HaidisLinkActor PUBLIC cxx_std_17)
 
     # Link libraries for HaidisLinkActor
+    # -lrt is required on Linux for shm_open / sem_open (not needed on macOS)
     target_link_libraries(HaidisLinkActor
         ${ERSAP_LIBRARY}
+        $<$<PLATFORM_ID:Linux>:rt>
     )
 
     # Set library properties for HaidisLinkActor
