@@ -150,7 +150,9 @@ ersap::EngineData HaidisLinkActor::execute(ersap::EngineData& input) {
             } else {
                 std::cerr << "HaidisLinkActor: ShmemWriter not initialized — dropping event " << eventCount_ << std::endl;
             }
+            if (verbose_) {
             std::cout << "HaidisLinkActor: write_data for event " << eventCount_ << std::endl;
+            }
         }
 
         // Step 3: Print received data (verbose only)
