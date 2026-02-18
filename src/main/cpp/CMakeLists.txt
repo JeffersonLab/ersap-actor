@@ -46,11 +46,28 @@ endif()
 # Expected install layout under $ERSAP_HOME/lib/haidis_connectors/:
 #   include/shmem_writer.hpp
 #   lib/libshmem_writer.a
-#   lib/cmake/shmem_writer/shmem_writer-config.cmake
+# Build and install haidis_connectors/source with:
+#   cmake ../source -DCMAKE_INSTALL_PREFIX=$ERSAP_HOME/lib/haidis_connectors
+#   make install
 # ---------------------------------------------------------------------------
-find_package(shmem_writer REQUIRED
-    PATHS "$ENV{ERSAP_HOME}/lib/haidis_connectors/lib/cmake/shmem_writer"
+find_path(SHMEM_WRITER_INCLUDE_DIR
+    NAMES shmem_writer.hpp
+    HINTS "$ENV{ERSAP_HOME}/lib/haidis_connectors/include"
     NO_DEFAULT_PATH)
+
+find_library(SHMEM_WRITER_LIBRARY
+    NAMES shmem_writer
+    HINTS "$ENV{ERSAP_HOME}/lib/haidis_connectors/lib"
+    NO_DEFAULT_PATH)
+
+if(NOT SHMEM_WRITER_INCLUDE_DIR OR NOT SHMEM_WRITER_LIBRARY)
+    message(FATAL_ERROR
+        "shmem_writer (haidis_connectors) not found.\n"
+        "Build and install haidis_connectors/source to $ENV{ERSAP_HOME}/lib/haidis_connectors first.")
+endif()
+
+message(STATUS "Found shmem_writer header: ${SHMEM_WRITER_INCLUDE_DIR}")
+message(STATUS "Found shmem_writer library: ${SHMEM_WRITER_LIBRARY}")
 
 # Find ET library (optional, for HaidisActor)
 find_library(ET_LIBRARY et HINTS $ENV{CODA}/Linux-x86_64/lib $ENV{CODA}/lib $ENV{CODA})
@@ -241,12 +258,16 @@ if(BUILD_HAIDIS_ACTOR)
     # Require C++17 for this target
     target_compile_features(HaidisLinkActor PUBLIC cxx_std_17)
 
+    # Include shmem_writer.hpp from haidis_connectors
+    target_include_directories(HaidisLinkActor PRIVATE ${SHMEM_WRITER_INCLUDE_DIR})
+
     # Link libraries for HaidisLinkActor.
-    # shmem_writer is the CMake target from haidis_connectors; it transitively
-    # pulls in its include directory (shmem_writer.hpp) plus -lrt and -lpthread.
+    # -lrt and -lpthread are required by shmem_writer on Linux (shm_open, sem_open).
     target_link_libraries(HaidisLinkActor
         ${ERSAP_LIBRARY}
-        shmem_writer
+        ${SHMEM_WRITER_LIBRARY}
+        $<$<PLATFORM_ID:Linux>:rt>
+        $<$<PLATFORM_ID:Linux>:pthread>
     )
 
     # Set library properties for HaidisLinkActor
