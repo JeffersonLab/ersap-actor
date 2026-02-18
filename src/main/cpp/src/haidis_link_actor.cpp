@@ -48,13 +48,17 @@ ersap::EngineData HaidisLinkActor::configure(ersap::EngineData& input) {
             if (!config["shmem_size"].is_null()) {
                 shmem_size_ = static_cast<std::size_t>(config["shmem_size"].int_value());
             }
+            if (!config["sem_ack_name"].is_null()) {
+                sem_ack_name_ = config["sem_ack_name"].string_value();
+            }
 
             if (verbose_) {
                 std::cout << "HaidisLinkActor configuration:" << std::endl;
-                std::cout << "  - verbose:    " << verbose_    << std::endl;
-                std::cout << "  - shmem_name: " << shmem_name_ << std::endl;
-                std::cout << "  - sem_name:   " << sem_name_   << std::endl;
-                std::cout << "  - shmem_size: " << shmem_size_ << std::endl;
+                std::cout << "  - verbose:      " << verbose_      << std::endl;
+                std::cout << "  - shmem_name:   " << shmem_name_   << std::endl;
+                std::cout << "  - sem_name:     " << sem_name_     << std::endl;
+                std::cout << "  - sem_ack_name: " << sem_ack_name_ << std::endl;
+                std::cout << "  - shmem_size:   " << shmem_size_   << std::endl;
             }
 
         } catch (const std::exception& e) {
@@ -65,13 +69,15 @@ ersap::EngineData HaidisLinkActor::configure(ersap::EngineData& input) {
         }
     }
 
-    // (Re-)initialize shared memory writer with current config
-    writer_ = std::make_unique<ShmemWriter>(shmem_name_, shmem_size_, sem_name_);
+    // (Re-)initialize shared memory writer with current config.
+    // Reset first so the destructor releases any existing IPC resources.
+    writer_.reset();
+    writer_ = std::make_unique<ShmemWriter>(shmem_name_, shmem_size_, sem_name_, sem_ack_name_);
     if (!writer_->initialize()) {
-        output.set_status(ersap::EngineStatus::ERROR);
-        output.set_description("Failed to initialize ShmemWriter for " + shmem_name_);
-        std::cerr << "HaidisLinkActor: failed to initialize ShmemWriter" << std::endl;
         writer_.reset();
+        output.set_status(ersap::EngineStatus::ERROR);
+        output.set_description("Failed to initialize shared memory writer for " + shmem_name_);
+        std::cerr << "HaidisLinkActor: Failed to initialize shared memory '" << shmem_name_ << "'" << std::endl;
         return output;
     }
 
@@ -109,53 +115,20 @@ ersap::EngineData HaidisLinkActor::execute(ersap::EngineData& input) {
                       << ", leftover: " << (num_doubles % 3) << std::endl;
         }
 
-        // Step 2: Build contiguous [header][payload] buffer.
-        //
-        // Header layout (20 bytes):
-        //   Offset  Size  Field
-        //   0        8    size_t  : size_bytes
-        //   8        4    uint32_t: constant 2
-        //   12       4    uint32_t: triplet_count
-        //   16       4    uint32_t: constant 3
-        // Payload (size_bytes):
-        //   20       N*8  double[]: raw doubles
-        //
-        const std::size_t HEADER_BYTES = sizeof(std::size_t) + 3 * sizeof(std::uint32_t);
-        const std::size_t total_bytes  = HEADER_BYTES + size_bytes;
-
-        if (writer_ && total_bytes > shmem_size_) {
-            std::cerr << "HaidisLinkActor: message size " << total_bytes
-                      << " bytes exceeds shmem capacity " << shmem_size_ << " bytes — skipping write" << std::endl;
+        // Send received data to shared memory as a 2-D array (triplet_count × 3)
+        if (writer_) {
+            const std::vector<uint32_t> dims = {triplet_count, 3};
+            if (!writer_->write_data(in, 2, dims)) {
+                std::cerr << "HaidisLinkActor: write_data failed (event "
+                          << eventCount_ << ")" << std::endl;
+                // Non-fatal: log and continue — do not drop the event
+            }
         } else {
-            std::vector<std::uint8_t> buf(total_bytes);
-            std::size_t off = 0;
-
-            // Header field 1: payload size in bytes
-            std::memcpy(buf.data() + off, &size_bytes,    sizeof(std::size_t));   off += sizeof(std::size_t);
-            // Header field 2: constant 2
-            std::uint32_t a = 2;
-            std::memcpy(buf.data() + off, &a,             sizeof(std::uint32_t)); off += sizeof(std::uint32_t);
-            // Header field 3: triplet count
-            std::memcpy(buf.data() + off, &triplet_count, sizeof(std::uint32_t)); off += sizeof(std::uint32_t);
-            // Header field 4: constant 3
-            std::uint32_t b = 3;
-            std::memcpy(buf.data() + off, &b,             sizeof(std::uint32_t)); off += sizeof(std::uint32_t);
-            // Payload: raw double bytes
-            std::memcpy(buf.data() + off, in.data(),      size_bytes);
-
-            if (writer_) {
-                if (!writer_->write_data(buf.data(), buf.size())) {
-                    std::cerr << "HaidisLinkActor: write_data failed for event " << eventCount_ << std::endl;
-                }
-            } else {
-                std::cerr << "HaidisLinkActor: ShmemWriter not initialized — dropping event " << eventCount_ << std::endl;
-            }
-            if (verbose_) {
-            std::cout << "HaidisLinkActor: write_data for event " << eventCount_ << std::endl;
-            }
+            std::cerr << "HaidisLinkActor: shared memory writer not initialized; "
+                         "skipping write (event " << eventCount_ << ")" << std::endl;
         }
 
-        // Step 3: Print received data (verbose only)
+        // Print received data if verbose
         if (verbose_) {
             printReceivedData(in);
         }

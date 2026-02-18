@@ -17,7 +17,8 @@
 #ifndef HAIDIS_LINK_ACTOR_HPP
 #define HAIDIS_LINK_ACTOR_HPP
 
-#include "haidis_shem_writer.hpp"
+// ShmemWriter from haidis_connectors (source/include/shmem_writer.hpp)
+#include "shmem_writer.hpp"
 #include <ersap/engine.hpp>
 #include <ersap/engine_data.hpp>
 #include <ersap/engine_data_type.hpp>
@@ -39,30 +40,29 @@ namespace coda {
  *
  * Processing:
  *   1. Read input array and compute size metrics.
- *   2. Optionally print received triplets (verbose mode).
- *   3. Build a contiguous byte buffer:
- *        [custom header (20 bytes)][raw double payload]
- *   4. Write the buffer to POSIX shared memory via ShmemWriter.
- *      The writer does NOT inject any additional header word.
+ *   2. Write to shared memory via ShmemWriter::write_data(in, 2, {triplet_count, 3}).
+ *   3. Optionally print received triplets (verbose mode).
+ *   4. Pass the ARRAY_DOUBLE through unchanged to downstream actors.
  *
- * Shared-memory layout per message:
- *   Offset  Size  Field
- *   0        8    size_t  : payload size in bytes (num_doubles * sizeof(double))
- *   8        4    uint32_t: constant 2
- *   12       4    uint32_t: triplet_count (num_doubles / 3)
- *   16       4    uint32_t: constant 3
- *   20       N*8  double[] : raw payload
+ * Shared-memory layout written by ShmemWriter::write_data(in, 2, {triplet_count, 3}):
+ *   Offset  Size       Field
+ *   0        8         data_size (size_t) = num_doubles * sizeof(double)
+ *   8        4         ndim (uint32_t) = 2
+ *   12       4         dims[0] (uint32_t) = triplet_count
+ *   16       4         dims[1] (uint32_t) = 3
+ *   20       N*8       double[] raw payload
  *
- * Decoding (reader side):
- *   size_t  size_bytes    = *reinterpret_cast<size_t*>(ptr + 0);
- *   uint32_t triplet_count = *reinterpret_cast<uint32_t*>(ptr + 12);
- *   double*  payload       = reinterpret_cast<double*>(ptr + 20);
+ * Synchronization uses two POSIX named semaphores:
+ *   sem_name     (data-ready, init 0): posted by writer after each write
+ *   sem_ack_name (buffer-free, init 1): waited on by writer before each write,
+ *                                       released by reader after consuming
  *
  * Configuration (JSON):
- *   "verbose"    : bool   - enable per-event logging (default false)
- *   "shmem_name" : string - POSIX shmem object name (default "/haidis_shmem")
- *   "sem_name"   : string - POSIX semaphore name    (default "/haidis_sem")
- *   "shmem_size" : int    - shared memory size bytes (default 10485760 = 10 MB)
+ *   "verbose"      : bool   - enable per-event logging   (default false)
+ *   "shmem_name"   : string - POSIX shmem object name    (default "/haidis_shmem")
+ *   "sem_name"     : string - data-ready semaphore name  (default "/haidis_sem")
+ *   "sem_ack_name" : string - buffer-free semaphore name (default "/haidis_sem_ack")
+ *   "shmem_size"   : int    - shared memory size bytes   (default 10485760 = 10 MB)
  */
 class HaidisLinkActor : public ersap::Engine {
 public:
@@ -86,11 +86,12 @@ public:
     std::string version() const override;
 
 private:
-    // Configuration parameters
+    // Configuration parameters (settable via JSON in configure())
     bool verbose_ = false;
-    std::string shmem_name_ = "/haidis_shmem";
-    std::string sem_name_   = "/haidis_sem";
-    std::size_t shmem_size_ = 10485760; // 10 MB default
+    std::string shmem_name_   = "/haidis_shmem";
+    std::string sem_name_     = "/haidis_sem";
+    std::string sem_ack_name_ = "/haidis_sem_ack"; // buffer-free (ack) semaphore
+    std::size_t shmem_size_   = 10485760;           // 10 MB default
 
     // Shared memory writer — constructed in configure()
     std::unique_ptr<ShmemWriter> writer_;

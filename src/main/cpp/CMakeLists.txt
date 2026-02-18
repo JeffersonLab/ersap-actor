@@ -41,6 +41,17 @@ if(NOT ERSAP_INCLUDE_DIR OR NOT ERSAP_LIBRARY)
     message(FATAL_ERROR "ERSAP C++ library not found. Please install ersap-cpp or set ERSAP_HOME.")
 endif()
 
+# ---------------------------------------------------------------------------
+# haidis_connectors: shared-memory writer library used by HaidisLinkActor.
+# Expected install layout under $ERSAP_HOME/lib/haidis_connectors/:
+#   include/shmem_writer.hpp
+#   lib/libshmem_writer.a
+#   lib/cmake/shmem_writer/shmem_writer-config.cmake
+# ---------------------------------------------------------------------------
+find_package(shmem_writer REQUIRED
+    PATHS "$ENV{ERSAP_HOME}/lib/haidis_connectors/lib/cmake/shmem_writer"
+    NO_DEFAULT_PATH)
+
 # Find ET library (optional, for HaidisActor)
 find_library(ET_LIBRARY et HINTS $ENV{CODA}/Linux-x86_64/lib $ENV{CODA}/lib $ENV{CODA})
 find_path(ET_INCLUDE_DIR et.h HINTS $ENV{CODA}/common/include $ENV{CODA}/include $ENV{CODA})
@@ -122,12 +133,10 @@ set(HAIDIS_ACTOR_HEADERS
 
 set(HAIDIS_LINK_ACTOR_SOURCES
     src/haidis_link_actor.cpp
-    src/haidis_shem_writer.cpp
 )
 
 set(HAIDIS_LINK_ACTOR_HEADERS
     include/HaidisLinkActor.hpp
-    include/haidis_shem_writer.hpp
 )
 
 # Create shared library for the data type
@@ -232,11 +241,12 @@ if(BUILD_HAIDIS_ACTOR)
     # Require C++17 for this target
     target_compile_features(HaidisLinkActor PUBLIC cxx_std_17)
 
-    # Link libraries for HaidisLinkActor
-    # -lrt is required on Linux for shm_open / sem_open (not needed on macOS)
+    # Link libraries for HaidisLinkActor.
+    # shmem_writer is the CMake target from haidis_connectors; it transitively
+    # pulls in its include directory (shmem_writer.hpp) plus -lrt and -lpthread.
     target_link_libraries(HaidisLinkActor
         ${ERSAP_LIBRARY}
-        $<$<PLATFORM_ID:Linux>:rt>
+        shmem_writer
     )
 
     # Set library properties for HaidisLinkActor
