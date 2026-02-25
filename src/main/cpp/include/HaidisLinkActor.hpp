@@ -98,6 +98,8 @@ private:
 
     // Statistics
     std::size_t eventCount_ = 0;
+    std::size_t writeFailureCount_ = 0;
+    std::size_t consecutiveFailures_ = 0;
 
     // Helper methods
     void printReceivedData(const std::vector<double>& data) const;

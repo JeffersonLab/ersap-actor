@@ -69,9 +69,7 @@ ersap::EngineData HaidisLinkActor::configure(ersap::EngineData& input) {
         }
     }
 
-    // (Re-)initialize shared memory writer with current config.
     // Reset first so the destructor releases any existing IPC resources.
-    writer_.reset();
     writer_ = std::make_unique<ShmemWriter>(shmem_name_, shmem_size_, sem_name_, sem_ack_name_);
     if (!writer_->initialize()) {
         writer_.reset();
@@ -116,16 +114,36 @@ ersap::EngineData HaidisLinkActor::execute(ersap::EngineData& input) {
         }
 
         // Send received data to shared memory as a 2-D array (triplet_count × 3)
+        // Only write complete triplets to match header dimensions
         if (writer_) {
             const std::vector<uint32_t> dims = {triplet_count, 3};
-            if (!writer_->write_data(in, 2, dims)) {
+            const std::size_t complete_elements = triplet_count * 3;
+
+            // Create vector with only complete triplets
+            std::vector<double> complete_data(in.begin(), in.begin() + complete_elements);
+
+            if (!writer_->write_data(complete_data, 2, dims)) {
+                writeFailureCount_++;
+                consecutiveFailures_++;
                 std::cerr << "HaidisLinkActor: write_data failed (event "
-                          << eventCount_ << ")" << std::endl;
-                // Non-fatal: log and continue — do not drop the event
+                          << eventCount_ << ", consecutive failures: "
+                          << consecutiveFailures_ << ")" << std::endl;
+
+                // Set warning status if failures are persistent
+                if (consecutiveFailures_ >= 3) {
+                    output.set_status(ersap::EngineStatus::WARNING);
+                    output.set_description("Shared memory write failing persistently (failures: " +
+                                         std::to_string(consecutiveFailures_) + ")");
+                }
+            } else {
+                // Reset consecutive failure counter on success
+                consecutiveFailures_ = 0;
             }
         } else {
             std::cerr << "HaidisLinkActor: shared memory writer not initialized; "
                          "skipping write (event " << eventCount_ << ")" << std::endl;
+            output.set_status(ersap::EngineStatus::WARNING);
+            output.set_description("Shared memory writer not initialized");
         }
 
         // Print received data if verbose
@@ -139,6 +157,8 @@ ersap::EngineData HaidisLinkActor::execute(ersap::EngineData& input) {
         if (verbose_ && eventCount_ % 100 == 0) {
             std::cout << "\nHaidisLinkActor Statistics:" << std::endl;
             std::cout << "  Events processed: " << eventCount_ << std::endl;
+            std::cout << "  Write failures:   " << writeFailureCount_ << std::endl;
+            std::cout << "  Consecutive failures: " << consecutiveFailures_ << std::endl;
         }
 
         // Pass input through to downstream ERSAP actors unchanged
