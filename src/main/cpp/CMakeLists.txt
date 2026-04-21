@@ -148,6 +148,14 @@ set(HAIDIS_ACTOR_HEADERS
     include/HaidisActor.hpp
 )
 
+set(HAIDIS_GLUEX_ACTOR_SOURCES
+    src/haidis_gleux_actor.cpp
+)
+
+set(HAIDIS_GLUEX_ACTOR_HEADERS
+    include/HaidisGluexActor.hpp
+)
+
 set(HAIDIS_LINK_ACTOR_SOURCES
     src/haidis_link_actor.cpp
 )
@@ -252,6 +260,25 @@ if(BUILD_HAIDIS_ACTOR)
         PUBLIC_HEADER "${HAIDIS_ACTOR_HEADERS}"
     )
 
+    # Create shared library for the HaidisGluexActor
+    add_library(HaidisGluexActor SHARED ${HAIDIS_GLUEX_ACTOR_SOURCES} ${HAIDIS_GLUEX_ACTOR_HEADERS})
+
+    # Require C++17 for this target
+    target_compile_features(HaidisGluexActor PUBLIC cxx_std_17)
+
+    # Link libraries for HaidisGluexActor
+    target_link_libraries(HaidisGluexActor
+        ${ERSAP_LIBRARY}
+        ${ET_LIBRARY}
+    )
+
+    # Set library properties for HaidisGluexActor
+    set_target_properties(HaidisGluexActor PROPERTIES
+        VERSION ${PROJECT_VERSION}
+        SOVERSION 1
+        PUBLIC_HEADER "${HAIDIS_GLUEX_ACTOR_HEADERS}"
+    )
+
     # Create shared library for the HaidisLinkActor
     add_library(HaidisLinkActor SHARED ${HAIDIS_LINK_ACTOR_SOURCES} ${HAIDIS_LINK_ACTOR_HEADERS})
 
@@ -280,7 +307,7 @@ endif()
 
 # Installation rules for all libraries
 if(BUILD_HAIDIS_ACTOR)
-    install(TARGETS CodaTimeFrameDataType CodaTimeFrameBinaryDataType CodaTimeFramePrinterActor CodaTimeFrameBinaryPrinterActor HaidisActor HaidisLinkActor
+    install(TARGETS CodaTimeFrameDataType CodaTimeFrameBinaryDataType CodaTimeFramePrinterActor CodaTimeFrameBinaryPrinterActor HaidisActor HaidisGluexActor HaidisLinkActor
         LIBRARY DESTINATION lib
         PUBLIC_HEADER DESTINATION include/ersap-actor-cpp
     )
