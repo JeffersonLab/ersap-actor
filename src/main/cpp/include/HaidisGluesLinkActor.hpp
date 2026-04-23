@@ -97,6 +97,7 @@ private:
     std::unique_ptr<ShmemWriter> writer_;
 
     // Statistics
+    std::size_t executeCallCount_ = 0;  // Track how many times execute() is called
     std::size_t eventCount_ = 0;
     std::size_t writeFailureCount_ = 0;
     std::size_t consecutiveFailures_ = 0;

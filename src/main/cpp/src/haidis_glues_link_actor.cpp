@@ -31,6 +31,9 @@ namespace coda {
 ersap::EngineData HaidisGluesLinkActor::configure(ersap::EngineData& input) {
     auto output = ersap::EngineData{};
 
+    std::cout << "\nDEBUG: HaidisGluesLinkActor::configure() called" << std::endl;
+    std::cout << "  Input MIME type: " << input.mime_type() << std::endl;
+
     // Parse JSON configuration if provided
     if (input.mime_type() == ersap::type::JSON.mime_type()) {
         try {
@@ -88,6 +91,18 @@ ersap::EngineData HaidisGluesLinkActor::configure(ersap::EngineData& input) {
 
 ersap::EngineData HaidisGluesLinkActor::execute(ersap::EngineData& input) {
     auto output = ersap::EngineData{};
+
+    // Increment execute call counter
+    executeCallCount_++;
+
+    // Debug: Log execute() call information
+    if (verbose_) {
+        std::cout << "\n========================================" << std::endl;
+        std::cout << "DEBUG: HaidisGluesLinkActor::execute() called - Call #" << executeCallCount_ << std::endl;
+        std::cout << "  Input MIME type: " << input.mime_type() << std::endl;
+        std::cout << "  Writer initialized: " << (writer_ ? "YES" : "NO") << std::endl;
+        std::cout << "========================================\n" << std::endl;
+    }
 
     // Verify input data type - expecting ARRAY_DOUBLE
     if (input.mime_type() != ersap::type::ARRAY_DOUBLE.mime_type()) {
@@ -163,6 +178,18 @@ ersap::EngineData HaidisGluesLinkActor::execute(ersap::EngineData& input) {
 
         // Pass input through to downstream ERSAP actors unchanged
         output.set_data(ersap::type::ARRAY_DOUBLE, in);
+
+        // Debug: Log output summary
+        if (verbose_) {
+            std::cout << "\nDEBUG: HaidisGluesLinkActor::execute() returning - Call #" << executeCallCount_ << std::endl;
+            std::cout << "  Received " << num_doubles << " doubles" << std::endl;
+            std::cout << "  Duplet count: " << duplet_count << std::endl;
+            std::cout << "  Output data type: ARRAY_DOUBLE" << std::endl;
+            std::cout << "  Total execute calls so far: " << executeCallCount_ << std::endl;
+            std::cout << "  Total events processed: " << eventCount_ << std::endl;
+            std::cout << "  Write failures: " << writeFailureCount_ << std::endl;
+            std::cout << "========================================\n" << std::endl;
+        }
 
     } catch (const std::exception& e) {
         output.set_status(ersap::EngineStatus::ERROR);
