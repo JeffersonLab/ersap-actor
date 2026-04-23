@@ -136,6 +136,7 @@ private:
     bool etConnected_ = false;
 
     // Statistics
+    std::size_t executeCallCount_ = 0;  // Track how many times execute() is called
     std::size_t eventCount_ = 0;
     std::size_t errorCount_ = 0;
     std::size_t passedEventCount_ = 0;

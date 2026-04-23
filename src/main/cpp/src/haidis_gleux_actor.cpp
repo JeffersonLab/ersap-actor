@@ -101,6 +101,18 @@ ersap::EngineData HaidisGluexActor::configure(ersap::EngineData& input) {
 ersap::EngineData HaidisGluexActor::execute(ersap::EngineData& input) {
     auto output = ersap::EngineData{};
 
+    // Increment execute call counter
+    executeCallCount_++;
+
+    // Debug: Log execute() call information
+    if (verbose_) {
+        std::cout << "\n========================================" << std::endl;
+        std::cout << "DEBUG: execute() called - Call #" << executeCallCount_ << std::endl;
+        std::cout << "  Input MIME type: " << input.mime_type() << std::endl;
+        std::cout << "  ET connected: " << (etConnected_ ? "YES" : "NO") << std::endl;
+        std::cout << "========================================\n" << std::endl;
+    }
+
     // Verify input data type - expecting SINT32 trigger
     if (input.mime_type() != ersap::type::SINT32.mime_type()) {
         output.set_status(ersap::EngineStatus::ERROR);
@@ -153,9 +165,27 @@ ersap::EngineData HaidisGluexActor::execute(ersap::EngineData& input) {
         et_event_getdata(pe, &data_ptr);
         et_event_getlength(pe, &data_len);
 
+        // Debug: Log ET event metadata
+        if (verbose_) {
+            std::cout << "DEBUG: ET event received" << std::endl;
+            std::cout << "  ET event data size: " << data_len << " bytes" << std::endl;
+        }
+
         // Validate payload size - expecting 19 doubles per event (16 four-vector components + 3 kfit scalars)
         constexpr size_t DOUBLES_PER_EVENT = 19;
         constexpr size_t BYTES_PER_EVENT = DOUBLES_PER_EVENT * sizeof(double);
+
+        // Debug: Log calculated event count
+        if (verbose_) {
+            size_t calculated_events = data_len / BYTES_PER_EVENT;
+            size_t leftover = data_len % BYTES_PER_EVENT;
+            std::cout << "  Expected bytes per physics event: " << BYTES_PER_EVENT << std::endl;
+            std::cout << "  Calculated physics events in ET event: " << calculated_events << std::endl;
+            if (leftover > 0) {
+                std::cout << "  WARNING: " << leftover << " leftover bytes" << std::endl;
+            }
+            std::cout << std::endl;
+        }
 
         if (data_len < BYTES_PER_EVENT) {
             std::cerr << "Warning: Received " << data_len
@@ -263,7 +293,21 @@ ersap::EngineData HaidisGluexActor::execute(ersap::EngineData& input) {
         }
 
         // Return event to ET system
+        if (verbose_) {
+            std::cout << "\nDEBUG: Returning ET event to system..." << std::endl;
+        }
         status = et_event_put(etSys_, etAtt_, pe);
+        if (verbose_) {
+            std::cout << "  et_event_put status: " << status;
+            if (status == ET_OK) {
+                std::cout << " (ET_OK - SUCCESS)";
+            } else if (status == ET_ERROR_DEAD) {
+                std::cout << " (ET_ERROR_DEAD - SYSTEM DEAD)";
+            } else {
+                std::cout << " (ERROR)";
+            }
+            std::cout << std::endl;
+        }
         if (status == ET_ERROR_DEAD) {
             output.set_status(ersap::EngineStatus::ERROR);
             output.set_description("ET system is dead (during event_put)");
@@ -288,6 +332,18 @@ ersap::EngineData HaidisGluexActor::execute(ersap::EngineData& input) {
         // Set success status and output analysis results
         // Output contains 2 doubles per passing event: (X, Y) Dalitz coordinates
         output.set_data(ersap::type::ARRAY_DOUBLE, analysis_results);
+
+        // Debug: Log output summary
+        if (verbose_) {
+            std::cout << "\nDEBUG: Returning from execute() - Call #" << executeCallCount_ << std::endl;
+            std::cout << "  Output data type: ARRAY_DOUBLE" << std::endl;
+            std::cout << "  Output array size: " << analysis_results.size() << " doubles" << std::endl;
+            std::cout << "  Passing events: " << (analysis_results.size() / 2) << std::endl;
+            std::cout << "  Total execute calls so far: " << executeCallCount_ << std::endl;
+            std::cout << "  Total physics events processed: " << eventCount_ << std::endl;
+            std::cout << "  Total passed events: " << passedEventCount_ << std::endl;
+            std::cout << "========================================\n" << std::endl;
+        }
 
     } catch (const std::exception& e) {
         output.set_status(ersap::EngineStatus::ERROR);
