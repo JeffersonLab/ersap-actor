@@ -128,8 +128,18 @@ ersap::EngineData HaidisGluesLinkActor::execute(ersap::EngineData& input) {
                       << ", leftover: " << (num_doubles % 2) << std::endl;
         }
 
+        // TEMPORARY DEBUG: Skip shared memory write to verify chain flow
+        // The write_data() call blocks on semaphore wait if no reader is present
+        if (verbose_) {
+            std::cout << "DEBUG: Skipping shared memory write (testing mode)" << std::endl;
+            std::cout << "  Would write " << duplet_count << " duplets ("
+                      << (duplet_count * 2) << " doubles)" << std::endl;
+        }
+
+        // ORIGINAL CODE (commented out for testing):
         // Send received data to shared memory as a 2-D array (duplet_count × 2)
         // Only write complete duplets to match header dimensions
+        /*
         if (writer_) {
             const std::vector<uint32_t> dims = {duplet_count, 2};
             const std::size_t complete_elements = duplet_count * 2;
@@ -160,6 +170,7 @@ ersap::EngineData HaidisGluesLinkActor::execute(ersap::EngineData& input) {
             output.set_status(ersap::EngineStatus::WARNING);
             output.set_description("Shared memory writer not initialized");
         }
+        */
 
         // Print received data if verbose
         if (verbose_) {
