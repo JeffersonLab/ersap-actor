@@ -122,7 +122,7 @@ ersap::EngineData HaidisLinkActor::execute(ersap::EngineData& input) {
             // Create vector with only complete triplets
             std::vector<double> complete_data(in.begin(), in.begin() + complete_elements);
 
-            if (!writer_->write_data(complete_data, 2, dims)) {
+            if (!writer_->write_data(complete_data, 2, dims, 0)) {
                 writeFailureCount_++;
                 consecutiveFailures_++;
                 std::cerr << "HaidisLinkActor: write_data failed (event "
