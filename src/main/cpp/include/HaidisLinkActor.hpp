@@ -58,11 +58,12 @@ namespace coda {
  *                                       released by reader after consuming
  *
  * Configuration (JSON):
- *   "verbose"      : bool   - enable per-event logging   (default false)
- *   "shmem_name"   : string - POSIX shmem object name    (default "/haidis_shmem")
- *   "sem_name"     : string - data-ready semaphore name  (default "/haidis_sem")
- *   "sem_ack_name" : string - buffer-free semaphore name (default "/haidis_sem_ack")
- *   "shmem_size"   : int    - shared memory size bytes   (default 10485760 = 10 MB)
+ *   "verbose"      : bool   - enable per-event logging       (default false)
+ *   "data_id"      : int    - data identifier for shmem writes (default 0)
+ *   "shmem_name"   : string - POSIX shmem object name        (default "/haidis_shmem")
+ *   "sem_name"     : string - data-ready semaphore name      (default "/haidis_sem")
+ *   "sem_ack_name" : string - buffer-free semaphore name     (default "/haidis_sem_ack")
+ *   "shmem_size"   : int    - shared memory size bytes       (default 10485760 = 10 MB)
  */
 class HaidisLinkActor : public ersap::Engine {
 public:
@@ -88,6 +89,7 @@ public:
 private:
     // Configuration parameters (settable via JSON in configure())
     bool verbose_ = false;
+    std::uint16_t data_id_    = 0;                  // Data identifier for shared memory writes
     std::string shmem_name_   = "/haidis_shmem";
     std::string sem_name_     = "/haidis_sem";
     std::string sem_ack_name_ = "/haidis_sem_ack"; // buffer-free (ack) semaphore

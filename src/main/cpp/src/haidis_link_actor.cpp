@@ -39,6 +39,9 @@ ersap::EngineData HaidisLinkActor::configure(ersap::EngineData& input) {
             if (!config["verbose"].is_null()) {
                 verbose_ = config["verbose"].bool_value();
             }
+            if (!config["data_id"].is_null()) {
+                data_id_ = static_cast<std::uint16_t>(config["data_id"].int_value());
+            }
             if (!config["shmem_name"].is_null()) {
                 shmem_name_ = config["shmem_name"].string_value();
             }
@@ -55,6 +58,7 @@ ersap::EngineData HaidisLinkActor::configure(ersap::EngineData& input) {
             if (verbose_) {
                 std::cout << "HaidisLinkActor configuration:" << std::endl;
                 std::cout << "  - verbose:      " << verbose_      << std::endl;
+                std::cout << "  - data_id:      " << data_id_      << std::endl;
                 std::cout << "  - shmem_name:   " << shmem_name_   << std::endl;
                 std::cout << "  - sem_name:     " << sem_name_     << std::endl;
                 std::cout << "  - sem_ack_name: " << sem_ack_name_ << std::endl;
@@ -122,7 +126,7 @@ ersap::EngineData HaidisLinkActor::execute(ersap::EngineData& input) {
             // Create vector with only complete triplets
             std::vector<double> complete_data(in.begin(), in.begin() + complete_elements);
 
-            if (!writer_->write_data(complete_data, 2, dims, 0)) {
+            if (!writer_->write_data(complete_data, 2, dims, data_id_)) {
                 writeFailureCount_++;
                 consecutiveFailures_++;
                 std::cerr << "HaidisLinkActor: write_data failed (event "
