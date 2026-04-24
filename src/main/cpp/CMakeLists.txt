@@ -43,27 +43,27 @@ endif()
 
 # ---------------------------------------------------------------------------
 # haidis_connectors: shared-memory writer library used by HaidisLinkActor.
-# Expected install layout under $ERSAP_HOME/lib/haidis_connectors/:
+# Expected install layout under $ERSAP_HOME:
 #   include/shmem_writer.hpp
-#   lib/libshmem_writer.a
+#   lib/libshmem_writer.a (or .so)
 # Build and install haidis_connectors/source with:
-#   cmake ../source -DCMAKE_INSTALL_PREFIX=$ERSAP_HOME/lib/haidis_connectors
+#   cmake ../source -DCMAKE_INSTALL_PREFIX=$ERSAP_HOME
 #   make install
 # ---------------------------------------------------------------------------
 find_path(SHMEM_WRITER_INCLUDE_DIR
     NAMES shmem_writer.hpp
-    HINTS "$ENV{ERSAP_HOME}/lib/haidis_connectors/include"
+    HINTS "$ENV{ERSAP_HOME}/include"
     NO_DEFAULT_PATH)
 
 find_library(SHMEM_WRITER_LIBRARY
     NAMES shmem_writer
-    HINTS "$ENV{ERSAP_HOME}/lib/haidis_connectors/lib"
+    HINTS "$ENV{ERSAP_HOME}/lib"
     NO_DEFAULT_PATH)
 
 if(NOT SHMEM_WRITER_INCLUDE_DIR OR NOT SHMEM_WRITER_LIBRARY)
     message(FATAL_ERROR
         "shmem_writer (haidis_connectors) not found.\n"
-        "Build and install haidis_connectors/source to $ENV{ERSAP_HOME}/lib/haidis_connectors first.")
+        "Build and install haidis_connectors/source to $ENV{ERSAP_HOME} first.")
 endif()
 
 message(STATUS "Found shmem_writer header: ${SHMEM_WRITER_INCLUDE_DIR}")
