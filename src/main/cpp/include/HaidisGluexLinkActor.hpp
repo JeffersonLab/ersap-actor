@@ -6,7 +6,7 @@
  * 12000, Jefferson Ave, Newport News, VA 23606
  * Phone : (757)-269-7100
  *
- * ERSAP actor that receives ARRAY_DOUBLE output from HaidisGluesActor,
+ * ERSAP actor that receives ARRAY_DOUBLE output from HaidisGluexActor,
  * constructs a structured binary header, and writes [header][payload]
  * to a POSIX shared memory region via ShmemWriter.
  *
@@ -14,8 +14,8 @@
  * @project ersap-actor
  */
 
-#ifndef HAIDIS_GLUES_LINK_ACTOR_HPP
-#define HAIDIS_GLUES_LINK_ACTOR_HPP
+#ifndef HAIDIS_GLUEX_LINK_ACTOR_HPP
+#define HAIDIS_GLUEX_LINK_ACTOR_HPP
 
 // ShmemWriter from haidis_connectors (source/include/shmem_writer.hpp)
 #include "shmem_writer.hpp"
@@ -32,11 +32,11 @@ namespace ersap {
 namespace coda {
 
 /**
- * ERSAP actor for processing HaidisGluesActor output and forwarding to shared memory.
+ * ERSAP actor for processing HaidisGluexActor output and forwarding to shared memory.
  *
  * Input:
  *   - ARRAY_DOUBLE: duplets of doubles (value1, value2, ...)
- *     from HaidisGluesActor analysis
+ *     from HaidisGluexActor analysis
  *
  * Processing:
  *   1. Read input array and compute size metrics.
@@ -58,16 +58,17 @@ namespace coda {
  *                                       released by reader after consuming
  *
  * Configuration (JSON):
- *   "verbose"      : bool   - enable per-event logging   (default false)
- *   "shmem_name"   : string - POSIX shmem object name    (default "/haidis_glues_shmem")
- *   "sem_name"     : string - data-ready semaphore name  (default "/haidis_glues_sem")
- *   "sem_ack_name" : string - buffer-free semaphore name (default "/haidis_glues_sem_ack")
- *   "shmem_size"   : int    - shared memory size bytes   (default 10485760 = 10 MB)
+ *   "verbose"            : bool   - enable per-event logging              (default false)
+ *   "enable_shmem_write" : bool   - enable shared memory writing          (default true)
+ *   "shmem_name"         : string - POSIX shmem object name               (default "/haidis_gluex_shmem")
+ *   "sem_name"           : string - data-ready semaphore name             (default "/haidis_gluex_sem")
+ *   "sem_ack_name"       : string - buffer-free semaphore name            (default "/haidis_gluex_sem_ack")
+ *   "shmem_size"         : int    - shared memory size bytes              (default 10485760 = 10 MB)
  */
-class HaidisGluesLinkActor : public ersap::Engine {
+class HaidisGluexLinkActor : public ersap::Engine {
 public:
-    HaidisGluesLinkActor() = default;
-    virtual ~HaidisGluesLinkActor() = default;
+    HaidisGluexLinkActor() = default;
+    virtual ~HaidisGluexLinkActor() = default;
 
     // Engine interface implementation
     ersap::EngineData configure(ersap::EngineData& input) override;
@@ -88,9 +89,10 @@ public:
 private:
     // Configuration parameters (settable via JSON in configure())
     bool verbose_ = false;
-    std::string shmem_name_   = "/haidis_glues_shmem";
-    std::string sem_name_     = "/haidis_glues_sem";
-    std::string sem_ack_name_ = "/haidis_glues_sem_ack"; // buffer-free (ack) semaphore
+    bool enable_shmem_write_ = true;  // Enable/disable shared memory writing
+    std::string shmem_name_   = "/haidis_gluex_shmem";
+    std::string sem_name_     = "/haidis_gluex_sem";
+    std::string sem_ack_name_ = "/haidis_gluex_sem_ack"; // buffer-free (ack) semaphore
     std::size_t shmem_size_   = 10485760;                 // 10 MB default
 
     // Shared memory writer — constructed in configure()
@@ -112,4 +114,4 @@ private:
 // C interface for engine creation (required by ERSAP framework)
 extern "C" std::unique_ptr<ersap::Engine> create_engine();
 
-#endif // HAIDIS_GLUES_LINK_ACTOR_HPP
+#endif // HAIDIS_GLUEX_LINK_ACTOR_HPP

@@ -164,12 +164,12 @@ set(HAIDIS_LINK_ACTOR_HEADERS
     include/HaidisLinkActor.hpp
 )
 
-set(HAIDIS_GLUES_LINK_ACTOR_SOURCES
-    src/haidis_glues_link_actor.cpp
+set(HAIDIS_GLUEX_LINK_ACTOR_SOURCES
+    src/haidis_gluex_link_actor.cpp
 )
 
-set(HAIDIS_GLUES_LINK_ACTOR_HEADERS
-    include/HaidisGluesLinkActor.hpp
+set(HAIDIS_GLUEX_LINK_ACTOR_HEADERS
+    include/HaidisGluexLinkActor.hpp
 )
 
 # Create shared library for the data type
@@ -312,35 +312,35 @@ if(BUILD_HAIDIS_ACTOR)
         PUBLIC_HEADER "${HAIDIS_LINK_ACTOR_HEADERS}"
     )
 
-    # Create shared library for the HaidisGluesLinkActor
-    add_library(HaidisGluesLinkActor SHARED ${HAIDIS_GLUES_LINK_ACTOR_SOURCES} ${HAIDIS_GLUES_LINK_ACTOR_HEADERS})
+    # Create shared library for the HaidisGluexLinkActor
+    add_library(HaidisGluexLinkActor SHARED ${HAIDIS_GLUEX_LINK_ACTOR_SOURCES} ${HAIDIS_GLUEX_LINK_ACTOR_HEADERS})
 
     # Require C++17 for this target
-    target_compile_features(HaidisGluesLinkActor PUBLIC cxx_std_17)
+    target_compile_features(HaidisGluexLinkActor PUBLIC cxx_std_17)
 
     # Include shmem_writer.hpp from haidis_connectors
-    target_include_directories(HaidisGluesLinkActor PRIVATE ${SHMEM_WRITER_INCLUDE_DIR})
+    target_include_directories(HaidisGluexLinkActor PRIVATE ${SHMEM_WRITER_INCLUDE_DIR})
 
-    # Link libraries for HaidisGluesLinkActor.
+    # Link libraries for HaidisGluexLinkActor.
     # -lrt and -lpthread are required by shmem_writer on Linux (shm_open, sem_open).
-    target_link_libraries(HaidisGluesLinkActor
+    target_link_libraries(HaidisGluexLinkActor
         ${ERSAP_LIBRARY}
         ${SHMEM_WRITER_LIBRARY}
         $<$<PLATFORM_ID:Linux>:rt>
         $<$<PLATFORM_ID:Linux>:pthread>
     )
 
-    # Set library properties for HaidisGluesLinkActor
-    set_target_properties(HaidisGluesLinkActor PROPERTIES
+    # Set library properties for HaidisGluexLinkActor
+    set_target_properties(HaidisGluexLinkActor PROPERTIES
         VERSION ${PROJECT_VERSION}
         SOVERSION 1
-        PUBLIC_HEADER "${HAIDIS_GLUES_LINK_ACTOR_HEADERS}"
+        PUBLIC_HEADER "${HAIDIS_GLUEX_LINK_ACTOR_HEADERS}"
     )
 endif()
 
 # Installation rules for all libraries
 if(BUILD_HAIDIS_ACTOR)
-    install(TARGETS CodaTimeFrameDataType CodaTimeFrameBinaryDataType CodaTimeFramePrinterActor CodaTimeFrameBinaryPrinterActor HaidisActor HaidisGluexActor HaidisLinkActor HaidisGluesLinkActor
+    install(TARGETS CodaTimeFrameDataType CodaTimeFrameBinaryDataType CodaTimeFramePrinterActor CodaTimeFrameBinaryPrinterActor HaidisActor HaidisGluexActor HaidisLinkActor HaidisGluexLinkActor
         LIBRARY DESTINATION lib
         PUBLIC_HEADER DESTINATION include/ersap-actor-cpp
     )

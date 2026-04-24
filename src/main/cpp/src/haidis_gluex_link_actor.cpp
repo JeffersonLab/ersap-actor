@@ -6,12 +6,12 @@
  * 12000, Jefferson Ave, Newport News, VA 23606
  * Phone : (757)-269-7100
  *
- * Implementation of HaidisGluesLinkActor for header prepending to ARRAY_DOUBLE
+ * Implementation of HaidisGluexLinkActor for header prepending to ARRAY_DOUBLE
  * @author gurjyan
  * @project ersap-actor
  */
 
-#include "HaidisGluesLinkActor.hpp"
+#include "HaidisGluexLinkActor.hpp"
 #include <ersap/stdlib/json_utils.hpp>
 #include <iostream>
 #include <iomanip>
@@ -22,16 +22,16 @@
 extern "C"
 std::unique_ptr<ersap::Engine> create_engine()
 {
-    return std::make_unique<ersap::coda::HaidisGluesLinkActor>();
+    return std::make_unique<ersap::coda::HaidisGluexLinkActor>();
 }
 
 namespace ersap {
 namespace coda {
 
-ersap::EngineData HaidisGluesLinkActor::configure(ersap::EngineData& input) {
+ersap::EngineData HaidisGluexLinkActor::configure(ersap::EngineData& input) {
     auto output = ersap::EngineData{};
 
-    std::cout << "\nDEBUG: HaidisGluesLinkActor::configure() called" << std::endl;
+    std::cout << "\nDEBUG: HaidisGluexLinkActor::configure() called" << std::endl;
     std::cout << "  Input MIME type: " << input.mime_type() << std::endl;
 
     // Parse JSON configuration if provided
@@ -41,6 +41,9 @@ ersap::EngineData HaidisGluesLinkActor::configure(ersap::EngineData& input) {
 
             if (!config["verbose"].is_null()) {
                 verbose_ = config["verbose"].bool_value();
+            }
+            if (!config["enable_shmem_write"].is_null()) {
+                enable_shmem_write_ = config["enable_shmem_write"].bool_value();
             }
             if (!config["shmem_name"].is_null()) {
                 shmem_name_ = config["shmem_name"].string_value();
@@ -56,18 +59,19 @@ ersap::EngineData HaidisGluesLinkActor::configure(ersap::EngineData& input) {
             }
 
             if (verbose_) {
-                std::cout << "HaidisGluesLinkActor configuration:" << std::endl;
-                std::cout << "  - verbose:      " << verbose_      << std::endl;
-                std::cout << "  - shmem_name:   " << shmem_name_   << std::endl;
-                std::cout << "  - sem_name:     " << sem_name_     << std::endl;
-                std::cout << "  - sem_ack_name: " << sem_ack_name_ << std::endl;
-                std::cout << "  - shmem_size:   " << shmem_size_   << std::endl;
+                std::cout << "HaidisGluexLinkActor configuration:" << std::endl;
+                std::cout << "  - verbose:            " << verbose_            << std::endl;
+                std::cout << "  - enable_shmem_write: " << enable_shmem_write_ << std::endl;
+                std::cout << "  - shmem_name:         " << shmem_name_         << std::endl;
+                std::cout << "  - sem_name:           " << sem_name_           << std::endl;
+                std::cout << "  - sem_ack_name:       " << sem_ack_name_       << std::endl;
+                std::cout << "  - shmem_size:         " << shmem_size_         << std::endl;
             }
 
         } catch (const std::exception& e) {
             output.set_status(ersap::EngineStatus::ERROR);
             output.set_description("Error parsing configuration: " + std::string(e.what()));
-            std::cerr << "Error parsing HaidisGluesLinkActor configuration: " << e.what() << std::endl;
+            std::cerr << "Error parsing HaidisGluexLinkActor configuration: " << e.what() << std::endl;
             return output;
         }
     }
@@ -78,18 +82,18 @@ ersap::EngineData HaidisGluesLinkActor::configure(ersap::EngineData& input) {
         writer_.reset();
         output.set_status(ersap::EngineStatus::ERROR);
         output.set_description("Failed to initialize shared memory writer for " + shmem_name_);
-        std::cerr << "HaidisGluesLinkActor: Failed to initialize shared memory '" << shmem_name_ << "'" << std::endl;
+        std::cerr << "HaidisGluexLinkActor: Failed to initialize shared memory '" << shmem_name_ << "'" << std::endl;
         return output;
     }
 
     if (verbose_) {
-        std::cout << "HaidisGluesLinkActor configured successfully" << std::endl;
+        std::cout << "HaidisGluexLinkActor configured successfully" << std::endl;
     }
 
     return output;
 }
 
-ersap::EngineData HaidisGluesLinkActor::execute(ersap::EngineData& input) {
+ersap::EngineData HaidisGluexLinkActor::execute(ersap::EngineData& input) {
     auto output = ersap::EngineData{};
 
     // Increment execute call counter
@@ -98,7 +102,7 @@ ersap::EngineData HaidisGluesLinkActor::execute(ersap::EngineData& input) {
     // Debug: Log execute() call information
     if (verbose_) {
         std::cout << "\n========================================" << std::endl;
-        std::cout << "DEBUG: HaidisGluesLinkActor::execute() called - Call #" << executeCallCount_ << std::endl;
+        std::cout << "DEBUG: HaidisGluexLinkActor::execute() called - Call #" << executeCallCount_ << std::endl;
         std::cout << "  Input MIME type: " << input.mime_type() << std::endl;
         std::cout << "  Writer initialized: " << (writer_ ? "YES" : "NO") << std::endl;
         std::cout << "========================================\n" << std::endl;
@@ -128,49 +132,41 @@ ersap::EngineData HaidisGluesLinkActor::execute(ersap::EngineData& input) {
                       << ", leftover: " << (num_doubles % 2) << std::endl;
         }
 
-        // TEMPORARY DEBUG: Skip shared memory write to verify chain flow
-        // The write_data() call blocks on semaphore wait if no reader is present
-        if (verbose_) {
-            std::cout << "DEBUG: Skipping shared memory write (testing mode)" << std::endl;
-            std::cout << "  Would write " << duplet_count << " duplets ("
-                      << (duplet_count * 2) << " doubles)" << std::endl;
-        }
+        // Write to shared memory if enabled (requires reader process)
+        if (enable_shmem_write_) {
+            if (writer_) {
+                const std::vector<uint32_t> dims = {duplet_count, 2};
+                const std::size_t complete_elements = duplet_count * 2;
 
-        // ORIGINAL CODE (commented out for testing):
-        // Send received data to shared memory as a 2-D array (duplet_count × 2)
-        // Only write complete duplets to match header dimensions
-        /*
-        if (writer_) {
-            const std::vector<uint32_t> dims = {duplet_count, 2};
-            const std::size_t complete_elements = duplet_count * 2;
+                // Create vector with only complete duplets
+                std::vector<double> complete_data(in.begin(), in.begin() + complete_elements);
 
-            // Create vector with only complete duplets
-            std::vector<double> complete_data(in.begin(), in.begin() + complete_elements);
+                if (!writer_->write_data(complete_data, 2, dims)) {
+                    writeFailureCount_++;
+                    consecutiveFailures_++;
+                    std::cerr << "HaidisGluexLinkActor: write_data failed (event "
+                              << eventCount_ << ", consecutive failures: "
+                              << consecutiveFailures_ << ")" << std::endl;
 
-            if (!writer_->write_data(complete_data, 2, dims)) {
-                writeFailureCount_++;
-                consecutiveFailures_++;
-                std::cerr << "HaidisGluesLinkActor: write_data failed (event "
-                          << eventCount_ << ", consecutive failures: "
-                          << consecutiveFailures_ << ")" << std::endl;
-
-                // Set warning status if failures are persistent
-                if (consecutiveFailures_ >= 3) {
-                    output.set_status(ersap::EngineStatus::WARNING);
-                    output.set_description("Shared memory write failing persistently (failures: " +
-                                         std::to_string(consecutiveFailures_) + ")");
+                    // Set warning status if failures are persistent
+                    if (consecutiveFailures_ >= 3) {
+                        output.set_status(ersap::EngineStatus::WARNING);
+                        output.set_description("Shared memory write failing persistently (failures: " +
+                                             std::to_string(consecutiveFailures_) + ")");
+                    }
+                } else {
+                    // Reset consecutive failure counter on success
+                    consecutiveFailures_ = 0;
                 }
             } else {
-                // Reset consecutive failure counter on success
-                consecutiveFailures_ = 0;
+                std::cerr << "HaidisGluexLinkActor: shared memory writer not initialized; "
+                             "skipping write (event " << eventCount_ << ")" << std::endl;
+                output.set_status(ersap::EngineStatus::WARNING);
+                output.set_description("Shared memory writer not initialized");
             }
-        } else {
-            std::cerr << "HaidisGluesLinkActor: shared memory writer not initialized; "
-                         "skipping write (event " << eventCount_ << ")" << std::endl;
-            output.set_status(ersap::EngineStatus::WARNING);
-            output.set_description("Shared memory writer not initialized");
+        } else if (verbose_) {
+            std::cout << "Shared memory write disabled (enable_shmem_write=false)" << std::endl;
         }
-        */
 
         // Print received data if verbose
         if (verbose_) {
@@ -181,7 +177,7 @@ ersap::EngineData HaidisGluesLinkActor::execute(ersap::EngineData& input) {
         eventCount_++;
 
         if (verbose_ && eventCount_ % 100 == 0) {
-            std::cout << "\nHaidisGluesLinkActor Statistics:" << std::endl;
+            std::cout << "\nHaidisGluexLinkActor Statistics:" << std::endl;
             std::cout << "  Events processed: " << eventCount_ << std::endl;
             std::cout << "  Write failures:   " << writeFailureCount_ << std::endl;
             std::cout << "  Consecutive failures: " << consecutiveFailures_ << std::endl;
@@ -192,7 +188,7 @@ ersap::EngineData HaidisGluesLinkActor::execute(ersap::EngineData& input) {
 
         // Debug: Log output summary
         if (verbose_) {
-            std::cout << "\nDEBUG: HaidisGluesLinkActor::execute() returning - Call #" << executeCallCount_ << std::endl;
+            std::cout << "\nDEBUG: HaidisGluexLinkActor::execute() returning - Call #" << executeCallCount_ << std::endl;
             std::cout << "  Received " << num_doubles << " doubles" << std::endl;
             std::cout << "  Duplet count: " << duplet_count << std::endl;
             std::cout << "  Output data type: ARRAY_DOUBLE" << std::endl;
@@ -205,55 +201,54 @@ ersap::EngineData HaidisGluesLinkActor::execute(ersap::EngineData& input) {
     } catch (const std::exception& e) {
         output.set_status(ersap::EngineStatus::ERROR);
         output.set_description("Error processing input: " + std::string(e.what()));
-        std::cerr << "Error in HaidisGluesLinkActor: " << e.what() << std::endl;
+        std::cerr << "Error in HaidisGluexLinkActor: " << e.what() << std::endl;
     }
 
     return output;
 }
 
-ersap::EngineData HaidisGluesLinkActor::execute_group(const std::vector<ersap::EngineData>&) {
+ersap::EngineData HaidisGluexLinkActor::execute_group(const std::vector<ersap::EngineData>&) {
     // Group processing not implemented for this actor
     return {};
 }
 
-std::vector<ersap::EngineDataType> HaidisGluesLinkActor::input_data_types() const {
+std::vector<ersap::EngineDataType> HaidisGluexLinkActor::input_data_types() const {
     return { ersap::type::ARRAY_DOUBLE, ersap::type::JSON };
 }
 
-std::vector<ersap::EngineDataType> HaidisGluesLinkActor::output_data_types() const {
+std::vector<ersap::EngineDataType> HaidisGluexLinkActor::output_data_types() const {
     return { ersap::type::ARRAY_DOUBLE };
 }
 
-std::set<std::string> HaidisGluesLinkActor::states() const {
+std::set<std::string> HaidisGluexLinkActor::states() const {
     return {}; // Stateless engine
 }
 
-std::string HaidisGluesLinkActor::name() const {
-    return "HaidisGluesLinkActor";
+std::string HaidisGluexLinkActor::name() const {
+    return "HaidisGluexLinkActor";
 }
 
-std::string HaidisGluesLinkActor::author() const {
+std::string HaidisGluexLinkActor::author() const {
     return "Jefferson Lab";
 }
 
-std::string HaidisGluesLinkActor::description() const {
-    return "ERSAP actor that receives ARRAY_DOUBLE from HaidisGluesActor (duplets: value1, "
-           "value2), creates a 64-bit header (32+16+16 bit structure) encoding "
-           "size_bytes, duplet_count, and num_doubles, copies it into a double using memcpy, "
-           "and prepends it to the output array.";
+std::string HaidisGluexLinkActor::description() const {
+    return "ERSAP actor that receives ARRAY_DOUBLE from HaidisGluexActor (duplets: value1, "
+           "value2), writes data to shared memory (if enabled), and passes the data "
+           "through to downstream actors unchanged.";
 }
 
-std::string HaidisGluesLinkActor::version() const {
+std::string HaidisGluexLinkActor::version() const {
     return "1.0.0";
 }
 
-void HaidisGluesLinkActor::printReceivedData(const std::vector<double>& data) const {
+void HaidisGluexLinkActor::printReceivedData(const std::vector<double>& data) const {
     size_t num_doubles = data.size();
     size_t size_bytes = num_doubles * sizeof(double);
     size_t duplet_count = num_doubles / 2;
 
     std::cout << "\n========================================" << std::endl;
-    std::cout << "HaidisGluesLinkActor: Received Data" << std::endl;
+    std::cout << "HaidisGluexLinkActor: Received Data" << std::endl;
     std::cout << "========================================" << std::endl;
     std::cout << "Received " << num_doubles << " doubles (" << size_bytes << " bytes)" << std::endl;
     std::cout << "Number of duplets: " << duplet_count << std::endl;
