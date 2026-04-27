@@ -45,9 +45,6 @@ ersap::EngineData HaidisGluexLinkActor::configure(ersap::EngineData& input) {
             if (!config["enable_shmem_write"].is_null()) {
                 enable_shmem_write_ = config["enable_shmem_write"].bool_value();
             }
-            if (!config["data_id"].is_null()) {
-                data_id_ = static_cast<std::uint16_t>(config["data_id"].int_value());
-            }
             if (!config["shmem_name"].is_null()) {
                 shmem_name_ = config["shmem_name"].string_value();
             }
@@ -65,7 +62,6 @@ ersap::EngineData HaidisGluexLinkActor::configure(ersap::EngineData& input) {
                 std::cout << "HaidisGluexLinkActor configuration:" << std::endl;
                 std::cout << "  - verbose:            " << verbose_            << std::endl;
                 std::cout << "  - enable_shmem_write: " << enable_shmem_write_ << std::endl;
-                std::cout << "  - data_id:            " << data_id_            << std::endl;
                 std::cout << "  - shmem_name:         " << shmem_name_         << std::endl;
                 std::cout << "  - sem_name:           " << sem_name_           << std::endl;
                 std::cout << "  - sem_ack_name:       " << sem_ack_name_       << std::endl;
@@ -124,8 +120,20 @@ ersap::EngineData HaidisGluexLinkActor::execute(ersap::EngineData& input) {
         // Extract input data as vector of doubles
         auto& in = ersap::data_cast<std::vector<double>>(input);
 
+        // Guard against empty input before reading in[0]
+        if (in.empty()) {
+            output.set_status(ersap::EngineStatus::ERROR);
+            output.set_description("Empty input: expected at least one double (data_id)");
+            std::cerr << "Error: HaidisGluexLinkActor received empty input" << std::endl;
+            return output;
+        }
+
+        // Extract data_id from the first element, then copy the remainder into data
+        const std::uint16_t data_id = static_cast<std::uint16_t>(in[0]);
+        std::vector<double> data(in.begin() + 1, in.end());
+
         // Step 1: Compute size metrics
-        const std::size_t num_doubles   = in.size();
+        const std::size_t num_doubles   = data.size();
         const std::size_t size_bytes    = num_doubles * sizeof(double);
         const std::uint32_t duplet_count = static_cast<std::uint32_t>(num_doubles / 2);
 
@@ -143,9 +151,9 @@ ersap::EngineData HaidisGluexLinkActor::execute(ersap::EngineData& input) {
                 const std::size_t complete_elements = duplet_count * 2;
 
                 // Create vector with only complete duplets
-                std::vector<double> complete_data(in.begin(), in.begin() + complete_elements);
+                std::vector<double> complete_data(data.begin(), data.begin() + complete_elements);
 
-                if (!writer_->write_data(complete_data, 2, dims, data_id_)) {
+                if (!writer_->write_data(complete_data, 2, dims, data_id)) {
                     writeFailureCount_++;
                     consecutiveFailures_++;
                     std::cerr << "HaidisGluexLinkActor: write_data failed (event "
@@ -174,7 +182,7 @@ ersap::EngineData HaidisGluexLinkActor::execute(ersap::EngineData& input) {
 
         // Print received data if verbose
         if (verbose_) {
-            printReceivedData(in);
+            printReceivedData(data);
         }
 
         // Update statistics
@@ -187,8 +195,8 @@ ersap::EngineData HaidisGluexLinkActor::execute(ersap::EngineData& input) {
             std::cout << "  Consecutive failures: " << consecutiveFailures_ << std::endl;
         }
 
-        // Pass input through to downstream ERSAP actors unchanged
-        output.set_data(ersap::type::ARRAY_DOUBLE, in);
+        // Pass analysis results through to downstream ERSAP actors (data_id stripped)
+        output.set_data(ersap::type::ARRAY_DOUBLE, data);
 
         // Debug: Log output summary
         if (verbose_) {
