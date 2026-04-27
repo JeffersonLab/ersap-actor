@@ -70,6 +70,7 @@ struct EventData {
     double imass_kfit;     // Invariant mass from kinematic fit
     double imassGG_kfit;   // γγ invariant mass from kinematic fit
     double kfit_prob;      // Kinematic fit probability/confidence
+    double data_id;        // data ID
 };
 
 /**
@@ -141,8 +142,8 @@ private:
     std::size_t errorCount_ = 0;
     std::size_t passedEventCount_ = 0;
 
-    // Expected physics data size: 19 doubles (16 for four-vectors + 3 kfit scalars)
-    static constexpr std::size_t EXPECTED_SIZE = 19 * sizeof(double);
+    // Expected physics data size: 20 doubles (16 for four-vectors + 3 kfit scalars + 1 data_id)
+    static constexpr std::size_t EXPECTED_SIZE = 20 * sizeof(double);
 
     // Helper methods for ET system management
     bool initializeET();

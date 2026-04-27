@@ -171,8 +171,8 @@ ersap::EngineData HaidisGluexActor::execute(ersap::EngineData& input) {
             std::cout << "  ET event data size: " << data_len << " bytes" << std::endl;
         }
 
-        // Validate payload size - expecting 19 doubles per event (16 four-vector components + 3 kfit scalars)
-        constexpr size_t DOUBLES_PER_EVENT = 19;
+        // Validate payload size - expecting 20 doubles per event (16 four-vector components + 3 kfit scalars + 1 data_id)
+        constexpr size_t DOUBLES_PER_EVENT = 20;
         constexpr size_t BYTES_PER_EVENT = DOUBLES_PER_EVENT * sizeof(double);
 
         // Debug: Log calculated event count
@@ -219,8 +219,9 @@ ersap::EngineData HaidisGluexActor::execute(ersap::EngineData& input) {
 
         // Vector to collect analysis results (2 doubles per passing event: X, Y)
         std::vector<double> analysis_results;
+        double data_id = 0.0;
 
-        // Process each event (19 doubles each)
+        // Process each event (20 doubles each)
         for (size_t event_idx = 0; event_idx < num_events; ++event_idx) {
             const double* event_data = doubles + (event_idx * DOUBLES_PER_EVENT);
 
@@ -255,6 +256,8 @@ ersap::EngineData HaidisGluexActor::execute(ersap::EngineData& input) {
             ev.imass_kfit   = event_data[16];
             ev.imassGG_kfit = event_data[17];
             ev.kfit_prob    = event_data[18];
+            ev.data_id      = event_data[19];
+            data_id         = ev.data_id;
 
             // Print event data if verbose
             if (verbose_) {
@@ -329,15 +332,23 @@ ersap::EngineData HaidisGluexActor::execute(ersap::EngineData& input) {
             printEventSummary();
         }
 
-        // Set success status and output analysis results
-        // Output contains 2 doubles per passing event: (X, Y) Dalitz coordinates
-        output.set_data(ersap::type::ARRAY_DOUBLE, analysis_results);
+        // Prepend data_id to analysis results before output.
+        // Output layout: [data_id][X0][Y0][X1][Y1]...
+        std::vector<double> output_results;
+        output_results.reserve(analysis_results.size() + 1);
+        output_results.push_back(data_id);
+        output_results.insert(output_results.end(),
+                              analysis_results.begin(),
+                              analysis_results.end());
+
+        output.set_data(ersap::type::ARRAY_DOUBLE, output_results);
 
         // Debug: Log output summary
         if (verbose_) {
             std::cout << "\nDEBUG: Returning from execute() - Call #" << executeCallCount_ << std::endl;
             std::cout << "  Output data type: ARRAY_DOUBLE" << std::endl;
-            std::cout << "  Output array size: " << analysis_results.size() << " doubles" << std::endl;
+            std::cout << "  data_id: " << data_id << std::endl;
+            std::cout << "  Output array size: " << output_results.size() << " doubles" << std::endl;
             std::cout << "  Passing events: " << (analysis_results.size() / 2) << std::endl;
             std::cout << "  Total execute calls so far: " << executeCallCount_ << std::endl;
             std::cout << "  Total physics events processed: " << eventCount_ << std::endl;
