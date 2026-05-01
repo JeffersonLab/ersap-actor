@@ -76,14 +76,17 @@ ersap::EngineData HaidisGluexLinkActor::configure(ersap::EngineData& input) {
         }
     }
 
-    // Reset first so the destructor releases any existing IPC resources.
-    writer_ = std::make_unique<ShmemWriter>(shmem_name_, shmem_size_, sem_name_, sem_ack_name_);
-    if (!writer_->initialize()) {
+    if (enable_shmem_write_) {
+        writer_ = std::make_unique<ShmemWriter>(shmem_name_, shmem_size_, sem_name_, sem_ack_name_);
+        if (!writer_->initialize()) {
+            writer_.reset();
+            output.set_status(ersap::EngineStatus::ERROR);
+            output.set_description("Failed to initialize shared memory writer for " + shmem_name_);
+            std::cerr << "HaidisGluexLinkActor: Failed to initialize shared memory '" << shmem_name_ << "'" << std::endl;
+            return output;
+        }
+    } else {
         writer_.reset();
-        output.set_status(ersap::EngineStatus::ERROR);
-        output.set_description("Failed to initialize shared memory writer for " + shmem_name_);
-        std::cerr << "HaidisGluexLinkActor: Failed to initialize shared memory '" << shmem_name_ << "'" << std::endl;
-        return output;
     }
 
     if (verbose_) {
