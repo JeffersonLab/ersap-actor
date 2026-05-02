@@ -97,8 +97,15 @@ ersap::EngineData HaidisGluexLinkActor::configure(ersap::EngineData& input) {
 }
 
 ersap::EngineData HaidisGluexLinkActor::execute(ersap::EngineData& input) {
-    auto output = ersap::EngineData{};
 
+    if (!enable_shmem_write_) {
+        if (verbose_) {
+        std::cout << "Shared memory write disabled (enable_shmem_write=false)" << std::endl;
+        }
+        return input;
+        }
+
+    auto output = ersap::EngineData{};
     // Increment execute call counter
     executeCallCount_++;
 
@@ -147,8 +154,7 @@ ersap::EngineData HaidisGluexLinkActor::execute(ersap::EngineData& input) {
                       << ", leftover: " << (num_doubles % 2) << std::endl;
         }
 
-        // Write to shared memory if enabled (requires reader process)
-        if (enable_shmem_write_) {
+        // Write to shared memory requires reader process)
             if (writer_) {
                 const std::vector<uint32_t> dims = {duplet_count, 2};
                 const std::size_t complete_elements = duplet_count * 2;
@@ -179,9 +185,6 @@ ersap::EngineData HaidisGluexLinkActor::execute(ersap::EngineData& input) {
                 output.set_status(ersap::EngineStatus::WARNING);
                 output.set_description("Shared memory writer not initialized");
             }
-        } else if (verbose_) {
-            std::cout << "Shared memory write disabled (enable_shmem_write=false)" << std::endl;
-        }
 
         // Print received data if verbose
         if (verbose_) {
