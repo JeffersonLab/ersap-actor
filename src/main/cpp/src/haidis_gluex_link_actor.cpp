@@ -98,14 +98,15 @@ ersap::EngineData HaidisGluexLinkActor::configure(ersap::EngineData& input) {
 
 ersap::EngineData HaidisGluexLinkActor::execute(ersap::EngineData& input) {
 
+    auto output = ersap::EngineData{};
     if (!enable_shmem_write_) {
         if (verbose_) {
         std::cout << "Shared memory write disabled (enable_shmem_write=false)" << std::endl;
         }
-        return input;
+        return output;
         }
 
-    auto output = ersap::EngineData{};
+
     // Increment execute call counter
     executeCallCount_++;
 
