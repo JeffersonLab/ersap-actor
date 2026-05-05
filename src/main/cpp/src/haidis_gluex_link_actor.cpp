@@ -103,6 +103,8 @@ ersap::EngineData HaidisGluexLinkActor::execute(ersap::EngineData& input) {
         if (verbose_) {
         std::cout << "Shared memory write disabled (enable_shmem_write=false)" << std::endl;
         }
+        std::vector<double> empty;
+        output.set_data(ersap::type::ARRAY_DOUBLE, empty);
         return output;
         }
 
