@@ -458,9 +458,9 @@ bool HaidisGluexActor::initializeET() {
 
     // Configure station
     et_station_config_setuser(statconfig, ET_STATION_USER_MULTI);
-    et_station_config_setrestore(statconfig, ET_STATION_RESTORE_OUT);
+    et_station_config_setrestore(statconfig, ET_STATION_RESTORE_IN);
     et_station_config_setprescale(statconfig, 1);
-    et_station_config_setcue(statconfig, 10);
+    et_station_config_setcue(statconfig, 1);
     et_station_config_setselect(statconfig, ET_STATION_SELECT_ALL);
     et_station_config_setblock(statconfig, ET_STATION_BLOCKING);
 
