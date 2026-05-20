@@ -58,6 +58,24 @@ ersap::EngineData HaidisGluexLinkActor::configure(ersap::EngineData& input) {
             if (!config["sem_ack_name"].is_null()) {
                 sem_ack_name_ = config["sem_ack_name"].string_value();
             }
+            if (!config["batch_size"].is_null()) {
+                batch_size_ = config["batch_size"].int_value();
+                if (batch_size_ <= 0) {
+                    output.set_status(ersap::EngineStatus::ERROR);
+                    output.set_description("batch_size must be positive, got " + std::to_string(batch_size_));
+                    std::cerr << "HaidisGluexLinkActor: batch_size must be positive" << std::endl;
+                    return output;
+                }
+            }
+            if (!config["data_id_number"].is_null()) {
+                data_id_number_ = config["data_id_number"].int_value();
+                if (data_id_number_ <= 0) {
+                    output.set_status(ersap::EngineStatus::ERROR);
+                    output.set_description("data_id_number must be positive, got " + std::to_string(data_id_number_));
+                    std::cerr << "HaidisGluexLinkActor: data_id_number must be positive" << std::endl;
+                    return output;
+                }
+            }
 
             if (verbose_) {
                 std::cout << "HaidisGluexLinkActor configuration:" << std::endl;
@@ -67,6 +85,8 @@ ersap::EngineData HaidisGluexLinkActor::configure(ersap::EngineData& input) {
                 std::cout << "  - sem_name:           " << sem_name_           << std::endl;
                 std::cout << "  - sem_ack_name:       " << sem_ack_name_       << std::endl;
                 std::cout << "  - shmem_size:         " << shmem_size_         << std::endl;
+                std::cout << "  - batch_size:         " << batch_size_         << std::endl;
+                std::cout << "  - data_id_number:     " << data_id_number_     << std::endl;
             }
 
         } catch (const std::exception& e) {
@@ -90,6 +110,10 @@ ersap::EngineData HaidisGluexLinkActor::configure(ersap::EngineData& input) {
         writer_.reset();
     }
 
+    // Initialize per-data-ID batch buffers (reset on every configure call)
+    data_buffers_.assign(data_id_number_, std::vector<double>{});
+    event_counts_.assign(data_id_number_, 0);
+
     if (verbose_) {
         std::cout << "HaidisGluexLinkActor configured successfully" << std::endl;
     }
@@ -100,15 +124,25 @@ ersap::EngineData HaidisGluexLinkActor::configure(ersap::EngineData& input) {
 ersap::EngineData HaidisGluexLinkActor::execute(ersap::EngineData& input) {
 
     auto output = ersap::EngineData{};
+
+    // Gate 1: shmem writing disabled — return empty immediately
     if (!enable_shmem_write_) {
         if (verbose_) {
-        std::cout << "Shared memory write disabled (enable_shmem_write=false)" << std::endl;
+            std::cout << "Shared memory write disabled (enable_shmem_write=false)" << std::endl;
         }
         std::vector<double> empty;
         output.set_data(ersap::type::ARRAY_DOUBLE, empty);
         return output;
-        }
+    }
 
+    // Gate 2: writer not ready (initialize() failed or not yet called) — return empty immediately
+    if (!writer_) {
+        std::cerr << "HaidisGluexLinkActor: shared memory writer not ready; "
+                     "skipping event " << eventCount_ << std::endl;
+        std::vector<double> empty;
+        output.set_data(ersap::type::ARRAY_DOUBLE, empty);
+        return output;
+    }
 
     // Increment execute call counter
     executeCallCount_++;
@@ -118,7 +152,7 @@ ersap::EngineData HaidisGluexLinkActor::execute(ersap::EngineData& input) {
         std::cout << "\n========================================" << std::endl;
         std::cout << "DEBUG: HaidisGluexLinkActor::execute() called - Call #" << executeCallCount_ << std::endl;
         std::cout << "  Input MIME type: " << input.mime_type() << std::endl;
-        std::cout << "  Writer initialized: " << (writer_ ? "YES" : "NO") << std::endl;
+        std::cout << "  Writer initialized: YES" << std::endl;
         std::cout << "========================================\n" << std::endl;
     }
 
@@ -146,10 +180,10 @@ ersap::EngineData HaidisGluexLinkActor::execute(ersap::EngineData& input) {
         const std::uint16_t data_id = static_cast<std::uint16_t>(in[0]);
         std::vector<double> data(in.begin() + 1, in.end());
 
-        // Step 1: Compute size metrics
-        const std::size_t num_doubles   = data.size();
-        const std::size_t size_bytes    = num_doubles * sizeof(double);
+        // Compute size metrics
+        const std::size_t num_doubles    = data.size();
         const std::uint32_t duplet_count = static_cast<std::uint32_t>(num_doubles / 2);
+        const std::size_t complete_elements = duplet_count * 2;
 
         if (num_doubles % 2 != 0 && verbose_) {
             std::cout << "Warning: Input has " << num_doubles
@@ -158,46 +192,71 @@ ersap::EngineData HaidisGluexLinkActor::execute(ersap::EngineData& input) {
                       << ", leftover: " << (num_doubles % 2) << std::endl;
         }
 
-        // Write to shared memory requires reader process)
-            if (writer_) {
-                const std::vector<uint32_t> dims = {duplet_count, 2};
-                const std::size_t complete_elements = duplet_count * 2;
+        // Validate data_id against configured range (data IDs are zero-based)
+        if (static_cast<int>(data_id) >= data_id_number_) {
+            output.set_status(ersap::EngineStatus::ERROR);
+            output.set_description("data_id " + std::to_string(data_id) +
+                                   " out of range [0, " + std::to_string(data_id_number_) + ")");
+            std::cerr << "HaidisGluexLinkActor: data_id " << data_id
+                      << " >= data_id_number " << data_id_number_
+                      << ", dropping event " << eventCount_ << std::endl;
+            return output;
+        }
 
-                // Create vector with only complete duplets
-                std::vector<double> complete_data(data.begin(), data.begin() + complete_elements);
+        // Accumulate complete duplets into the per-data-ID buffer
+        auto& buffer = data_buffers_[data_id];
+        buffer.insert(buffer.end(), data.begin(), data.begin() + complete_elements);
+        event_counts_[data_id]++;
 
-                if (!writer_->write_data(complete_data, 2, dims, data_id)) {
-                    const int saved_errno = errno;
-                    if (saved_errno == ETIMEDOUT) {
-                        std::cerr << "HaidisGluexLinkActor: write_data timed out after "
-                                  << ShmemWriter::WRITE_TIMEOUT_SEC << "s, dropping event "
-                                  << eventCount_ << std::endl;
-                        std::vector<double> empty;
-                        output.set_data(ersap::type::ARRAY_DOUBLE, empty);
-                        return output;
-                    }
-                    writeFailureCount_++;
-                    consecutiveFailures_++;
-                    std::cerr << "HaidisGluexLinkActor: write_data failed (event "
-                              << eventCount_ << ", consecutive failures: "
-                              << consecutiveFailures_ << ")" << std::endl;
+        if (verbose_) {
+            std::cout << "  Batch state: data_id=" << data_id
+                      << " events=" << event_counts_[data_id]
+                      << "/" << batch_size_
+                      << " buffered_doubles=" << buffer.size() << std::endl;
+        }
 
-                    // Set warning status if failures are persistent
-                    if (consecutiveFailures_ >= 3) {
-                        output.set_status(ersap::EngineStatus::WARNING);
-                        output.set_description("Shared memory write failing persistently (failures: " +
-                                             std::to_string(consecutiveFailures_) + ")");
-                    }
-                } else {
-                    // Reset consecutive failure counter on success
-                    consecutiveFailures_ = 0;
+        // Write to shared memory when the batch for this data_id is complete
+        if (event_counts_[data_id] >= batch_size_) {
+            const std::uint32_t batch_duplet_count = static_cast<std::uint32_t>(buffer.size() / 2);
+            const std::vector<uint32_t> dims = {batch_duplet_count, 2};
+
+            // Guard: accumulated batch must fit within the configured shared memory region
+            const std::size_t payload_bytes = buffer.size() * sizeof(double);
+            if (payload_bytes > shmem_size_) {
+                std::cerr << "HaidisGluexLinkActor: batch payload (" << payload_bytes
+                          << " bytes) exceeds shmem_size (" << shmem_size_
+                          << " bytes), dropping batch for data_id " << data_id << std::endl;
+                buffer.clear();
+                event_counts_[data_id] = 0;
+            } else if (!writer_->write_data(buffer, 2, dims, data_id)) {
+                const int saved_errno = errno;
+                buffer.clear();
+                event_counts_[data_id] = 0;
+                if (saved_errno == ETIMEDOUT) {
+                    std::cerr << "HaidisGluexLinkActor: write_data timed out after "
+                              << ShmemWriter::WRITE_TIMEOUT_SEC << "s, dropping batch for data_id "
+                              << data_id << " (event " << eventCount_ << ")" << std::endl;
+                    std::vector<double> empty;
+                    output.set_data(ersap::type::ARRAY_DOUBLE, empty);
+                    eventCount_++;
+                    return output;
+                }
+                writeFailureCount_++;
+                consecutiveFailures_++;
+                std::cerr << "HaidisGluexLinkActor: write_data failed for data_id " << data_id
+                          << " (event " << eventCount_ << ", consecutive failures: "
+                          << consecutiveFailures_ << ")" << std::endl;
+                if (consecutiveFailures_ >= 3) {
+                    output.set_status(ersap::EngineStatus::WARNING);
+                    output.set_description("Shared memory write failing persistently (failures: " +
+                                         std::to_string(consecutiveFailures_) + ")");
                 }
             } else {
-                std::cerr << "HaidisGluexLinkActor: shared memory writer not initialized; "
-                             "skipping write (event " << eventCount_ << ")" << std::endl;
-                output.set_status(ersap::EngineStatus::WARNING);
-                output.set_description("Shared memory writer not initialized");
+                consecutiveFailures_ = 0;
+                buffer.clear();
+                event_counts_[data_id] = 0;
             }
+        }
 
         // Print received data if verbose
         if (verbose_) {
@@ -214,7 +273,7 @@ ersap::EngineData HaidisGluexLinkActor::execute(ersap::EngineData& input) {
             std::cout << "  Consecutive failures: " << consecutiveFailures_ << std::endl;
         }
 
-        // Pass analysis results through to downstream ERSAP actors (data_id stripped)
+        // Pass current event's data through to downstream actors (data_id stripped)
         output.set_data(ersap::type::ARRAY_DOUBLE, data);
 
         // Debug: Log output summary
@@ -252,7 +311,7 @@ std::vector<ersap::EngineDataType> HaidisGluexLinkActor::output_data_types() con
 }
 
 std::set<std::string> HaidisGluexLinkActor::states() const {
-    return {}; // Stateless engine
+    return {}; // No externally-named states (batch buffers are internal actor state)
 }
 
 std::string HaidisGluexLinkActor::name() const {

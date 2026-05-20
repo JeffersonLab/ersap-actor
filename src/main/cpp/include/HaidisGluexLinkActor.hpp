@@ -64,6 +64,8 @@ namespace coda {
  *   "sem_name"           : string - data-ready semaphore name             (default "/haidis_gluex_sem")
  *   "sem_ack_name"       : string - buffer-free semaphore name            (default "/haidis_gluex_sem_ack")
  *   "shmem_size"         : int    - shared memory size bytes              (default 10485760 = 10 MB)
+ *   "batch_size"         : int    - events to accumulate before writing   (default 1, must be > 0)
+ *   "data_id_number"     : int    - number of distinct data IDs expected  (default 1, must be > 0)
  */
 class HaidisGluexLinkActor : public ersap::Engine {
 public:
@@ -94,9 +96,15 @@ private:
     std::string sem_name_     = "/haidis_gluex_sem";
     std::string sem_ack_name_ = "/haidis_gluex_sem_ack"; // buffer-free (ack) semaphore
     std::size_t shmem_size_   = 10485760;                 // 10 MB default
+    int batch_size_           = 1;   // events to accumulate per data_id before writing
+    int data_id_number_       = 1;   // number of distinct data IDs expected
 
     // Shared memory writer — constructed in configure()
     std::unique_ptr<ShmemWriter> writer_;
+
+    // Per-data-ID batch state — indexed by data_id (zero-based)
+    std::vector<std::vector<double>> data_buffers_;
+    std::vector<int>                 event_counts_;
 
     // Statistics
     std::size_t executeCallCount_ = 0;  // Track how many times execute() is called
