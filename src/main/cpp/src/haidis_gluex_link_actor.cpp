@@ -15,6 +15,7 @@
 #include <ersap/stdlib/json_utils.hpp>
 #include <iostream>
 #include <iomanip>
+#include <cerrno>
 #include <cstring>
 #include <cstdint>
 
@@ -166,6 +167,15 @@ ersap::EngineData HaidisGluexLinkActor::execute(ersap::EngineData& input) {
                 std::vector<double> complete_data(data.begin(), data.begin() + complete_elements);
 
                 if (!writer_->write_data(complete_data, 2, dims, data_id)) {
+                    const int saved_errno = errno;
+                    if (saved_errno == ETIMEDOUT) {
+                        std::cerr << "HaidisGluexLinkActor: write_data timed out after "
+                                  << ShmemWriter::WRITE_TIMEOUT_SEC << "s, dropping event "
+                                  << eventCount_ << std::endl;
+                        std::vector<double> empty;
+                        output.set_data(ersap::type::ARRAY_DOUBLE, empty);
+                        return output;
+                    }
                     writeFailureCount_++;
                     consecutiveFailures_++;
                     std::cerr << "HaidisGluexLinkActor: write_data failed (event "
