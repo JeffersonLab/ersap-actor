@@ -134,9 +134,8 @@ ersap::EngineData HaidisGluexActor::execute(ersap::EngineData& input) {
     // Note: SINT32 value is just a trigger - we don't need to extract or use it
     // It signals us to read the next event from ET
 
+    et_event* pe = nullptr;
     try {
-        et_event* pe;
-
         // Get event from ET system (blocking call)
         int status = et_event_get(etSys_, etAtt_, &pe, ET_SLEEP, NULL);
 
@@ -300,6 +299,7 @@ ersap::EngineData HaidisGluexActor::execute(ersap::EngineData& input) {
             std::cout << "\nDEBUG: Returning ET event to system..." << std::endl;
         }
         status = et_event_put(etSys_, etAtt_, pe);
+        pe = nullptr;
         if (verbose_) {
             std::cout << "  et_event_put status: " << status;
             if (status == ET_OK) {
@@ -357,6 +357,10 @@ ersap::EngineData HaidisGluexActor::execute(ersap::EngineData& input) {
         }
 
     } catch (const std::exception& e) {
+        if (pe != nullptr) {
+            et_event_put(etSys_, etAtt_, pe);
+            pe = nullptr;
+        }
         output.set_status(ersap::EngineStatus::ERROR);
         output.set_description("Error processing ET event: " + std::string(e.what()));
         std::cerr << "Error in HaidisGluexActor: " << e.what() << std::endl;
