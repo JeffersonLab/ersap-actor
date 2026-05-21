@@ -170,14 +170,18 @@ ersap::EngineData HaidisGluexActor::execute(ersap::EngineData& input) {
             std::cout << "  ET event data size: " << data_len << " bytes" << std::endl;
         }
 
-        // Validate payload size - expecting 20 doubles per event (16 four-vector components + 3 kfit scalars + 1 data_id)
+        // Payload layout: [data_id (8 bytes)] [N × 20 doubles physics events]
+        // Each physics event: [pip E,Px,Py,Pz][pim E,Px,Py,Pz][g1 E,Px,Py,Pz][g2 E,Px,Py,Pz]
+        //                     [imass_kfit][imassGG_kfit][kfit_prob][data_id_field]
         constexpr size_t DOUBLES_PER_EVENT = 20;
-        constexpr size_t BYTES_PER_EVENT = DOUBLES_PER_EVENT * sizeof(double);
+        constexpr size_t BYTES_PER_EVENT   = DOUBLES_PER_EVENT * sizeof(double);
+        constexpr size_t HEADER_BYTES      = sizeof(double); // prepended data_id
+        constexpr size_t MIN_PAYLOAD       = HEADER_BYTES + BYTES_PER_EVENT;
 
         // Debug: Log calculated event count
         if (verbose_) {
-            size_t calculated_events = data_len / BYTES_PER_EVENT;
-            size_t leftover = data_len % BYTES_PER_EVENT;
+            size_t calculated_events = (data_len > HEADER_BYTES) ? (data_len - HEADER_BYTES) / BYTES_PER_EVENT : 0;
+            size_t leftover = (data_len > HEADER_BYTES) ? (data_len - HEADER_BYTES) % BYTES_PER_EVENT : 0;
             std::cout << "  Expected bytes per physics event: " << BYTES_PER_EVENT << std::endl;
             std::cout << "  Calculated physics events in ET event: " << calculated_events << std::endl;
             if (leftover > 0) {
@@ -186,9 +190,9 @@ ersap::EngineData HaidisGluexActor::execute(ersap::EngineData& input) {
             std::cout << std::endl;
         }
 
-        if (data_len < BYTES_PER_EVENT) {
+        if (data_len < MIN_PAYLOAD) {
             std::cerr << "Warning: Received " << data_len
-                      << " bytes, expected minimum " << BYTES_PER_EVENT << " bytes" << std::endl;
+                      << " bytes, expected minimum " << MIN_PAYLOAD << " bytes" << std::endl;
 
             // Return event to ET system
             status = et_event_put(etSys_, etAtt_, pe);
@@ -198,14 +202,14 @@ ersap::EngineData HaidisGluexActor::execute(ersap::EngineData& input) {
 
             output.set_status(ersap::EngineStatus::ERROR);
             output.set_description("Invalid ET event size: " + std::to_string(data_len) +
-                                   " bytes, expected minimum " + std::to_string(BYTES_PER_EVENT));
+                                   " bytes, expected minimum " + std::to_string(MIN_PAYLOAD));
             errorCount_++;
             return output;
         }
 
-        // Calculate number of complete events in the payload
-        size_t num_events = data_len / BYTES_PER_EVENT;
-        size_t leftover_bytes = data_len % BYTES_PER_EVENT;
+        // Calculate number of complete physics events after the prepended data_id
+        size_t num_events    = (data_len - HEADER_BYTES) / BYTES_PER_EVENT;
+        size_t leftover_bytes = (data_len - HEADER_BYTES) % BYTES_PER_EVENT;
 
         if (leftover_bytes > 0 && verbose_) {
             std::cout << "Warning: Payload has " << leftover_bytes
@@ -214,15 +218,17 @@ ersap::EngineData HaidisGluexActor::execute(ersap::EngineData& input) {
         }
 
         // Interpret data as array of doubles
-        double* doubles = static_cast<double*>(data_ptr);
+        const double* doubles = static_cast<const double*>(data_ptr);
+
+        // Read data_id from the prepended first double (integer from E2SAR header, stored as double)
+        const double data_id = doubles[0];
 
         // Vector to collect analysis results (2 doubles per passing event: X, Y)
         std::vector<double> analysis_results;
-        double data_id = 0.0;
 
-        // Process each event (20 doubles each)
+        // Process each physics event (20 doubles each), starting after the prepended data_id
         for (size_t event_idx = 0; event_idx < num_events; ++event_idx) {
-            const double* event_data = doubles + (event_idx * DOUBLES_PER_EVENT);
+            const double* event_data = (doubles + 1) + (event_idx * DOUBLES_PER_EVENT);
 
             // Extract event data from payload
             // Layout: [pip E px py pz][pim E px py pz][g1 E px py pz][g2 E px py pz]
@@ -256,7 +262,6 @@ ersap::EngineData HaidisGluexActor::execute(ersap::EngineData& input) {
             ev.imassGG_kfit = event_data[17];
             ev.kfit_prob    = event_data[18];
             ev.data_id      = event_data[19];
-            data_id         = ev.data_id;
 
             // Print event data if verbose
             if (verbose_) {

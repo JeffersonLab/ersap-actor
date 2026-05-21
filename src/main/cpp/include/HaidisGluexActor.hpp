@@ -90,7 +90,8 @@ struct GluexAnalysisResult {
  * Architecture:
  * 1. Java UniAdapterSourceEngine sends SINT32 trigger value
  * 2. HaidisGluexActor validates trigger and reads next event from ET system
- * 3. Processes physics data (19 doubles: 16 for four-vectors + 3 kfit scalars)
+ * 3. ET payload layout: [data_id (8 bytes)] [N × 20 doubles physics events]
+ *    Each physics event: 16 four-vector components + 3 kfit scalars + 1 reserved field
  * 4. Performs eta meson Dalitz analysis with event selection
  * 5. Returns event to ET system and outputs Dalitz coordinates for passing events
  *
@@ -142,8 +143,8 @@ private:
     std::size_t errorCount_ = 0;
     std::size_t passedEventCount_ = 0;
 
-    // Expected physics data size: 20 doubles (16 for four-vectors + 3 kfit scalars + 1 data_id)
-    static constexpr std::size_t EXPECTED_SIZE = 20 * sizeof(double);
+    // Minimum ET payload: 1 data_id double (prepended) + at least one 20-double physics event
+    static constexpr std::size_t EXPECTED_SIZE = sizeof(double) + 20 * sizeof(double);
 
     // Helper methods for ET system management
     bool initializeET();
