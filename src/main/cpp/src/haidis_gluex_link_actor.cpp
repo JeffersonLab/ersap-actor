@@ -253,6 +253,12 @@ ersap::EngineData HaidisGluexLinkActor::execute(ersap::EngineData& input) {
                 }
             } else {
                 consecutiveFailures_ = 0;
+                if (verbose_) {
+                    std::cout << "  BATCH FLUSHED: data_id=" << data_id
+                              << " doubles_written=" << buffer.size()
+                              << " duplets=" << batch_duplet_count
+                              << " (batch_size=" << batch_size_ << ")" << std::endl;
+                }
                 buffer.clear();
                 event_counts_[data_id] = 0;
             }
