@@ -609,7 +609,7 @@ GluexAnalysisResult HaidisGluexActor::analysis(const EventData& ev) const {
     // denom is the normalization factor
     // old: double denom = Q * (Q + 3*M_PI0);
     // NEW:
-    denom = 2.0 * M_ETA * Q;
+    double denom = 2.0 * M_ETA * Q;
 
     GluexAnalysisResult res;
     // X coordinate: measures asymmetry between π-π0 and π+π0
