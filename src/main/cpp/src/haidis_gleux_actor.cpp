@@ -562,6 +562,36 @@ void HaidisGluexActor::cleanupET() {
 }
 
 // GluEx Dalitz analysis method - extracted from factored_gluex_analysis.C (lines 52-70)
+//GluexAnalysisResult HaidisGluexActor::analysis(const EventData& ev) const {
+//    // Reconstruct π0 from two photons (same as in factored_gluex_analysis.C line 54)
+//    LorentzVector pi0 = ev.g1 + ev.g2;
+//
+//    // Compute invariant mass squared for particle pairs (lines 55-57)
+//    double s_pimpi0 = (ev.pim + pi0).M2();
+//    double s_pippi0 = (ev.pip + pi0).M2();
+//    double s_pippim = (ev.pip + ev.pim).M2();
+//
+//    // Compute Dalitz coordinates using eta meson formulas (lines 59-65)
+//    // Q is the kinematic range available for the decay
+//    double Q = M_ETA - 2*M_PIPM - M_PI0;
+//    // s_centre is the center point of the Dalitz plot
+//    double s_centre = (M_ETA*M_ETA + 2*M_PIPM*M_PIPM + M_PI0*M_PI0) / 3.0;
+//    // denom is the normalization factor
+//    double denom = Q * (Q + 3*M_PI0);
+//
+//    GluexAnalysisResult res;
+//    // X coordinate: measures asymmetry between π-π0 and π+π0
+//    res.X = std::sqrt(3.0) * (s_pimpi0 - s_pippi0) / denom;
+//    // Y coordinate: measures deviation of π+π- system from center
+//    res.Y = 3.0 * (s_pippim - s_centre) / denom;
+//
+//    // Apply event selection cuts based on kinematic fit quality (lines 66-68)
+//    res.pass_event_selection = (ev.kfit_prob    >  0.0001 &&
+//                                ev.imass_kfit   >= 0.45   && ev.imass_kfit   < 0.58 &&
+//                                ev.imassGG_kfit >  0.1    && ev.imassGG_kfit < 0.15);
+//
+//    return res;
+//}
 GluexAnalysisResult HaidisGluexActor::analysis(const EventData& ev) const {
     // Reconstruct π0 from two photons (same as in factored_gluex_analysis.C line 54)
     LorentzVector pi0 = ev.g1 + ev.g2;
@@ -577,13 +607,17 @@ GluexAnalysisResult HaidisGluexActor::analysis(const EventData& ev) const {
     // s_centre is the center point of the Dalitz plot
     double s_centre = (M_ETA*M_ETA + 2*M_PIPM*M_PIPM + M_PI0*M_PI0) / 3.0;
     // denom is the normalization factor
-    double denom = Q * (Q + 3*M_PI0);
+    // old: double denom = Q * (Q + 3*M_PI0);
+    // NEW:
+    denom = 2.0 * M_ETA * Q;
 
     GluexAnalysisResult res;
     // X coordinate: measures asymmetry between π-π0 and π+π0
     res.X = std::sqrt(3.0) * (s_pimpi0 - s_pippi0) / denom;
     // Y coordinate: measures deviation of π+π- system from center
-    res.Y = 3.0 * (s_pippim - s_centre) / denom;
+    // old: res.Y = 3.0 * (s_pippim - s_centre) / denom;
+    // NEW:
+    res.Y = -3.0 * (s_pippim - s_centre) / denom;
 
     // Apply event selection cuts based on kinematic fit quality (lines 66-68)
     res.pass_event_selection = (ev.kfit_prob    >  0.0001 &&
