@@ -59,11 +59,11 @@ ersap::EngineData HaidisGluexLinkActor::configure(ersap::EngineData& input) {
                 sem_ack_name_ = config["sem_ack_name"].string_value();
             }
             if (!config["bunch_size"].is_null()) {
-                batch_size_ = config["batch_size"].int_value();
+                batch_size_ = config["bunch_size"].int_value();
                 if (batch_size_ <= 0) {
                     output.set_status(ersap::EngineStatus::ERROR);
                     output.set_description("bunch_size must be positive, got " + std::to_string(batch_size_));
-                    std::cerr << "HaidisGluexLinkActor: bunch_size must be positive" << std::endl;
+                    std::cerr << "HaidisGluexLinkActor: bunch_size must be positive." << std::endl;
                     return output;
                 }
             }
