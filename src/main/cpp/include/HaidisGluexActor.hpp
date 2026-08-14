@@ -130,6 +130,8 @@ private:
     std::string etHost_ = "localhost";
     int etPort_ = ET_SERVER_PORT;
     std::string stationName_ = "ERSAP_GLUEX_PROCESSOR";
+    double dalitzVarMin_ = -1.0;
+    double dalitzVarMax_ =  1.0;
 
     // ET system handles
     et_sys_id etSys_ = nullptr;

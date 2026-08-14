@@ -54,6 +54,12 @@ ersap::EngineData HaidisGluexActor::configure(ersap::EngineData& input) {
             if (!config["station_name"].is_null()) {
                 stationName_ = config["station_name"].string_value();
             }
+            if (!config["dalitz_var_min"].is_null()) {
+                dalitzVarMin_ = config["dalitz_var_min"].number_value();
+            }
+            if (!config["dalitz_var_max"].is_null()) {
+                dalitzVarMax_ = config["dalitz_var_max"].number_value();
+            }
             if (!config["verbose"].is_null()) {
                 verbose_ = config["verbose"].bool_value();
             }
@@ -64,6 +70,8 @@ ersap::EngineData HaidisGluexActor::configure(ersap::EngineData& input) {
                 std::cout << "  - ET host: " << etHost_ << std::endl;
                 std::cout << "  - ET port: " << etPort_ << std::endl;
                 std::cout << "  - Station name: " << stationName_ << std::endl;
+                std::cout << "  - Dalitz var min: " << dalitzVarMin_ << std::endl;
+                std::cout << "  - Dalitz var max: " << dalitzVarMax_ << std::endl;
                 std::cout << "  - Verbose: " << verbose_ << std::endl;
             }
 
@@ -80,6 +88,17 @@ ersap::EngineData HaidisGluexActor::configure(ersap::EngineData& input) {
         output.set_status(ersap::EngineStatus::ERROR);
         output.set_description("ET filename is required in configuration");
         std::cerr << "Error: ET filename not specified in configuration" << std::endl;
+        return output;
+    }
+
+    // Validate Dalitz filter range
+    if (!(dalitzVarMin_ < dalitzVarMax_)) {
+        std::ostringstream msg;
+        msg << "dalitz_var_min (" << dalitzVarMin_
+            << ") must be strictly less than dalitz_var_max (" << dalitzVarMax_ << ")";
+        output.set_status(ersap::EngineStatus::ERROR);
+        output.set_description(msg.str());
+        std::cerr << "Error: " << msg.str() << std::endl;
         return output;
     }
 
@@ -278,8 +297,15 @@ ersap::EngineData HaidisGluexActor::execute(ersap::EngineData& input) {
             // Run GluEx Dalitz analysis on this event (extracted from factored_gluex_analysis.C)
             GluexAnalysisResult result = analysis(ev);
 
-            // Only collect results that pass event selection cuts
-            if (result.pass_event_selection) {
+            // Apply Dalitz-variable range filter: both X and Y must lie strictly inside the configured window.
+            const double X = result.X;
+            const double Y = result.Y;
+            const bool passes_filter =
+                X > dalitzVarMin_ && X < dalitzVarMax_ &&
+                Y > dalitzVarMin_ && Y < dalitzVarMax_;
+
+            // Only collect results that pass event selection cuts AND the Dalitz range filter
+            if (result.pass_event_selection && passes_filter) {
                 analysis_results.push_back(result.X);
                 analysis_results.push_back(result.Y);
                 passedEventCount_++;
@@ -290,7 +316,13 @@ ersap::EngineData HaidisGluexActor::execute(ersap::EngineData& input) {
                     std::cout << "  Y = " << result.Y << std::endl;
                 }
             } else if (verbose_) {
-                std::cout << "Event " << (event_idx + 1) << " FAILED event selection (not included in output)" << std::endl;
+                if (!result.pass_event_selection) {
+                    std::cout << "Event " << (event_idx + 1) << " FAILED event selection (not included in output)" << std::endl;
+                } else {
+                    std::cout << "Event " << (event_idx + 1)
+                              << " FAILED Dalitz range filter [" << dalitzVarMin_ << ", " << dalitzVarMax_
+                              << "] (X=" << X << ", Y=" << Y << ") (not included in output)" << std::endl;
+                }
             }
         }
 
