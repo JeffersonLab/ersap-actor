@@ -106,27 +106,32 @@ ersap::EngineData HaidisLinkActor::execute(ersap::EngineData& input) {
         auto& in = ersap::data_cast<std::vector<double>>(input);
 
         // Step 1: Compute size metrics
-        const std::size_t num_doubles   = in.size();
-        const std::size_t size_bytes    = num_doubles * sizeof(double);
-        const std::uint32_t triplet_count = static_cast<std::uint32_t>(num_doubles / 3);
+        const std::size_t num_doubles = in.size();
 
-        if (num_doubles % 3 != 0 && verbose_) {
-            std::cout << "Warning: Input has " << num_doubles
-                      << " doubles (not divisible by 3). "
-                      << "Complete triplets: " << triplet_count
-                      << ", leftover: " << (num_doubles % 3) << std::endl;
+        // Reject malformed payloads: must be non-empty and a whole number of triplets.
+        // Silently truncating would desync shmem writes from the ERSAP pass-through.
+        if (num_doubles == 0 || (num_doubles % 3) != 0) {
+            droppedEventCount_++;
+            std::cerr << "HaidisLinkActor: malformed event dropped (doubles="
+                      << num_doubles << ", leftover=" << (num_doubles % 3)
+                      << ", event=" << eventCount_ << ")" << std::endl;
+            output.set_status(ersap::EngineStatus::WARNING);
+            output.set_description("Malformed input: expected non-empty, 3-divisible payload");
+            std::vector<double> empty;
+            output.set_data(ersap::type::ARRAY_DOUBLE, empty);
+            eventCount_++;
+            return output;
         }
 
-        // Send received data to shared memory as a 2-D array (triplet_count × 3)
-        // Only write complete triplets to match header dimensions
+        const std::size_t size_bytes      = num_doubles * sizeof(double);
+        const std::uint32_t triplet_count = static_cast<std::uint32_t>(num_doubles / 3);
+
+        // Send received data to shared memory as a 2-D array (triplet_count × 3).
+        // Input is validated above, so write the whole payload directly.
         if (writer_) {
             const std::vector<uint32_t> dims = {triplet_count, 3};
-            const std::size_t complete_elements = triplet_count * 3;
 
-            // Create vector with only complete triplets
-            std::vector<double> complete_data(in.begin(), in.begin() + complete_elements);
-
-            if (!writer_->write_data(complete_data, 2, dims, data_id_)) {
+            if (!writer_->write_data(in, 2, dims, data_id_)) {
                 writeFailureCount_++;
                 consecutiveFailures_++;
                 std::cerr << "HaidisLinkActor: write_data failed (event "
@@ -160,8 +165,9 @@ ersap::EngineData HaidisLinkActor::execute(ersap::EngineData& input) {
 
         if (verbose_ && eventCount_ % 100 == 0) {
             std::cout << "\nHaidisLinkActor Statistics:" << std::endl;
-            std::cout << "  Events processed: " << eventCount_ << std::endl;
-            std::cout << "  Write failures:   " << writeFailureCount_ << std::endl;
+            std::cout << "  Events processed:     " << eventCount_ << std::endl;
+            std::cout << "  Dropped (malformed):  " << droppedEventCount_ << std::endl;
+            std::cout << "  Write failures:       " << writeFailureCount_ << std::endl;
             std::cout << "  Consecutive failures: " << consecutiveFailures_ << std::endl;
         }
 

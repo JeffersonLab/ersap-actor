@@ -181,16 +181,26 @@ ersap::EngineData HaidisGluexLinkActor::execute(ersap::EngineData& input) {
         std::vector<double> data(in.begin() + 1, in.end());
 
         // Compute size metrics
-        const std::size_t num_doubles    = data.size();
-        const std::uint32_t duplet_count = static_cast<std::uint32_t>(num_doubles / 2);
-        const std::size_t complete_elements = duplet_count * 2;
+        const std::size_t num_doubles = data.size();
 
-        if (num_doubles % 2 != 0 && verbose_) {
-            std::cout << "Warning: Input has " << num_doubles
-                      << " doubles (not divisible by 2). "
-                      << "Complete duplets: " << duplet_count
-                      << ", leftover: " << (num_doubles % 2) << std::endl;
+        // Reject malformed payloads: must be non-empty and a whole number of duplets.
+        // Silently truncating would desync shmem writes from the ERSAP pass-through and
+        // let a batch slot be consumed by data that was never fully published.
+        if (num_doubles == 0 || (num_doubles % 2) != 0) {
+            droppedEventCount_++;
+            std::cerr << "HaidisGluexLinkActor: malformed event dropped (data_id="
+                      << data_id << ", doubles=" << num_doubles
+                      << ", leftover=" << (num_doubles % 2)
+                      << ", event=" << eventCount_ << ")" << std::endl;
+            output.set_status(ersap::EngineStatus::WARNING);
+            output.set_description("Malformed input: expected non-empty, 2-divisible payload");
+            std::vector<double> empty;
+            output.set_data(ersap::type::ARRAY_DOUBLE, empty);
+            eventCount_++;
+            return output;
         }
+
+        const std::uint32_t duplet_count = static_cast<std::uint32_t>(num_doubles / 2);
 
         // Validate data_id against configured range (data IDs are zero-based)
         if (static_cast<int>(data_id) >= data_id_number_) {
@@ -203,9 +213,9 @@ ersap::EngineData HaidisGluexLinkActor::execute(ersap::EngineData& input) {
             return output;
         }
 
-        // Accumulate complete duplets into the per-data-ID buffer
+        // Accumulate the (now-validated) whole payload into the per-data-ID buffer
         auto& buffer = data_buffers_[data_id];
-        buffer.insert(buffer.end(), data.begin(), data.begin() + complete_elements);
+        buffer.insert(buffer.end(), data.begin(), data.end());
         event_counts_[data_id]++;
 
         if (verbose_) {
@@ -274,8 +284,9 @@ ersap::EngineData HaidisGluexLinkActor::execute(ersap::EngineData& input) {
 
         if (verbose_ && eventCount_ % 100 == 0) {
             std::cout << "\nHaidisGluexLinkActor Statistics:" << std::endl;
-            std::cout << "  Events processed: " << eventCount_ << std::endl;
-            std::cout << "  Write failures:   " << writeFailureCount_ << std::endl;
+            std::cout << "  Events processed:     " << eventCount_ << std::endl;
+            std::cout << "  Dropped (malformed):  " << droppedEventCount_ << std::endl;
+            std::cout << "  Write failures:       " << writeFailureCount_ << std::endl;
             std::cout << "  Consecutive failures: " << consecutiveFailures_ << std::endl;
         }
 

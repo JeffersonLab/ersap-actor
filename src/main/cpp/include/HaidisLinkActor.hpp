@@ -102,6 +102,7 @@ private:
     std::size_t eventCount_ = 0;
     std::size_t writeFailureCount_ = 0;
     std::size_t consecutiveFailures_ = 0;
+    std::size_t droppedEventCount_ = 0;  // Malformed events rejected at input
 
     // Helper methods
     void printReceivedData(const std::vector<double>& data) const;
