@@ -371,12 +371,18 @@ ersap::EngineData HaidisGluexActor::execute(ersap::EngineData& input) {
 
         // Prepend data_id to analysis results before output.
         // Output layout: [data_id][X0][Y0][X1][Y1]...
+        //
+        // When nothing passes selection, emit an empty array (no data_id either),
+        // so downstream actors can detect "no data" without having to special-case
+        // a single-element [data_id] payload as "malformed".
         std::vector<double> output_results;
-        output_results.reserve(analysis_results.size() + 1);
-        output_results.push_back(data_id);
-        output_results.insert(output_results.end(),
-                              analysis_results.begin(),
-                              analysis_results.end());
+        if (!analysis_results.empty()) {
+            output_results.reserve(analysis_results.size() + 1);
+            output_results.push_back(data_id);
+            output_results.insert(output_results.end(),
+                                  analysis_results.begin(),
+                                  analysis_results.end());
+        }
 
         output.set_data(ersap::type::ARRAY_DOUBLE, output_results);
 

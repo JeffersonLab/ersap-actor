@@ -168,11 +168,12 @@ ersap::EngineData HaidisGluexLinkActor::execute(ersap::EngineData& input) {
         // Extract input data as vector of doubles
         auto& in = ersap::data_cast<std::vector<double>>(input);
 
-        // Guard against empty input before reading in[0]
+        // Empty input is the upstream "no events passed selection" signal — not an
+        // error. Pass an empty array through silently and move on.
         if (in.empty()) {
-            output.set_status(ersap::EngineStatus::ERROR);
-            output.set_description("Empty input: expected at least one double (data_id)");
-            std::cerr << "Error: HaidisGluexLinkActor received empty input" << std::endl;
+            std::vector<double> empty;
+            output.set_data(ersap::type::ARRAY_DOUBLE, empty);
+            eventCount_++;
             return output;
         }
 
@@ -183,17 +184,18 @@ ersap::EngineData HaidisGluexLinkActor::execute(ersap::EngineData& input) {
         // Compute size metrics
         const std::size_t num_doubles = data.size();
 
-        // Reject malformed payloads: must be non-empty and a whole number of duplets.
-        // Silently truncating would desync shmem writes from the ERSAP pass-through and
-        // let a batch slot be consumed by data that was never fully published.
-        if (num_doubles == 0 || (num_doubles % 2) != 0) {
+        // Reject only truly malformed payloads (odd number of doubles after the
+        // data_id header). Silently truncating would desync shmem writes from the
+        // ERSAP pass-through and let a batch slot be consumed by data that was
+        // never fully published.
+        if ((num_doubles % 2) != 0) {
             droppedEventCount_++;
             std::cerr << "HaidisGluexLinkActor: malformed event dropped (data_id="
                       << data_id << ", doubles=" << num_doubles
                       << ", leftover=" << (num_doubles % 2)
                       << ", event=" << eventCount_ << ")" << std::endl;
             output.set_status(ersap::EngineStatus::WARNING);
-            output.set_description("Malformed input: expected non-empty, 2-divisible payload");
+            output.set_description("Malformed input: expected 2-divisible payload");
             std::vector<double> empty;
             output.set_data(ersap::type::ARRAY_DOUBLE, empty);
             eventCount_++;
